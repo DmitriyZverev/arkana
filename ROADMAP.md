@@ -82,59 +82,124 @@ arcana --config /path/to/config.toml encrypt < decrypted.txt > encrypted.yml
 
 CLI flags (Step 3) take precedence over config file values.
 
-### Step 5 — Named document storage `Planned`
+### Step 5 — Named secret storage `Planned`
 
-Introduce a document registry stored in `$HOME/.arcana/documents/`. Each encryption
-creates a new versioned snapshot of the document, making it possible to track and
+Introduce a secret registry stored in `$HOME/.arcana/secrets/`. Each encryption
+creates a new versioned snapshot of the secret, making it possible to track and
 restore previous versions.
 
-The documents directory can be overridden via `--documents-dir` or via `config.toml`:
+The secrets directory can be overridden via `--secrets-dir` or via `config.toml`:
 
 ```shell
-arcana --documents-dir /path/to/documents encrypt --document document-name < ./decrypted.txt
+arcana --secrets-dir /path/to/secrets secret encrypt <secret-name> < ./decrypted.txt
 ```
 
 ```toml
 # $HOME/.arcana/config.toml
-[documents]
-dir = "/path/to/documents"
+[secrets]
+dir = "/path/to/secrets"
 ```
 
-`--documents-dir` takes precedence over the config file value. If neither is set,
-`$HOME/.arcana/documents/` is used.
+`--secrets-dir` takes precedence over the config file value. If neither is set,
+`$HOME/.arcana/secrets/` is used.
 
-File naming pattern: `<document-name>.YYYY_MM_DD_HH_mm_ss_fffffffff_<counter>.yml`
+File naming pattern: `<secret-name>.YYYY_MM_DD_HH_mm_ss_fffffffff_<counter>.yml`
 
-**Encrypting a named document:**
+The timestamp in the filename is always in UTC. The latest version is determined by this timestamp
+(and counter as a tiebreaker).
+
+**Encrypting a named secret:**
 
 ```shell
 # From stdin:
-arcana encrypt --document document-name < ./decrypted.txt
+arcana secret encrypt <secret-name> < ./decrypted.txt
 
 # From file:
-arcana encrypt --document document-name --input ./decrypted.txt
+arcana secret encrypt <secret-name> --input ./decrypted.txt
 ```
 
 Both commands write the encrypted result to:
-`$HOME/.arcana/documents/document-name.YYYY_MM_DD_HH_mm_ss_fffffffff_0001.yml`
+`$HOME/.arcana/secrets/<secret-name>.YYYY_MM_DD_HH_mm_ss_fffffffff_<counter>.yml`
 
-**Decrypting a named document:**
+Each invocation creates a new version; existing versions are never modified. `--output` is not
+supported — the destination is always the secrets directory.
+
+**Decrypting a named secret:**
 
 ```shell
 # To stdout:
-arcana decrypt --document document-name > decrypted.txt
+arcana secret decrypt <secret-name> > ./decrypted.txt
 
 # To file:
-arcana decrypt --document document-name --output ./decrypted.txt
+arcana secret decrypt <secret-name> --output ./decrypted.txt
 ```
 
-Decryption automatically resolves to the latest version of the document found in
-`$HOME/.arcana/documents/`.
+**Decrypting a specific version:**
+
+```shell
+# To stdout:
+arcana secret decrypt <secret-name> --version 2024_03_16_130000_000000000_0001 > ./decrypted.txt
+
+# To file:
+arcana secret decrypt <secret-name> --version 2024_03_16_130000_000000000_0001 --output ./decrypted.txt
+```
+
+The version identifier matches the filename suffix returned by `arcana secret list-versions <name>`.
+Without `--version`, the latest version is used. Exits with an error if the secret or version does not exist.
+
+**Listing all secrets:**
+
+```shell
+arcana secret list
+```
+
+Outputs the list of secret names stored in `$HOME/.arcana/secrets/`:
+
+```
+foo
+bar
+baz
+```
+
+**Listing versions of a secret:**
+
+```shell
+arcana secret list-versions <secret-name>
+```
+
+Outputs the list of available versions for the specified secret, ordered from oldest to newest:
+
+```
+2024_03_16_120000_000000000_0001
+2024_03_16_130000_000000000_0001
+2024_03_17_090000_000000000_0001
+```
+
+**Deleting a secret or a specific version:**
+
+```shell
+# Delete all versions of a secret:
+arcana secret delete <secret-name>
+
+# Delete a specific version:
+arcana secret delete <secret-name> --version 2024_03_16_120000_000000000_0001
+```
+
+Without `--version`, all versions are deleted. Any deletion requires interactive confirmation or `--force`
+to proceed. Exits with an error if the secret or version does not exist.
+
+**Renaming a secret:**
+
+```shell
+arcana secret rename <secret-name> <new-secret-name>
+```
+
+Renames all version files of the secret in `$HOME/.arcana/secrets/`.
 
 ### Step 6 — Interactive mode (TUI) `Planned`
 
 Run the tool without arguments to launch a terminal user interface (TUI) for browsing,
-decrypting, editing, and re-encrypting stored documents.
+decrypting, editing, and re-encrypting stored secrets.
 
 ```shell
 arcana
