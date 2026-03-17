@@ -1,44 +1,17 @@
+mod cli;
 mod crypto;
 mod password;
 
+use crate::cli::{CliArgs, SubCommand};
 use crate::crypto::{EncryptParams, EncryptedContainer, decrypt, encrypt};
 use crate::password::read_password;
 use anyhow::Context;
-use clap::{Args, Parser, Subcommand};
+use clap::Parser;
 use path_absolutize::Absolutize;
 use pathdiff::diff_paths;
 use std::fs;
 use std::io::{Read, Write};
 use std::path::PathBuf;
-
-#[derive(Debug, Args)]
-struct SubCommandArgs {
-    #[arg(long)]
-    password_file: Option<PathBuf>,
-    /// Read input from a file instead of standard input
-    #[arg(long, short = 'i', alias = "input")]
-    input_file: Option<PathBuf>,
-    /// Write output to a file instead of standard output
-    #[arg(long, short = 'o', alias = "output")]
-    output_file: Option<PathBuf>,
-}
-
-#[derive(Debug, Subcommand)]
-enum SubCommand {
-    /// Encrypts data from stdin or a file and writes encrypted data to stdout or a file
-    Encrypt(SubCommandArgs),
-    /// Decrypts data from stdin or a file and writes decrypted data to stdout or a file
-    Decrypt(SubCommandArgs),
-}
-
-#[derive(Parser, Debug)]
-struct CliArgs {
-    /// Working directory for resolving relative paths
-    #[arg(long, short = 'C')]
-    cwd: Option<PathBuf>,
-    #[command(subcommand)]
-    command: Option<SubCommand>,
-}
 
 fn read_input(path: Option<PathBuf>, cwd: &PathBuf) -> anyhow::Result<Vec<u8>> {
     match path {
@@ -85,14 +58,10 @@ fn main() -> anyhow::Result<()> {
         None => std::env::current_dir()?,
     };
     match cli_args.command {
-        Some(SubCommand::Encrypt(SubCommandArgs {
-            password_file,
-            input_file,
-            output_file,
-        })) => {
-            let input_file = resolve_path(&cwd, input_file)?;
-            let output_file = resolve_path(&cwd, output_file)?;
-            let password_file = resolve_path(&cwd, password_file)?;
+        Some(SubCommand::Encrypt { io }) => {
+            let input_file = resolve_path(&cwd, io.input_file)?;
+            let output_file = resolve_path(&cwd, io.output_file)?;
+            let password_file = resolve_path(&cwd, io.password_file)?;
             let encrypt_params =
                 EncryptParams::new(read_input(input_file, &cwd)?, read_password(password_file)?);
             let encrypted_container = encrypt(encrypt_params)?;
@@ -102,14 +71,10 @@ fn main() -> anyhow::Result<()> {
                 &cwd,
             )?;
         }
-        Some(SubCommand::Decrypt(SubCommandArgs {
-            password_file,
-            input_file,
-            output_file,
-        })) => {
-            let input_file = resolve_path(&cwd, input_file)?;
-            let output_file = resolve_path(&cwd, output_file)?;
-            let password_file = resolve_path(&cwd, password_file)?;
+        Some(SubCommand::Decrypt { io }) => {
+            let input_file = resolve_path(&cwd, io.input_file)?;
+            let output_file = resolve_path(&cwd, io.output_file)?;
+            let password_file = resolve_path(&cwd, io.password_file)?;
             let data = read_input(input_file, &cwd)?;
             let encrypted_container = serde_yaml::from_slice::<EncryptedContainer>(&data)?;
             let decrypted_text = decrypt(&encrypted_container, &read_password(password_file)?)?;
