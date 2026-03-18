@@ -173,14 +173,22 @@ pub struct Argon2Facade {
     pub parallelism: u32,
 }
 
+impl Argon2Facade {
+    pub const DEFAULT_ALGORITHM: Algorithm = Algorithm::Argon2id;
+    pub const DEFAULT_VERSION: Version = Version::V0x13;
+    pub const DEFAULT_MEMORY: u32 = 128 * 1024;
+    pub const DEFAULT_ITERATIONS: u32 = 4;
+    pub const DEFAULT_PARALLELISM: u32 = 4;
+}
+
 impl Default for Argon2Facade {
     fn default() -> Self {
         Self {
-            algorithm: Algorithm::default(),
-            version: Version::default(),
-            memory: 128 * 1024,
-            iterations: 4,
-            parallelism: 4,
+            algorithm: Self::DEFAULT_ALGORITHM,
+            version: Self::DEFAULT_VERSION,
+            memory: Self::DEFAULT_MEMORY,
+            iterations: Self::DEFAULT_ITERATIONS,
+            parallelism: Self::DEFAULT_PARALLELISM,
         }
     }
 }
