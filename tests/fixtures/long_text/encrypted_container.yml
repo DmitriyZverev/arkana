@@ -7,8 +7,8 @@ kdf:
   parallelism: 4
 cipher:
   type: ChaCha20Poly1305
-salt: 1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B
-nonce: 0A0A0A0A0A0A0A0A0A0A0A0A
+salt: GxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxs=
+nonce: CgoKCgoKCgoKCgoK
 ciphertext: |-
   QmGMKUpbMTiw4y3VNcyRczjoWe3tDsafehFLdnVsACiAdBg4AH91oORjkONGmEN+
   QpRkityFXVFY/FdiCmC6+0xo5TZwuhY55fKfiVw1oVUUbQvUu54uiZWc8iibZ+H9

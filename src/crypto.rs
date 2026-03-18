@@ -13,11 +13,38 @@ mod base64_serde {
     use base64::{Engine, engine::general_purpose::STANDARD};
     use serde::{Deserialize, Deserializer, Serializer};
 
-    pub fn serialize<S>(bytes: &[u8], serializer: S) -> Result<S::Ok, S::Error>
+    pub trait Base64Bytes: Sized {
+        fn to_bytes(&self) -> &[u8];
+        fn from_bytes(bytes: Vec<u8>) -> Result<Self, String>;
+    }
+
+    impl Base64Bytes for Vec<u8> {
+        fn to_bytes(&self) -> &[u8] {
+            self
+        }
+
+        fn from_bytes(bytes: Vec<u8>) -> Result<Self, String> {
+            Ok(bytes)
+        }
+    }
+
+    impl<const N: usize> Base64Bytes for [u8; N] {
+        fn to_bytes(&self) -> &[u8] {
+            self
+        }
+
+        fn from_bytes(bytes: Vec<u8>) -> Result<Self, String> {
+            bytes
+                .try_into()
+                .map_err(|_| format!("expected {} bytes", N))
+        }
+    }
+
+    pub fn serialize<S, T: Base64Bytes>(value: &T, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
     {
-        let encoded = STANDARD.encode(bytes);
+        let encoded = STANDARD.encode(value.to_bytes());
         let wrapped = encoded
             .as_bytes()
             .chunks(64)
@@ -27,39 +54,14 @@ mod base64_serde {
         serializer.serialize_str(&wrapped)
     }
 
-    pub fn deserialize<'de, D>(deserializer: D) -> Result<Vec<u8>, D::Error>
+    pub fn deserialize<'de, D, T: Base64Bytes>(deserializer: D) -> Result<T, D::Error>
     where
         D: Deserializer<'de>,
     {
         let s = String::deserialize(deserializer)?;
         let cleaned: String = s.lines().collect();
-        STANDARD.decode(cleaned).map_err(serde::de::Error::custom)
-    }
-}
-
-mod hex_serde {
-    use serde::{Deserialize, Deserializer};
-
-    pub fn serialize<S, const N: usize>(value: &[u8; N], serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: serde::Serializer,
-    {
-        let hex = hex::encode_upper(value);
-        serializer.serialize_str(&hex)
-    }
-
-    pub fn deserialize<'de, D, const N: usize>(deserializer: D) -> Result<[u8; N], D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        let s = String::deserialize(deserializer)?;
-        let bytes = hex::decode(&s).map_err(serde::de::Error::custom)?;
-        if bytes.len() != N {
-            return Err(serde::de::Error::custom("invalid length"));
-        }
-        let mut arr = [0u8; N];
-        arr.copy_from_slice(&bytes);
-        Ok(arr)
+        let bytes = STANDARD.decode(cleaned).map_err(serde::de::Error::custom)?;
+        T::from_bytes(bytes).map_err(serde::de::Error::custom)
     }
 }
 
@@ -223,9 +225,9 @@ impl Default for Kdf {
 pub struct EncryptedContainer {
     pub kdf: Kdf,
     pub cipher: Cipher,
-    #[serde(with = "hex_serde")]
+    #[serde(with = "base64_serde")]
     pub salt: [u8; SALT_LEN],
-    #[serde(with = "hex_serde")]
+    #[serde(with = "base64_serde")]
     pub nonce: [u8; NONCE_LEN],
     #[serde(with = "base64_serde")]
     pub ciphertext: Vec<u8>,
