@@ -1,5 +1,148 @@
-use clap::{Args, Parser, Subcommand};
+use crate::crypto::{Argon2Facade, Cipher, Kdf};
+use argon2::{Algorithm, Version};
+use clap::{Args, Parser, Subcommand, ValueEnum};
+use std::fmt::Display;
 use std::path::PathBuf;
+
+fn display_value(
+    value: &impl ValueEnum,
+    formatter: &mut std::fmt::Formatter<'_>,
+) -> std::fmt::Result {
+    write!(
+        formatter,
+        "{}",
+        value.to_possible_value().ok_or(std::fmt::Error)?.get_name()
+    )
+}
+
+#[derive(Debug, Args)]
+pub struct CipherArgs {
+    /// Cipher to use for encryption.
+    #[arg(long, default_value_t = CipherType::ChaCha20Poly1305)]
+    cipher_type: CipherType,
+}
+
+impl From<CipherArgs> for Cipher {
+    fn from(cipher: CipherArgs) -> Self {
+        match cipher.cipher_type {
+            CipherType::ChaCha20Poly1305 => Cipher::ChaCha20Poly1305,
+        }
+    }
+}
+
+#[derive(Debug, Clone, ValueEnum)]
+enum CipherType {
+    #[value(name = "ChaCha20Poly1305")]
+    ChaCha20Poly1305,
+}
+
+impl Display for CipherType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        display_value(self, f)
+    }
+}
+
+#[derive(Debug, Clone, ValueEnum)]
+enum Argon2Version {
+    #[value(name = "16")]
+    V0x10,
+    #[value(name = "19")]
+    V0x13,
+}
+
+impl Display for Argon2Version {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        display_value(self, f)
+    }
+}
+
+impl From<Argon2Version> for Version {
+    fn from(version: Argon2Version) -> Self {
+        match version {
+            Argon2Version::V0x10 => Version::V0x10,
+            Argon2Version::V0x13 => Version::V0x13,
+        }
+    }
+}
+
+#[derive(Debug, Clone, ValueEnum)]
+enum Argon2Algorithm {
+    #[value(name = "argon2id")]
+    Argon2id,
+    #[value(name = "argon2i")]
+    Argon2i,
+    #[value(name = "argon2d")]
+    Argon2d,
+}
+
+impl Display for Argon2Algorithm {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        display_value(self, f)
+    }
+}
+
+impl From<Argon2Algorithm> for Algorithm {
+    fn from(algorithm: Argon2Algorithm) -> Self {
+        match algorithm {
+            Argon2Algorithm::Argon2id => Algorithm::Argon2id,
+            Argon2Algorithm::Argon2i => Algorithm::Argon2i,
+            Argon2Algorithm::Argon2d => Algorithm::Argon2d,
+        }
+    }
+}
+
+#[derive(Debug, Args)]
+pub struct KdfArgon2Args {
+    /// Argon2 algorithm to use for key derivation.
+    #[arg(long = "kdf-argon2-algorithm", default_value_t = Argon2Algorithm::Argon2id)]
+    algorithm: Argon2Algorithm,
+    /// Argon2 version to use for key derivation.
+    #[arg(long = "kdf-argon2-version", default_value_t = Argon2Version::V0x13)]
+    version: Argon2Version,
+    /// Argon2 memory to use for key derivation.
+    #[arg(long = "kdf-argon2-memory", default_value_t = Argon2Facade::DEFAULT_MEMORY)]
+    memory: u32,
+    /// Argon2 iterations to use for key derivation.
+    #[arg(long = "kdf-argon2-iterations", default_value_t = Argon2Facade::DEFAULT_ITERATIONS)]
+    iterations: u32,
+    /// Argon2 parallelism to use for key derivation.
+    #[arg(long = "kdf-argon2-parallelism", default_value_t = Argon2Facade::DEFAULT_PARALLELISM)]
+    parallelism: u32,
+}
+
+#[derive(Debug, Clone, ValueEnum)]
+enum KdfType {
+    Argon2,
+}
+
+impl Display for KdfType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        display_value(self, f)
+    }
+}
+
+#[derive(Debug, Args)]
+pub struct KdfArgs {
+    /// Key derivation function to use for key derivation.
+    #[arg(long = "kdf-type", default_value_t = KdfType::Argon2)]
+    kdf_type: KdfType,
+    #[command(flatten)]
+    kdf_argon2: KdfArgon2Args,
+}
+
+impl From<KdfArgs> for Kdf {
+    fn from(kdf: KdfArgs) -> Self {
+        match kdf.kdf_type {
+            KdfType::Argon2 => Kdf::Argon2(Argon2Facade {
+                algorithm: kdf.kdf_argon2.algorithm.into(),
+                version: kdf.kdf_argon2.version.into(),
+                memory: kdf.kdf_argon2.memory,
+                iterations: kdf.kdf_argon2.iterations,
+                parallelism: kdf.kdf_argon2.parallelism,
+            }),
+        }
+    }
+}
 
 #[derive(Debug, Args)]
 pub struct IoArgs {
@@ -20,6 +163,10 @@ pub enum SubCommand {
     Encrypt {
         #[command(flatten)]
         io: IoArgs,
+        #[command(flatten)]
+        kdf: KdfArgs,
+        #[command(flatten)]
+        cipher: CipherArgs,
     },
     /// Decrypts data from stdin or a file and writes decrypted data to stdout or a file
     Decrypt {

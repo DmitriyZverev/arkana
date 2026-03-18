@@ -40,4 +40,23 @@ pub static SHORT_TEXT: Fixture = Fixture { name: "short_text" };
 pub static SHORT_TEXT_LOWER_CASE: Fixture = Fixture {
     name: "short_text_lower_case",
 };
+pub static DEFAULT_KDF_ARGON2_ALGORITHM_ARGON2I: Fixture = Fixture {
+    name: "default_kdf_argon2_algorithm_argon2i",
+};
+pub static DEFAULT_KDF_ARGON2_ALGORITHM_ARGON2D: Fixture = Fixture {
+    name: "default_kdf_argon2_algorithm_argon2d",
+};
+pub static DEFAULT_KDF_ARGON2_ITERATIONS_1: Fixture = Fixture {
+    name: "default_kdf_argon2_iterations_1",
+};
+pub static DEFAULT_KDF_ARGON2_MEMORY_65536: Fixture = Fixture {
+    name: "default_kdf_argon2_memory_65536",
+};
+pub static DEFAULT_KDF_ARGON2_PARALLELISM_1: Fixture = Fixture {
+    name: "default_kdf_argon2_parallelism_1",
+};
+pub static DEFAULT_KDF_ARGON2_VERSION_16: Fixture = Fixture {
+    name: "default_kdf_argon2_version_16",
+};
+pub static FASTEST: Fixture = Fixture { name: "fastest" };
 pub static LONG_TEXT: Fixture = Fixture { name: "long_text" };

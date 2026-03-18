@@ -35,24 +35,29 @@ arcana encrypt --input ./decrypted.txt --output ./encrypted.yml
 arcana decrypt --input ./encrypted.yml --output ./decrypted.txt
 ```
 
-### Step 3 — Encryption parameters `Planned`
+### Step 3 — Encryption parameters `Done`
 
 Add flags to override KDF and cipher settings per-invocation.
 
 ```shell
 arcana encrypt --kdf-type argon2 \
                --kdf-argon2-algorithm argon2id \
+               --kdf-argon2-version 19 \
                --kdf-argon2-memory 65536 \
                --kdf-argon2-iterations 3 \
                --kdf-argon2-parallelism 1 \
-               --cipher-type chacha20poly1305 < decrypted.txt > encrypted.yml
+               --cipher-type ChaCha20Poly1305 < decrypted.txt > encrypted.yml
 ```
 
 Supported flags:
 
-- `--kdf-type <type>` — select key derivation function (e.g. `argon2`)
-- `--kdf-<type>-<parameter> <value>` — set a KDF-specific parameter (e.g. `--kdf-argon2-memory 65536`)
-- `--cipher-type <type>` — select cipher (e.g. `chacha20poly1305`)
+- `--kdf-type <type>` — select key derivation function (`argon2`)
+- `--kdf-argon2-algorithm <algorithm>` — Argon2 algorithm (`argon2id`, `argon2i`, `argon2d`; default: `argon2id`)
+- `--kdf-argon2-version <version>` — Argon2 version (`16`, `19`; default: `19`)
+- `--kdf-argon2-memory <kib>` — memory in KiB (default: `131072`)
+- `--kdf-argon2-iterations <n>` — number of iterations (default: `4`)
+- `--kdf-argon2-parallelism <n>` — degree of parallelism (default: `4`)
+- `--cipher-type <type>` — select cipher (`ChaCha20Poly1305`)
 
 ### Step 4 — Configuration file `Planned`
 

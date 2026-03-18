@@ -145,16 +145,6 @@ pub struct EncryptParams {
     pub cipher: Cipher,
 }
 
-impl EncryptParams {
-    pub fn new(data: Vec<u8>, password: Zeroizing<Vec<u8>>) -> Self {
-        Self {
-            data,
-            password,
-            ..Default::default()
-        }
-    }
-}
-
 #[derive(Default, Deserialize, Serialize)]
 #[serde(tag = "type")]
 pub enum Cipher {
