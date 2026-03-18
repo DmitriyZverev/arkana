@@ -58,12 +58,16 @@ fn main() -> anyhow::Result<()> {
         None => std::env::current_dir()?,
     };
     match cli_args.command {
-        Some(SubCommand::Encrypt { io }) => {
+        Some(SubCommand::Encrypt { io, kdf, cipher }) => {
             let input_file = resolve_path(&cwd, io.input_file)?;
             let output_file = resolve_path(&cwd, io.output_file)?;
             let password_file = resolve_path(&cwd, io.password_file)?;
-            let encrypt_params =
-                EncryptParams::new(read_input(input_file, &cwd)?, read_password(password_file)?);
+            let encrypt_params = EncryptParams {
+                data: read_input(input_file, &cwd)?,
+                password: read_password(password_file)?,
+                kdf: kdf.into(),
+                cipher: cipher.into(),
+            };
             let encrypted_container = encrypt(encrypt_params)?;
             write_output(
                 serde_yaml::to_string(&encrypted_container)?.as_bytes(),
