@@ -59,19 +59,6 @@ fn decrypt_long_text() -> anyhow::Result<()> {
 }
 
 #[test]
-fn decrypt_with_salt_and_nonce_in_lower_case() -> anyhow::Result<()> {
-    assert_cmd!(
-        arcana_cmd()
-            .arg("decrypt")
-            .arg("--password-file")
-            .arg(fixtures::SHORT_TEXT_LOWER_CASE.password_file_path())
-            .pass_stdin(fixtures::SHORT_TEXT_LOWER_CASE.encrypted_container()?)?,
-        ExpectedOutput::success().stdout(fixtures::SHORT_TEXT_LOWER_CASE.plaintext()?)
-    );
-    Ok(())
-}
-
-#[test]
 fn try_decrypt_with_invalid_password() -> anyhow::Result<()> {
     let password_file = create_temp_file("invalid_password")?;
     assert_cmd!(
@@ -104,8 +91,8 @@ fn try_decrypt_with_invalid_kdf_type() -> anyhow::Result<()> {
                   parallelism: 4
                 cipher:
                   type: ChaCha20Poly1305
-                salt: 1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B
-                nonce: 0A0A0A0A0A0A0A0A0A0A0A0A
+                salt: GxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxs=
+                nonce: CgoKCgoKCgoKCgoK
                 ciphertext: RmuSIEhbLyex+iTUh1yYEdQ5IHcvz3UL7W+ZHQ==
                 "
             )?,
@@ -135,8 +122,8 @@ fn try_decrypt_with_invalid_kdf_algorithm() -> anyhow::Result<()> {
                   parallelism: 4
                 cipher:
                   type: ChaCha20Poly1305
-                salt: 1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B
-                nonce: 0A0A0A0A0A0A0A0A0A0A0A0A
+                salt: GxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxs=
+                nonce: CgoKCgoKCgoKCgoK
                 ciphertext: RmuSIEhbLyex+iTUh1yYEdQ5IHcvz3UL7W+ZHQ==
                 "
             )?,
@@ -166,8 +153,8 @@ fn try_decrypt_with_invalid_kdf_memory() -> anyhow::Result<()> {
                   parallelism: 4
                 cipher:
                   type: ChaCha20Poly1305
-                salt: 1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B
-                nonce: 0A0A0A0A0A0A0A0A0A0A0A0A
+                salt: GxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxs=
+                nonce: CgoKCgoKCgoKCgoK
                 ciphertext: RmuSIEhbLyex+iTUh1yYEdQ5IHcvz3UL7W+ZHQ==
                 "
             )?,
@@ -195,8 +182,8 @@ fn try_decrypt_with_invalid_kdf_iterations() -> anyhow::Result<()> {
                   parallelism: 4
                 cipher:
                   type: ChaCha20Poly1305
-                salt: 1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B
-                nonce: 0A0A0A0A0A0A0A0A0A0A0A0A
+                salt: GxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxs=
+                nonce: CgoKCgoKCgoKCgoK
                 ciphertext: RmuSIEhbLyex+iTUh1yYEdQ5IHcvz3UL7W+ZHQ==
                 "
             )?,
@@ -224,8 +211,8 @@ fn try_decrypt_with_invalid_kdf_parallelism() -> anyhow::Result<()> {
                   parallelism: 1
                 cipher:
                   type: ChaCha20Poly1305
-                salt: 1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B
-                nonce: 0A0A0A0A0A0A0A0A0A0A0A0A
+                salt: GxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxs=
+                nonce: CgoKCgoKCgoKCgoK
                 ciphertext: RmuSIEhbLyex+iTUh1yYEdQ5IHcvz3UL7W+ZHQ==
                 "
             )?,
@@ -253,8 +240,8 @@ fn try_decrypt_with_invalid_cipher_type() -> anyhow::Result<()> {
                   parallelism: 4
                 cipher:
                   type: ChaCha20Poly1304
-                salt: 1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B
-                nonce: 0A0A0A0A0A0A0A0A0A0A0A0A
+                salt: GxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxs=
+                nonce: CgoKCgoKCgoKCgoK
                 ciphertext: RmuSIEhbLyex+iTUh1yYEdQ5IHcvz3UL7W+ZHQ==
                 "
             )?,
@@ -284,8 +271,8 @@ fn try_decrypt_with_invalid_salt() -> anyhow::Result<()> {
                   parallelism: 4
                 cipher:
                   type: ChaCha20Poly1305
-                salt: 0B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B
-                nonce: 0A0A0A0A0A0A0A0A0A0A0A0A
+                salt: CxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxs=
+                nonce: CgoKCgoKCgoKCgoK
                 ciphertext: RmuSIEhbLyex+iTUh1yYEdQ5IHcvz3UL7W+ZHQ==
                 "
             )?,
@@ -313,8 +300,8 @@ fn try_decrypt_with_invalid_nonce() -> anyhow::Result<()> {
                   parallelism: 4
                 cipher:
                   type: ChaCha20Poly1305
-                salt: 1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B
-                nonce: 1A0A0A0A0A0A0A0A0A0A0A0A
+                salt: GxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxs=
+                nonce: GgoKCgoKCgoKCgoK
                 ciphertext: RmuSIEhbLyex+iTUh1yYEdQ5IHcvz3UL7W+ZHQ==
                 "
             )?,

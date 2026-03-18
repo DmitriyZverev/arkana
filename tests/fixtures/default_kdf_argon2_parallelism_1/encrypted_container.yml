@@ -7,6 +7,6 @@ kdf:
   parallelism: 1
 cipher:
   type: ChaCha20Poly1305
-salt: 1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B1B
-nonce: 0A0A0A0A0A0A0A0A0A0A0A0A
+salt: GxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxs=
+nonce: CgoKCgoKCgoKCgoK
 ciphertext: RY2O/OH4AyT8Na4Eue4SGuZngSJ+Im9s6hbg6Q==

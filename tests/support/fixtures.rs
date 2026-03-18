@@ -37,9 +37,6 @@ impl Fixture {
 }
 
 pub static SHORT_TEXT: Fixture = Fixture { name: "short_text" };
-pub static SHORT_TEXT_LOWER_CASE: Fixture = Fixture {
-    name: "short_text_lower_case",
-};
 pub static DEFAULT_KDF_ARGON2_ALGORITHM_ARGON2I: Fixture = Fixture {
     name: "default_kdf_argon2_algorithm_argon2i",
 };
