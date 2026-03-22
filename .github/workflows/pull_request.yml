@@ -29,8 +29,34 @@ jobs:
   test:
     name: Test
     runs-on: ubuntu-22.04
+    permissions:
+      pull-requests: write
     steps:
       - uses: actions/checkout@v6.0.2
       - uses: dtolnay/rust-toolchain@1.93.1
+        with:
+          components: llvm-tools-preview
       - uses: Swatinem/rust-cache@v2.8.2
-      - run: cargo test --verbose --features deterministic
+      - uses: taiki-e/install-action@v2.69.6
+        with:
+          tool: cargo-llvm-cov
+      - run: cargo llvm-cov --features deterministic --html
+      - run: cargo llvm-cov report --summary-only | tee coverage-summary.txt
+      - uses: actions/upload-artifact@v5.0.0
+        id: upload-coverage
+        if: always()
+        with:
+          name: coverage-report
+          path: target/llvm-cov/html/
+      - run: |
+          echo '## Code coverage' > coverage-comment.md
+          echo '' >> coverage-comment.md
+          echo '```' >> coverage-comment.md
+          cat coverage-summary.txt >> coverage-comment.md
+          echo '```' >> coverage-comment.md
+          echo '' >> coverage-comment.md
+          echo "[Download report](${{ steps.upload-coverage.outputs.artifact-url }})" >> coverage-comment.md
+      - uses: marocchino/sticky-pull-request-comment@v3.0.2
+        with:
+          header: coverage
+          path: coverage-comment.md
