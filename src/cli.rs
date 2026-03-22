@@ -18,7 +18,7 @@ fn display_value(
 #[derive(Debug, Args)]
 pub struct CipherArgs {
     /// Cipher to use for encryption.
-    #[arg(long, default_value_t = CipherType::ChaCha20Poly1305)]
+    #[arg(long, default_value_t)]
     cipher_type: CipherType,
 }
 
@@ -30,8 +30,9 @@ impl From<CipherArgs> for Cipher {
     }
 }
 
-#[derive(Debug, Clone, ValueEnum)]
+#[derive(Debug, Clone, ValueEnum, Default)]
 enum CipherType {
+    #[default]
     #[value(name = "ChaCha20Poly1305")]
     ChaCha20Poly1305,
 }
@@ -42,12 +43,13 @@ impl Display for CipherType {
     }
 }
 
-#[derive(Debug, Clone, ValueEnum)]
+#[derive(Debug, Clone, ValueEnum, Default)]
 enum Argon2Version {
     #[value(name = "16")]
-    V0x10,
+    V16,
+    #[default]
     #[value(name = "19")]
-    V0x13,
+    V19,
 }
 
 impl Display for Argon2Version {
@@ -59,14 +61,15 @@ impl Display for Argon2Version {
 impl From<Argon2Version> for Version {
     fn from(version: Argon2Version) -> Self {
         match version {
-            Argon2Version::V0x10 => Version::V0x10,
-            Argon2Version::V0x13 => Version::V0x13,
+            Argon2Version::V16 => Version::V0x10,
+            Argon2Version::V19 => Version::V0x13,
         }
     }
 }
 
-#[derive(Debug, Clone, ValueEnum)]
+#[derive(Debug, Clone, ValueEnum, Default)]
 enum Argon2Algorithm {
+    #[default]
     #[value(name = "argon2id")]
     Argon2id,
     #[value(name = "argon2i")]
@@ -92,12 +95,12 @@ impl From<Argon2Algorithm> for Algorithm {
 }
 
 #[derive(Debug, Args)]
-pub struct KdfArgon2Args {
+pub struct Argon2Args {
     /// Argon2 algorithm to use for key derivation.
-    #[arg(long = "kdf-argon2-algorithm", default_value_t = Argon2Algorithm::Argon2id)]
+    #[arg(long = "kdf-argon2-algorithm", default_value_t)]
     algorithm: Argon2Algorithm,
     /// Argon2 version to use for key derivation.
-    #[arg(long = "kdf-argon2-version", default_value_t = Argon2Version::V0x13)]
+    #[arg(long = "kdf-argon2-version", default_value_t)]
     version: Argon2Version,
     /// Argon2 memory to use for key derivation.
     #[arg(long = "kdf-argon2-memory", default_value_t = Argon2::DEFAULT_MEMORY)]
@@ -110,8 +113,22 @@ pub struct KdfArgon2Args {
     parallelism: u32,
 }
 
-#[derive(Debug, Clone, ValueEnum)]
+impl From<Argon2Args> for Argon2 {
+    fn from(argon2_args: Argon2Args) -> Self {
+        Argon2 {
+            algorithm: argon2_args.algorithm.into(),
+            version: argon2_args.version.into(),
+            memory: argon2_args.memory,
+            iterations: argon2_args.iterations,
+            parallelism: argon2_args.parallelism,
+        }
+    }
+}
+
+#[derive(Debug, Clone, ValueEnum, Default)]
 enum KdfType {
+    #[default]
+    #[value(name = "argon2")]
     Argon2,
 }
 
@@ -124,22 +141,16 @@ impl Display for KdfType {
 #[derive(Debug, Args)]
 pub struct KdfArgs {
     /// Key derivation function to use for key derivation.
-    #[arg(long = "kdf-type", default_value_t = KdfType::Argon2)]
+    #[arg(long, default_value_t)]
     kdf_type: KdfType,
     #[command(flatten)]
-    kdf_argon2: KdfArgon2Args,
+    argon2: Argon2Args,
 }
 
 impl From<KdfArgs> for Kdf {
     fn from(kdf: KdfArgs) -> Self {
         match kdf.kdf_type {
-            KdfType::Argon2 => Kdf::Argon2(Argon2 {
-                algorithm: kdf.kdf_argon2.algorithm.into(),
-                version: kdf.kdf_argon2.version.into(),
-                memory: kdf.kdf_argon2.memory,
-                iterations: kdf.kdf_argon2.iterations,
-                parallelism: kdf.kdf_argon2.parallelism,
-            }),
+            KdfType::Argon2 => Kdf::Argon2(kdf.argon2.into()),
         }
     }
 }
