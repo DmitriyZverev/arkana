@@ -8,27 +8,27 @@ use support::{
 };
 
 #[test]
-fn encrypt_short_text() -> anyhow::Result<()> {
+fn encrypt_default() -> anyhow::Result<()> {
     assert_cmd!(
         arcana_cmd()
             .arg("encrypt")
             .arg("--password-file")
-            .arg(fixtures::SHORT_TEXT.password_file_path())
-            .pass_stdin(fixtures::SHORT_TEXT.plaintext()?)?,
-        ExpectedOutput::success().stdout(fixtures::SHORT_TEXT.encrypted_container()?)
+            .arg(fixtures::DEFAULT.password_file_path())
+            .pass_stdin(fixtures::DEFAULT.plaintext()?)?,
+        ExpectedOutput::success().stdout(fixtures::DEFAULT.encrypted_container()?)
     );
     Ok(())
 }
 
 #[test]
-fn decrypt_short_text() -> anyhow::Result<()> {
+fn decrypt_default() -> anyhow::Result<()> {
     assert_cmd!(
         arcana_cmd()
             .arg("decrypt")
             .arg("--password-file")
-            .arg(fixtures::SHORT_TEXT.password_file_path())
-            .pass_stdin(fixtures::SHORT_TEXT.encrypted_container()?)?,
-        ExpectedOutput::success().stdout(fixtures::SHORT_TEXT.plaintext()?)
+            .arg(fixtures::DEFAULT.password_file_path())
+            .pass_stdin(fixtures::DEFAULT.encrypted_container()?)?,
+        ExpectedOutput::success().stdout(fixtures::DEFAULT.plaintext()?)
     );
     Ok(())
 }
@@ -67,7 +67,7 @@ fn try_decrypt_with_invalid_password() -> anyhow::Result<()> {
             .arg("decrypt")
             .arg("--password-file")
             .arg(password_file.path())
-            .pass_stdin(fixtures::SHORT_TEXT.encrypted_container()?)?,
+            .pass_stdin(fixtures::DEFAULT.encrypted_container()?)?,
         ExpectedOutput::failure().stderr(indoc! {"
             Error: Decryption error
         "})
@@ -313,11 +313,11 @@ fn encrypt_with_input_file() -> anyhow::Result<()> {
         arcana_cmd()
             .arg("encrypt")
             .arg("--password-file")
-            .arg(fixtures::SHORT_TEXT.password_file_path())
+            .arg(fixtures::DEFAULT.password_file_path())
             .arg("--input-file")
-            .arg(fixtures::SHORT_TEXT.plaintext_file_path())
+            .arg(fixtures::DEFAULT.plaintext_file_path())
             .output()?,
-        ExpectedOutput::success().stdout(fixtures::SHORT_TEXT.encrypted_container()?)
+        ExpectedOutput::success().stdout(fixtures::DEFAULT.encrypted_container()?)
     );
     Ok(())
 }
@@ -328,11 +328,11 @@ fn encrypt_with_input_file_short_alias() -> anyhow::Result<()> {
         arcana_cmd()
             .arg("encrypt")
             .arg("--password-file")
-            .arg(fixtures::SHORT_TEXT.password_file_path())
+            .arg(fixtures::DEFAULT.password_file_path())
             .arg("-i")
-            .arg(fixtures::SHORT_TEXT.plaintext_file_path())
+            .arg(fixtures::DEFAULT.plaintext_file_path())
             .output()?,
-        ExpectedOutput::success().stdout(fixtures::SHORT_TEXT.encrypted_container()?)
+        ExpectedOutput::success().stdout(fixtures::DEFAULT.encrypted_container()?)
     );
     Ok(())
 }
@@ -343,11 +343,11 @@ fn encrypt_with_input_file_long_alias() -> anyhow::Result<()> {
         arcana_cmd()
             .arg("encrypt")
             .arg("--password-file")
-            .arg(fixtures::SHORT_TEXT.password_file_path())
+            .arg(fixtures::DEFAULT.password_file_path())
             .arg("--input")
-            .arg(fixtures::SHORT_TEXT.plaintext_file_path())
+            .arg(fixtures::DEFAULT.plaintext_file_path())
             .output()?,
-        ExpectedOutput::success().stdout(fixtures::SHORT_TEXT.encrypted_container()?)
+        ExpectedOutput::success().stdout(fixtures::DEFAULT.encrypted_container()?)
     );
     Ok(())
 }
@@ -358,11 +358,11 @@ fn encrypt_with_input_file_and_ignore_stdin() -> anyhow::Result<()> {
         arcana_cmd()
             .arg("encrypt")
             .arg("--password-file")
-            .arg(fixtures::SHORT_TEXT.password_file_path())
+            .arg(fixtures::DEFAULT.password_file_path())
             .arg("--input-file")
-            .arg(fixtures::SHORT_TEXT.plaintext_file_path())
+            .arg(fixtures::DEFAULT.plaintext_file_path())
             .pass_stdin("Hello everyone!")?,
-        ExpectedOutput::success().stdout(fixtures::SHORT_TEXT.encrypted_container()?)
+        ExpectedOutput::success().stdout(fixtures::DEFAULT.encrypted_container()?)
     );
     Ok(())
 }
@@ -374,16 +374,13 @@ fn encrypt_with_output_file() -> anyhow::Result<()> {
         arcana_cmd()
             .arg("encrypt")
             .arg("--password-file")
-            .arg(fixtures::SHORT_TEXT.password_file_path())
+            .arg(fixtures::DEFAULT.password_file_path())
             .arg("--output-file")
             .arg(output_file.path())
-            .pass_stdin(fixtures::SHORT_TEXT.plaintext()?)?,
+            .pass_stdin(fixtures::DEFAULT.plaintext()?)?,
         ExpectedOutput::success()
     );
-    assert_file!(
-        output_file.path(),
-        fixtures::SHORT_TEXT.encrypted_container()?
-    );
+    assert_file!(output_file.path(), fixtures::DEFAULT.encrypted_container()?);
     Ok(())
 }
 
@@ -394,16 +391,13 @@ fn encrypt_with_output_file_short_alias() -> anyhow::Result<()> {
         arcana_cmd()
             .arg("encrypt")
             .arg("--password-file")
-            .arg(fixtures::SHORT_TEXT.password_file_path())
+            .arg(fixtures::DEFAULT.password_file_path())
             .arg("-o")
             .arg(output_file.path())
-            .pass_stdin(fixtures::SHORT_TEXT.plaintext()?)?,
+            .pass_stdin(fixtures::DEFAULT.plaintext()?)?,
         ExpectedOutput::success()
     );
-    assert_file!(
-        output_file.path(),
-        fixtures::SHORT_TEXT.encrypted_container()?
-    );
+    assert_file!(output_file.path(), fixtures::DEFAULT.encrypted_container()?);
     Ok(())
 }
 
@@ -414,16 +408,13 @@ fn encrypt_with_output_file_long_alias() -> anyhow::Result<()> {
         arcana_cmd()
             .arg("encrypt")
             .arg("--password-file")
-            .arg(fixtures::SHORT_TEXT.password_file_path())
+            .arg(fixtures::DEFAULT.password_file_path())
             .arg("--output")
             .arg(output_file.path())
-            .pass_stdin(fixtures::SHORT_TEXT.plaintext()?)?,
+            .pass_stdin(fixtures::DEFAULT.plaintext()?)?,
         ExpectedOutput::success()
     );
-    assert_file!(
-        output_file.path(),
-        fixtures::SHORT_TEXT.encrypted_container()?
-    );
+    assert_file!(output_file.path(), fixtures::DEFAULT.encrypted_container()?);
     Ok(())
 }
 
@@ -434,26 +425,23 @@ fn encrypt_with_input_and_output_files() -> anyhow::Result<()> {
         arcana_cmd()
             .arg("encrypt")
             .arg("--password-file")
-            .arg(fixtures::SHORT_TEXT.password_file_path())
+            .arg(fixtures::DEFAULT.password_file_path())
             .arg("--input-file")
-            .arg(fixtures::SHORT_TEXT.plaintext_file_path())
+            .arg(fixtures::DEFAULT.plaintext_file_path())
             .arg("--output-file")
             .arg(output_file.path())
             .output()?,
         ExpectedOutput::success()
     );
-    assert_file!(
-        output_file.path(),
-        fixtures::SHORT_TEXT.encrypted_container()?
-    );
+    assert_file!(output_file.path(), fixtures::DEFAULT.encrypted_container()?);
     Ok(())
 }
 
 #[test]
 fn encrypt_with_cwd_and_relative_input_and_output_files() -> anyhow::Result<()> {
     let current_dir = create_temp_dir()?;
-    let password_file = create_temp_file_in(current_dir.path(), &fixtures::SHORT_TEXT.password()?)?;
-    let input_file = create_temp_file_in(current_dir.path(), &fixtures::SHORT_TEXT.plaintext()?)?;
+    let password_file = create_temp_file_in(current_dir.path(), &fixtures::DEFAULT.password()?)?;
+    let input_file = create_temp_file_in(current_dir.path(), &fixtures::DEFAULT.plaintext()?)?;
     let output_file = create_temp_file_in(current_dir.path(), "")?;
     assert_cmd!(
         arcana_cmd()
@@ -469,10 +457,7 @@ fn encrypt_with_cwd_and_relative_input_and_output_files() -> anyhow::Result<()> 
             .output()?,
         ExpectedOutput::success()
     );
-    assert_file!(
-        output_file.path(),
-        fixtures::SHORT_TEXT.encrypted_container()?
-    );
+    assert_file!(output_file.path(), fixtures::DEFAULT.encrypted_container()?);
     Ok(())
 }
 
@@ -524,11 +509,11 @@ fn decrypt_with_input_file() -> anyhow::Result<()> {
         arcana_cmd()
             .arg("decrypt")
             .arg("--password-file")
-            .arg(fixtures::SHORT_TEXT.password_file_path())
+            .arg(fixtures::DEFAULT.password_file_path())
             .arg("--input-file")
-            .arg(fixtures::SHORT_TEXT.encrypted_container_file_path())
+            .arg(fixtures::DEFAULT.encrypted_container_file_path())
             .output()?,
-        ExpectedOutput::success().stdout(fixtures::SHORT_TEXT.plaintext()?)
+        ExpectedOutput::success().stdout(fixtures::DEFAULT.plaintext()?)
     );
     Ok(())
 }
@@ -539,11 +524,11 @@ fn decrypt_with_input_file_short_alias() -> anyhow::Result<()> {
         arcana_cmd()
             .arg("decrypt")
             .arg("--password-file")
-            .arg(fixtures::SHORT_TEXT.password_file_path())
+            .arg(fixtures::DEFAULT.password_file_path())
             .arg("-i")
-            .arg(fixtures::SHORT_TEXT.encrypted_container_file_path())
+            .arg(fixtures::DEFAULT.encrypted_container_file_path())
             .output()?,
-        ExpectedOutput::success().stdout(fixtures::SHORT_TEXT.plaintext()?)
+        ExpectedOutput::success().stdout(fixtures::DEFAULT.plaintext()?)
     );
     Ok(())
 }
@@ -554,11 +539,11 @@ fn decrypt_with_input_file_long_alias() -> anyhow::Result<()> {
         arcana_cmd()
             .arg("decrypt")
             .arg("--password-file")
-            .arg(fixtures::SHORT_TEXT.password_file_path())
+            .arg(fixtures::DEFAULT.password_file_path())
             .arg("--input")
-            .arg(fixtures::SHORT_TEXT.encrypted_container_file_path())
+            .arg(fixtures::DEFAULT.encrypted_container_file_path())
             .output()?,
-        ExpectedOutput::success().stdout(fixtures::SHORT_TEXT.plaintext()?)
+        ExpectedOutput::success().stdout(fixtures::DEFAULT.plaintext()?)
     );
     Ok(())
 }
@@ -569,11 +554,11 @@ fn decrypt_with_input_file_and_ignore_stdin() -> anyhow::Result<()> {
         arcana_cmd()
             .arg("decrypt")
             .arg("--password-file")
-            .arg(fixtures::SHORT_TEXT.password_file_path())
+            .arg(fixtures::DEFAULT.password_file_path())
             .arg("--input-file")
-            .arg(fixtures::SHORT_TEXT.encrypted_container_file_path())
+            .arg(fixtures::DEFAULT.encrypted_container_file_path())
             .pass_stdin("Ignored input")?,
-        ExpectedOutput::success().stdout(fixtures::SHORT_TEXT.plaintext()?)
+        ExpectedOutput::success().stdout(fixtures::DEFAULT.plaintext()?)
     );
     Ok(())
 }
@@ -585,13 +570,13 @@ fn decrypt_with_output_file() -> anyhow::Result<()> {
         arcana_cmd()
             .arg("decrypt")
             .arg("--password-file")
-            .arg(fixtures::SHORT_TEXT.password_file_path())
+            .arg(fixtures::DEFAULT.password_file_path())
             .arg("--output-file")
             .arg(output_file.path())
-            .pass_stdin(fixtures::SHORT_TEXT.encrypted_container()?)?,
+            .pass_stdin(fixtures::DEFAULT.encrypted_container()?)?,
         ExpectedOutput::success()
     );
-    assert_file!(output_file.path(), fixtures::SHORT_TEXT.plaintext()?);
+    assert_file!(output_file.path(), fixtures::DEFAULT.plaintext()?);
     Ok(())
 }
 
@@ -602,13 +587,13 @@ fn decrypt_with_output_file_short_alias() -> anyhow::Result<()> {
         arcana_cmd()
             .arg("decrypt")
             .arg("--password-file")
-            .arg(fixtures::SHORT_TEXT.password_file_path())
+            .arg(fixtures::DEFAULT.password_file_path())
             .arg("-o")
             .arg(output_file.path())
-            .pass_stdin(fixtures::SHORT_TEXT.encrypted_container()?)?,
+            .pass_stdin(fixtures::DEFAULT.encrypted_container()?)?,
         ExpectedOutput::success()
     );
-    assert_file!(output_file.path(), fixtures::SHORT_TEXT.plaintext()?);
+    assert_file!(output_file.path(), fixtures::DEFAULT.plaintext()?);
     Ok(())
 }
 
@@ -619,13 +604,13 @@ fn decrypt_with_output_file_long_alias() -> anyhow::Result<()> {
         arcana_cmd()
             .arg("decrypt")
             .arg("--password-file")
-            .arg(fixtures::SHORT_TEXT.password_file_path())
+            .arg(fixtures::DEFAULT.password_file_path())
             .arg("--output")
             .arg(output_file.path())
-            .pass_stdin(fixtures::SHORT_TEXT.encrypted_container()?)?,
+            .pass_stdin(fixtures::DEFAULT.encrypted_container()?)?,
         ExpectedOutput::success()
     );
-    assert_file!(output_file.path(), fixtures::SHORT_TEXT.plaintext()?);
+    assert_file!(output_file.path(), fixtures::DEFAULT.plaintext()?);
     Ok(())
 }
 
@@ -636,25 +621,25 @@ fn decrypt_with_input_and_output_files() -> anyhow::Result<()> {
         arcana_cmd()
             .arg("decrypt")
             .arg("--password-file")
-            .arg(fixtures::SHORT_TEXT.password_file_path())
+            .arg(fixtures::DEFAULT.password_file_path())
             .arg("--input-file")
-            .arg(fixtures::SHORT_TEXT.encrypted_container_file_path())
+            .arg(fixtures::DEFAULT.encrypted_container_file_path())
             .arg("--output-file")
             .arg(output_file.path())
             .output()?,
         ExpectedOutput::success()
     );
-    assert_file!(output_file.path(), fixtures::SHORT_TEXT.plaintext()?);
+    assert_file!(output_file.path(), fixtures::DEFAULT.plaintext()?);
     Ok(())
 }
 
 #[test]
 fn decrypt_with_cwd_and_relative_input_and_output_files() -> anyhow::Result<()> {
     let current_dir = create_temp_dir()?;
-    let password_file = create_temp_file_in(current_dir.path(), &fixtures::SHORT_TEXT.password()?)?;
+    let password_file = create_temp_file_in(current_dir.path(), &fixtures::DEFAULT.password()?)?;
     let input_file = create_temp_file_in(
         current_dir.path(),
-        &fixtures::SHORT_TEXT.encrypted_container()?,
+        &fixtures::DEFAULT.encrypted_container()?,
     )?;
     let output_file = create_temp_file_in(current_dir.path(), "")?;
     assert_cmd!(
@@ -669,7 +654,7 @@ fn decrypt_with_cwd_and_relative_input_and_output_files() -> anyhow::Result<()> 
             .output()?,
         ExpectedOutput::success()
     );
-    assert_file!(output_file.path(), fixtures::SHORT_TEXT.plaintext()?);
+    assert_file!(output_file.path(), fixtures::DEFAULT.plaintext()?);
     Ok(())
 }
 
@@ -721,11 +706,11 @@ fn encrypt_with_cipher_type_cha_cha_20_poly_1305_argument() -> anyhow::Result<()
         arcana_cmd()
             .arg("encrypt")
             .arg("--password-file")
-            .arg(fixtures::SHORT_TEXT.password_file_path())
+            .arg(fixtures::DEFAULT.password_file_path())
             .arg("--cipher-type")
             .arg("ChaCha20Poly1305")
-            .pass_stdin(fixtures::SHORT_TEXT.plaintext()?)?,
-        ExpectedOutput::success().stdout(fixtures::SHORT_TEXT.encrypted_container()?)
+            .pass_stdin(fixtures::DEFAULT.plaintext()?)?,
+        ExpectedOutput::success().stdout(fixtures::DEFAULT.encrypted_container()?)
     );
     Ok(())
 }
@@ -757,11 +742,11 @@ fn encrypt_with_kdf_type_argon2_argument() -> anyhow::Result<()> {
         arcana_cmd()
             .arg("encrypt")
             .arg("--password-file")
-            .arg(fixtures::SHORT_TEXT.password_file_path())
+            .arg(fixtures::DEFAULT.password_file_path())
             .arg("--kdf-type")
             .arg("argon2")
-            .pass_stdin(fixtures::SHORT_TEXT.plaintext()?)?,
-        ExpectedOutput::success().stdout(fixtures::SHORT_TEXT.encrypted_container()?)
+            .pass_stdin(fixtures::DEFAULT.plaintext()?)?,
+        ExpectedOutput::success().stdout(fixtures::DEFAULT.encrypted_container()?)
     );
     Ok(())
 }
