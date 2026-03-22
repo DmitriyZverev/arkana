@@ -1,5 +1,6 @@
 mod support;
 
+use indoc::indoc;
 use std::env::current_dir;
 use support::{
     ExpectedOutput, SpawnExt, arcana_cmd, create_temp_dir, create_temp_file, create_temp_file_in,
@@ -67,7 +68,9 @@ fn try_decrypt_with_invalid_password() -> anyhow::Result<()> {
             .arg("--password-file")
             .arg(password_file.path())
             .pass_stdin(fixtures::SHORT_TEXT.encrypted_container()?)?,
-        ExpectedOutput::failure().stderr("Error: Decryption error\n")
+        ExpectedOutput::failure().stderr(indoc! {"
+            Error: Decryption error
+        "})
     );
     Ok(())
 }
@@ -80,8 +83,7 @@ fn try_decrypt_with_invalid_kdf_type() -> anyhow::Result<()> {
             .arg("decrypt")
             .arg("--password-file")
             .arg(password_file.path())
-            .pass_stdin(
-                "
+            .pass_stdin(indoc! {"
                 kdf:
                   type: argon3
                   algorithm: argon2id
@@ -94,11 +96,10 @@ fn try_decrypt_with_invalid_kdf_type() -> anyhow::Result<()> {
                 salt: GxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxs=
                 nonce: CgoKCgoKCgoKCgoK
                 ciphertext: RmuSIEhbLyex+iTUh1yYEdQ5IHcvz3UL7W+ZHQ==
-                "
-            )?,
-        ExpectedOutput::failure().stderr(
-            "Error: kdf.type: unknown variant `argon3`, expected `argon2` at line 3 column 25\n"
-        )
+            "})?,
+        ExpectedOutput::failure().stderr(indoc! {"
+            Error: kdf.type: unknown variant `argon3`, expected `argon2` at line 2 column 9
+        "})
     );
     Ok(())
 }
@@ -111,8 +112,7 @@ fn try_decrypt_with_invalid_kdf_algorithm() -> anyhow::Result<()> {
             .arg("decrypt")
             .arg("--password-file")
             .arg(password_file.path())
-            .pass_stdin(
-                "
+            .pass_stdin(indoc! {"
                 kdf:
                   type: argon2
                   algorithm: argon2
@@ -125,11 +125,10 @@ fn try_decrypt_with_invalid_kdf_algorithm() -> anyhow::Result<()> {
                 salt: GxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxs=
                 nonce: CgoKCgoKCgoKCgoK
                 ciphertext: RmuSIEhbLyex+iTUh1yYEdQ5IHcvz3UL7W+ZHQ==
-                "
-            )?,
-        ExpectedOutput::failure().stderr(
-            "Error: unknown variant `argon2`, expected one of `argon2i`, `argon2d`, `argon2id` at line 2 column 17\n"
-        )
+            "})?,
+        ExpectedOutput::failure().stderr(indoc! {"
+            Error: unknown variant `argon2`, expected one of `argon2i`, `argon2d`, `argon2id`
+        "})
     );
     Ok(())
 }
@@ -142,8 +141,7 @@ fn try_decrypt_with_invalid_kdf_memory() -> anyhow::Result<()> {
             .arg("decrypt")
             .arg("--password-file")
             .arg(password_file.path())
-            .pass_stdin(
-                "
+            .pass_stdin(indoc! {"
                 kdf:
                   type: argon2
                   algorithm: argon2id
@@ -156,9 +154,10 @@ fn try_decrypt_with_invalid_kdf_memory() -> anyhow::Result<()> {
                 salt: GxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxs=
                 nonce: CgoKCgoKCgoKCgoK
                 ciphertext: RmuSIEhbLyex+iTUh1yYEdQ5IHcvz3UL7W+ZHQ==
-                "
-            )?,
-        ExpectedOutput::failure().stderr("Error: Decryption error\n")
+            "})?,
+        ExpectedOutput::failure().stderr(indoc! {"
+            Error: Decryption error
+        "})
     );
     Ok(())
 }
@@ -171,8 +170,7 @@ fn try_decrypt_with_invalid_kdf_iterations() -> anyhow::Result<()> {
             .arg("decrypt")
             .arg("--password-file")
             .arg(password_file.path())
-            .pass_stdin(
-                "
+            .pass_stdin(indoc! {"
                 kdf:
                   type: argon2
                   algorithm: argon2id
@@ -185,9 +183,10 @@ fn try_decrypt_with_invalid_kdf_iterations() -> anyhow::Result<()> {
                 salt: GxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxs=
                 nonce: CgoKCgoKCgoKCgoK
                 ciphertext: RmuSIEhbLyex+iTUh1yYEdQ5IHcvz3UL7W+ZHQ==
-                "
-            )?,
-        ExpectedOutput::failure().stderr("Error: Decryption error\n")
+            "})?,
+        ExpectedOutput::failure().stderr(indoc! {"
+            Error: Decryption error
+        "})
     );
     Ok(())
 }
@@ -200,8 +199,7 @@ fn try_decrypt_with_invalid_kdf_parallelism() -> anyhow::Result<()> {
             .arg("decrypt")
             .arg("--password-file")
             .arg(password_file.path())
-            .pass_stdin(
-                "
+            .pass_stdin(indoc! {"
                 kdf:
                   type: argon2
                   algorithm: argon2id
@@ -214,9 +212,10 @@ fn try_decrypt_with_invalid_kdf_parallelism() -> anyhow::Result<()> {
                 salt: GxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxs=
                 nonce: CgoKCgoKCgoKCgoK
                 ciphertext: RmuSIEhbLyex+iTUh1yYEdQ5IHcvz3UL7W+ZHQ==
-                "
-            )?,
-        ExpectedOutput::failure().stderr("Error: Decryption error\n")
+            "})?,
+        ExpectedOutput::failure().stderr(indoc! {"
+            Error: Decryption error
+        "})
     );
     Ok(())
 }
@@ -229,8 +228,7 @@ fn try_decrypt_with_invalid_cipher_type() -> anyhow::Result<()> {
             .arg("decrypt")
             .arg("--password-file")
             .arg(password_file.path())
-            .pass_stdin(
-                "
+            .pass_stdin(indoc! {"
                 kdf:
                   type: argon2
                   algorithm: argon2id
@@ -243,11 +241,10 @@ fn try_decrypt_with_invalid_cipher_type() -> anyhow::Result<()> {
                 salt: GxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxs=
                 nonce: CgoKCgoKCgoKCgoK
                 ciphertext: RmuSIEhbLyex+iTUh1yYEdQ5IHcvz3UL7W+ZHQ==
-                "
-            )?,
-        ExpectedOutput::failure().stderr(
-            "Error: cipher.type: unknown variant `ChaCha20Poly1304`, expected `ChaCha20Poly1305` at line 10 column 25\n"
-        )
+            "})?,
+        ExpectedOutput::failure().stderr(indoc! {"
+            Error: cipher.type: unknown variant `ChaCha20Poly1304`, expected `ChaCha20Poly1305` at line 9 column 9
+        "})
     );
     Ok(())
 }
@@ -260,8 +257,7 @@ fn try_decrypt_with_invalid_salt() -> anyhow::Result<()> {
             .arg("decrypt")
             .arg("--password-file")
             .arg(password_file.path())
-            .pass_stdin(
-                "
+            .pass_stdin(indoc! {"
                 kdf:
                   type: argon2
                   algorithm: argon2id
@@ -274,9 +270,10 @@ fn try_decrypt_with_invalid_salt() -> anyhow::Result<()> {
                 salt: CxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxs=
                 nonce: CgoKCgoKCgoKCgoK
                 ciphertext: RmuSIEhbLyex+iTUh1yYEdQ5IHcvz3UL7W+ZHQ==
-                "
-            )?,
-        ExpectedOutput::failure().stderr("Error: Decryption error\n")
+            "})?,
+        ExpectedOutput::failure().stderr(indoc! {"
+            Error: Decryption error
+        "})
     );
     Ok(())
 }
@@ -289,8 +286,7 @@ fn try_decrypt_with_invalid_nonce() -> anyhow::Result<()> {
             .arg("decrypt")
             .arg("--password-file")
             .arg(password_file.path())
-            .pass_stdin(
-                "
+            .pass_stdin(indoc! {"
                 kdf:
                   type: argon2
                   algorithm: argon2id
@@ -303,9 +299,10 @@ fn try_decrypt_with_invalid_nonce() -> anyhow::Result<()> {
                 salt: GxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxs=
                 nonce: GgoKCgoKCgoKCgoK
                 ciphertext: RmuSIEhbLyex+iTUh1yYEdQ5IHcvz3UL7W+ZHQ==
-                "
-            )?,
-        ExpectedOutput::failure().stderr("Error: Decryption error\n")
+            "})?,
+        ExpectedOutput::failure().stderr(indoc! {"
+            Error: Decryption error
+        "})
     );
     Ok(())
 }
@@ -490,12 +487,12 @@ fn try_encrypt_with_relative_nonexistent_input_file() -> anyhow::Result<()> {
             .arg("--input-file")
             .arg("./nonexistent/path/input.txt")
             .output()?,
-        ExpectedOutput::failure().stderr(concat!(
-            "Error: Failed to read input file: \"nonexistent/path/input.txt\"\n",
-            "\n",
-            "Caused by:\n",
-            "    No such file or directory (os error 2)\n"
-        ))
+        ExpectedOutput::failure().stderr(indoc! {"
+            Error: Failed to read input file: \"nonexistent/path/input.txt\"
+
+            Caused by:
+                No such file or directory (os error 2)
+        "})
     );
     Ok(())
 }
@@ -511,12 +508,12 @@ fn try_encrypt_with_absolute_nonexistent_input_file() -> anyhow::Result<()> {
             .arg("--input-file")
             .arg(current_dir()?.join("nonexistent/path/input.txt"))
             .output()?,
-        ExpectedOutput::failure().stderr(concat!(
-            "Error: Failed to read input file: \"nonexistent/path/input.txt\"\n",
-            "\n",
-            "Caused by:\n",
-            "    No such file or directory (os error 2)\n"
-        ))
+        ExpectedOutput::failure().stderr(indoc! {"
+            Error: Failed to read input file: \"nonexistent/path/input.txt\"
+
+            Caused by:
+                No such file or directory (os error 2)
+        "})
     );
     Ok(())
 }
@@ -687,12 +684,12 @@ fn try_decrypt_with_relative_nonexistent_input_file() -> anyhow::Result<()> {
             .arg("--input-file")
             .arg("./nonexistent/path/input.txt")
             .output()?,
-        ExpectedOutput::failure().stderr(concat!(
-            "Error: Failed to read input file: \"nonexistent/path/input.txt\"\n",
-            "\n",
-            "Caused by:\n",
-            "    No such file or directory (os error 2)\n",
-        ))
+        ExpectedOutput::failure().stderr(indoc! {"
+            Error: Failed to read input file: \"nonexistent/path/input.txt\"
+
+            Caused by:
+                No such file or directory (os error 2)
+        "})
     );
     Ok(())
 }
@@ -708,12 +705,12 @@ fn try_decrypt_with_absolute_nonexistent_input_file() -> anyhow::Result<()> {
             .arg("--input-file")
             .arg(current_dir()?.join("nonexistent/path/input.txt"))
             .output()?,
-        ExpectedOutput::failure().stderr(concat!(
-            "Error: Failed to read input file: \"nonexistent/path/input.txt\"\n",
-            "\n",
-            "Caused by:\n",
-            "    No such file or directory (os error 2)\n",
-        ))
+        ExpectedOutput::failure().stderr(indoc! {"
+            Error: Failed to read input file: \"nonexistent/path/input.txt\"
+
+            Caused by:
+                No such file or directory (os error 2)
+        "})
     );
     Ok(())
 }
@@ -744,12 +741,12 @@ fn try_encrypt_with_cipher_type_invalid_argument() -> anyhow::Result<()> {
             .arg("--cipher-type")
             .arg("invalid")
             .output()?,
-        ExpectedOutput::code(2).stderr(concat!(
-            "error: invalid value 'invalid' for '--cipher-type <CIPHER_TYPE>'\n",
-            "  [possible values: ChaCha20Poly1305]\n",
-            "\n",
-            "For more information, try '--help'.\n"
-        ))
+        ExpectedOutput::code(2).stderr(indoc! {"
+            error: invalid value 'invalid' for '--cipher-type <CIPHER_TYPE>'
+              [possible values: ChaCha20Poly1305]
+
+            For more information, try '--help'.
+        "})
     );
     Ok(())
 }
@@ -780,12 +777,12 @@ fn try_encrypt_with_kdf_type_invalid_argument() -> anyhow::Result<()> {
             .arg("--kdf-type")
             .arg("invalid")
             .output()?,
-        ExpectedOutput::code(2).stderr(concat!(
-            "error: invalid value 'invalid' for '--kdf-type <KDF_TYPE>'\n",
-            "  [possible values: argon2]\n",
-            "\n",
-            "For more information, try '--help'.\n"
-        ))
+        ExpectedOutput::code(2).stderr(indoc! {"
+            error: invalid value 'invalid' for '--kdf-type <KDF_TYPE>'
+              [possible values: argon2]
+
+            For more information, try '--help'.
+        "})
     );
     Ok(())
 }
@@ -861,12 +858,12 @@ fn try_encrypt_with_kdf_argon2_invalid_algorithm_argument() -> anyhow::Result<()
             .arg("--kdf-argon2-algorithm")
             .arg("invalid")
             .output()?,
-        ExpectedOutput::code(2).stderr(concat!(
-            "error: invalid value 'invalid' for '--kdf-argon2-algorithm <ALGORITHM>'\n",
-            "  [possible values: argon2id, argon2i, argon2d]\n",
-            "\n",
-            "For more information, try '--help'.\n"
-        ))
+        ExpectedOutput::code(2).stderr(indoc! {"
+            error: invalid value 'invalid' for '--kdf-argon2-algorithm <ALGORITHM>'
+              [possible values: argon2id, argon2i, argon2d]
+
+            For more information, try '--help'.
+        "})
     );
     Ok(())
 }
@@ -898,12 +895,12 @@ fn try_encrypt_with_kdf_argon2_version_invalid_argument() -> anyhow::Result<()> 
             .arg("--kdf-argon2-version")
             .arg("17")
             .output()?,
-        ExpectedOutput::code(2).stderr(concat!(
-            "error: invalid value '17' for '--kdf-argon2-version <VERSION>'\n",
-            "  [possible values: 16, 19]\n",
-            "\n",
-            "For more information, try '--help'.\n"
-        ))
+        ExpectedOutput::code(2).stderr(indoc! {"
+            error: invalid value '17' for '--kdf-argon2-version <VERSION>'
+              [possible values: 16, 19]
+
+            For more information, try '--help'.
+        "})
     );
     Ok(())
 }
@@ -948,11 +945,11 @@ fn try_encrypt_with_kdf_argon2_memory_invalid_argument() -> anyhow::Result<()> {
             .arg("--kdf-argon2-memory")
             .arg("abc")
             .output()?,
-        ExpectedOutput::code(2).stderr(concat!(
-            "error: invalid value 'abc' for '--kdf-argon2-memory <MEMORY>': invalid digit found in string\n",
-            "\n",
-            "For more information, try '--help'.\n"
-        ))
+        ExpectedOutput::code(2).stderr(indoc! {"
+            error: invalid value 'abc' for '--kdf-argon2-memory <MEMORY>': invalid digit found in string
+
+            For more information, try '--help'.
+        "})
     );
     Ok(())
 }
@@ -997,11 +994,11 @@ fn try_encrypt_with_kdf_argon2_iterations_invalid_argument() -> anyhow::Result<(
             .arg("--kdf-argon2-iterations")
             .arg("abc")
             .output()?,
-        ExpectedOutput::code(2).stderr(concat!(
-            "error: invalid value 'abc' for '--kdf-argon2-iterations <ITERATIONS>': invalid digit found in string\n",
-            "\n",
-            "For more information, try '--help'.\n"
-        ))
+        ExpectedOutput::code(2).stderr(indoc! {"
+            error: invalid value 'abc' for '--kdf-argon2-iterations <ITERATIONS>': invalid digit found in string
+
+            For more information, try '--help'.
+        "})
     );
     Ok(())
 }
@@ -1046,11 +1043,11 @@ fn try_encrypt_with_kdf_argon2_parallelism_invalid_argument() -> anyhow::Result<
             .arg("--kdf-argon2-parallelism")
             .arg("abc")
             .output()?,
-        ExpectedOutput::code(2).stderr(concat!(
-            "error: invalid value 'abc' for '--kdf-argon2-parallelism <PARALLELISM>': invalid digit found in string\n",
-            "\n",
-            "For more information, try '--help'.\n"
-        ))
+        ExpectedOutput::code(2).stderr(indoc! {"
+            error: invalid value 'abc' for '--kdf-argon2-parallelism <PARALLELISM>': invalid digit found in string
+
+            For more information, try '--help'.
+        "})
     );
     Ok(())
 }
