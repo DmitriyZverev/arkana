@@ -1,4 +1,4 @@
-use crate::crypto::{Argon2Facade, Cipher, Kdf};
+use crate::crypto::{Argon2, Cipher, Kdf};
 use argon2::{Algorithm, Version};
 use clap::{Args, Parser, Subcommand, ValueEnum};
 use std::fmt::Display;
@@ -100,13 +100,13 @@ pub struct KdfArgon2Args {
     #[arg(long = "kdf-argon2-version", default_value_t = Argon2Version::V0x13)]
     version: Argon2Version,
     /// Argon2 memory to use for key derivation.
-    #[arg(long = "kdf-argon2-memory", default_value_t = Argon2Facade::DEFAULT_MEMORY)]
+    #[arg(long = "kdf-argon2-memory", default_value_t = Argon2::DEFAULT_MEMORY)]
     memory: u32,
     /// Argon2 iterations to use for key derivation.
-    #[arg(long = "kdf-argon2-iterations", default_value_t = Argon2Facade::DEFAULT_ITERATIONS)]
+    #[arg(long = "kdf-argon2-iterations", default_value_t = Argon2::DEFAULT_ITERATIONS)]
     iterations: u32,
     /// Argon2 parallelism to use for key derivation.
-    #[arg(long = "kdf-argon2-parallelism", default_value_t = Argon2Facade::DEFAULT_PARALLELISM)]
+    #[arg(long = "kdf-argon2-parallelism", default_value_t = Argon2::DEFAULT_PARALLELISM)]
     parallelism: u32,
 }
 
@@ -133,7 +133,7 @@ pub struct KdfArgs {
 impl From<KdfArgs> for Kdf {
     fn from(kdf: KdfArgs) -> Self {
         match kdf.kdf_type {
-            KdfType::Argon2 => Kdf::Argon2(Argon2Facade {
+            KdfType::Argon2 => Kdf::Argon2(Argon2 {
                 algorithm: kdf.kdf_argon2.algorithm.into(),
                 version: kdf.kdf_argon2.version.into(),
                 memory: kdf.kdf_argon2.memory,
