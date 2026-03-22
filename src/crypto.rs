@@ -1,6 +1,6 @@
 #[cfg(not(feature = "deterministic"))]
 use argon2::password_hash::rand_core::{OsRng, RngCore};
-use argon2::{Algorithm, Argon2, Params, Version};
+use argon2::{Algorithm, Params, Version};
 #[cfg(not(feature = "deterministic"))]
 use chacha20poly1305::AeadCore;
 use chacha20poly1305::aead::Aead;
@@ -155,7 +155,7 @@ pub enum Cipher {
 }
 
 #[derive(Clone, Deserialize, Serialize)]
-pub struct Argon2Facade {
+pub struct Argon2 {
     #[serde(with = "algorithm_serde")]
     pub algorithm: Algorithm,
     #[serde(with = "version_serde")]
@@ -165,7 +165,7 @@ pub struct Argon2Facade {
     pub parallelism: u32,
 }
 
-impl Argon2Facade {
+impl Argon2 {
     pub const DEFAULT_ALGORITHM: Algorithm = Algorithm::Argon2id;
     pub const DEFAULT_VERSION: Version = Version::V0x13;
     pub const DEFAULT_MEMORY: u32 = 128 * 1024;
@@ -173,7 +173,7 @@ impl Argon2Facade {
     pub const DEFAULT_PARALLELISM: u32 = 4;
 }
 
-impl Default for Argon2Facade {
+impl Default for Argon2 {
     fn default() -> Self {
         Self {
             algorithm: Self::DEFAULT_ALGORITHM,
@@ -185,14 +185,14 @@ impl Default for Argon2Facade {
     }
 }
 
-impl Argon2Facade {
-    fn hash_password(
+impl Argon2 {
+    fn derive_key(
         &self,
         salt: &[u8],
         password: &[u8],
     ) -> Result<Zeroizing<[u8; KEY_LEN]>, CryptoError> {
         let mut key = Zeroizing::new([0u8; KEY_LEN]);
-        Argon2::new(
+        argon2::Argon2::new(
             self.algorithm,
             self.version,
             Params::new(
@@ -212,12 +212,12 @@ impl Argon2Facade {
 #[derive(Clone, Deserialize, Serialize)]
 #[serde(tag = "type", rename_all = "camelCase")]
 pub enum Kdf {
-    Argon2(Argon2Facade),
+    Argon2(Argon2),
 }
 
 impl Default for Kdf {
     fn default() -> Self {
-        Self::Argon2(Argon2Facade::default())
+        Self::Argon2(Argon2::default())
     }
 }
 
@@ -264,7 +264,7 @@ fn generate_nonce() -> [u8; NONCE_LEN] {
 pub fn encrypt(encrypt_params: EncryptParams) -> Result<EncryptedContainer, EncryptError> {
     let salt = generate_salt()?;
     let key = match &encrypt_params.kdf {
-        Kdf::Argon2(argon2) => argon2.hash_password(&salt, &encrypt_params.password)?,
+        Kdf::Argon2(argon2) => argon2.derive_key(&salt, &encrypt_params.password)?,
     };
 
     let (nonce, ciphertext) = match &encrypt_params.cipher {
@@ -293,7 +293,7 @@ pub fn decrypt(
     password: &[u8],
 ) -> Result<Vec<u8>, DecryptError> {
     let key = match &encrypted_container.kdf {
-        Kdf::Argon2(argon2) => argon2.hash_password(&encrypted_container.salt, password)?,
+        Kdf::Argon2(argon2) => argon2.derive_key(&encrypted_container.salt, password)?,
     };
     let ciphertext = ChaCha20Poly1305::new(Key::from_slice(key.as_ref()))
         .decrypt(
