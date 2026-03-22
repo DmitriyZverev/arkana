@@ -47,6 +47,25 @@ cargo test --features deterministic <test_name>
 Prefer integration tests over unit tests to ensure the behavior of the compiled binary is validated from the user's
 perspective. All integration tests live in `tests/*`.
 
+## Code coverage
+
+Prerequisites:
+
+- `llvm-tools-preview` component:
+  ```bash
+  rustup component add llvm-tools-preview
+  ```
+- `cargo-llvm-cov`:
+  ```bash
+  cargo install cargo-llvm-cov
+  ```
+
+To generate an HTML coverage report locally:
+
+```bash
+cargo llvm-cov --features deterministic --html --open
+```
+
 ## Commit conventions
 
 - Use imperative mood in commit messages (e.g., "Add feature X" instead of "Added feature X").
