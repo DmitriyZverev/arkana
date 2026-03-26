@@ -5,8 +5,9 @@ kdf:
   memory: 32
   iterations: 1
   parallelism: 4
+  salt: GxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxs=
 cipher:
   type: ChaCha20Poly1305
-salt: GxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxs=
-nonce: CgoKCgoKCgoKCgoK
-ciphertext: qzTlTJ4wqAkkb5FYw0kE15YC4Lhj/8ZV2D09Eg==
+  nonce: CgoKCgoKCgoKCgoK
+  tag: w0kE15YC4Lhj/8ZV2D09Eg==
+  ciphertext: qzTlTJ4wqAkkb5FY
