@@ -3,8 +3,8 @@ use argon2::password_hash::rand_core::{OsRng, RngCore};
 use argon2::{Algorithm, Params, Version};
 #[cfg(not(feature = "deterministic"))]
 use chacha20poly1305::AeadCore;
-use chacha20poly1305::aead::Aead;
-use chacha20poly1305::{ChaCha20Poly1305, Key, KeyInit, Nonce};
+use chacha20poly1305::aead::AeadInPlace;
+use chacha20poly1305::{ChaCha20Poly1305, Key, KeyInit, Nonce, Tag};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 use zeroize::Zeroizing;
@@ -222,20 +222,35 @@ impl Default for Kdf {
 }
 
 #[derive(Deserialize, Serialize)]
-pub struct EncryptedContainer {
-    pub kdf: Kdf,
-    pub cipher: Cipher,
+pub struct KdfContainer {
+    #[serde(flatten)]
+    pub r#type: Kdf,
     #[serde(with = "base64_serde")]
     pub salt: [u8; SALT_LEN],
+}
+
+#[derive(Deserialize, Serialize)]
+pub struct CipherContainer {
+    #[serde(flatten)]
+    pub r#type: Cipher,
     #[serde(with = "base64_serde")]
     pub nonce: [u8; NONCE_LEN],
     #[serde(with = "base64_serde")]
+    pub tag: [u8; TAG_LEN],
+    #[serde(with = "base64_serde")]
     pub ciphertext: Vec<u8>,
+}
+
+#[derive(Deserialize, Serialize)]
+pub struct EncryptedContainer {
+    pub kdf: KdfContainer,
+    pub cipher: CipherContainer,
 }
 
 const SALT_LEN: usize = 32;
 const KEY_LEN: usize = 32;
 const NONCE_LEN: usize = 12;
+const TAG_LEN: usize = 16;
 
 #[cfg(feature = "deterministic")]
 fn generate_salt() -> Result<[u8; SALT_LEN], EncryptError> {
@@ -267,40 +282,47 @@ pub fn encrypt(encrypt_params: EncryptParams) -> Result<EncryptedContainer, Encr
         Kdf::Argon2(argon2) => argon2.derive_key(&salt, &encrypt_params.password)?,
     };
 
-    let (nonce, ciphertext) = match &encrypt_params.cipher {
+    let (nonce, ciphertext, tag) = match &encrypt_params.cipher {
         Cipher::ChaCha20Poly1305 => {
             let nonce = generate_nonce();
-            (
-                nonce,
-                ChaCha20Poly1305::new(Key::from_slice(key.as_ref()))
-                    .encrypt(Nonce::from_slice(&nonce), encrypt_params.data.as_slice())
-                    .map_err(|_| EncryptError::Hashing)?,
-            )
+            let mut buffer = encrypt_params.data;
+            let tag = ChaCha20Poly1305::new(Key::from_slice(key.as_ref()))
+                .encrypt_in_place_detached(Nonce::from_slice(&nonce), b"", &mut buffer)
+                .map_err(|_| EncryptError::Hashing)?;
+            (nonce, buffer, tag.into())
         }
     };
 
     Ok(EncryptedContainer {
-        salt,
-        nonce,
-        ciphertext,
-        cipher: encrypt_params.cipher,
-        kdf: encrypt_params.kdf,
+        cipher: CipherContainer {
+            r#type: encrypt_params.cipher,
+            ciphertext,
+            nonce,
+            tag,
+        },
+        kdf: KdfContainer {
+            r#type: encrypt_params.kdf,
+            salt,
+        },
     })
 }
 
 pub fn decrypt(
-    encrypted_container: &EncryptedContainer,
+    encrypted_container: EncryptedContainer,
     password: &[u8],
 ) -> Result<Vec<u8>, DecryptError> {
-    let key = match &encrypted_container.kdf {
-        Kdf::Argon2(argon2) => argon2.derive_key(&encrypted_container.salt, password)?,
+    let key = match &encrypted_container.kdf.r#type {
+        Kdf::Argon2(argon2) => argon2.derive_key(&encrypted_container.kdf.salt, password)?,
     };
-    let ciphertext = ChaCha20Poly1305::new(Key::from_slice(key.as_ref()))
-        .decrypt(
-            Nonce::from_slice(&encrypted_container.nonce),
-            encrypted_container.ciphertext.as_slice(),
+    let mut buffer = encrypted_container.cipher.ciphertext;
+    ChaCha20Poly1305::new(Key::from_slice(key.as_ref()))
+        .decrypt_in_place_detached(
+            Nonce::from_slice(&encrypted_container.cipher.nonce),
+            b"",
+            &mut buffer,
+            Tag::from_slice(&encrypted_container.cipher.tag),
         )
         .map_err(|_| DecryptError::Decryption)?;
 
-    Ok(ciphertext)
+    Ok(buffer)
 }

@@ -81,7 +81,7 @@ fn main() -> anyhow::Result<()> {
             let password_file = resolve_path(&cwd, io.password_file)?;
             let data = read_input(input_file, &cwd)?;
             let encrypted_container = serde_yaml::from_slice::<EncryptedContainer>(&data)?;
-            let decrypted_text = decrypt(&encrypted_container, &read_password(password_file)?)?;
+            let decrypted_text = decrypt(encrypted_container, &read_password(password_file)?)?;
             write_output(&decrypted_text, output_file, &cwd)?;
         }
         None => {

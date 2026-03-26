@@ -104,16 +104,12 @@ kdf:
   memory: 131072
   iterations: 4
   parallelism: 4
+  salt: GxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxs=
 cipher:
   type: ChaCha20Poly1305
-salt: GxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxs=
-nonce: CgoKCgoKCgoKCgoK
-ciphertext: |-
-  QmGMKUpbMTiw4y3VNcyRczjoWe3tDsafehFLdnVsACiAdBg4AH91oORjkONGmEN+
-  QpRkityFXVFY/FdiCmC6+0xo5TZwuhY55fKfiVw1oVUUbQvUu54uiZWc8iibZ+H9
-  80N4XRKNKiFvUA7DbG3rMO+RomI4hyGM0l5S3E5LZEALkoV6ivpWeKHyOsCuef+J
-  LmFJ
-
+  nonce: CgoKCgoKCgoKCgoK
+  tag: h1yYEdQ5IHcvz3UL7W+ZHQ==
+  ciphertext: RmuSIEhbLyex+iTU
 ```
 
 ## Security Parameters
@@ -122,3 +118,4 @@ ciphertext: |-
 - **ChaCha20-Poly1305**: Authenticated encryption with 256-bit keys
 - **Salt**: 256-bit random salt per encryption
 - **Nonce**: 96-bit random nonce per encryption
+- **Tag**: 128-bit authentication tag (detached)

@@ -91,14 +91,15 @@ fn try_decrypt_with_invalid_kdf_type() -> anyhow::Result<()> {
                   memory: 131072
                   iterations: 4
                   parallelism: 4
+                  salt: GxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxs=
                 cipher:
                   type: ChaCha20Poly1305
-                salt: GxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxs=
-                nonce: CgoKCgoKCgoKCgoK
-                ciphertext: RmuSIEhbLyex+iTUh1yYEdQ5IHcvz3UL7W+ZHQ==
+                  nonce: CgoKCgoKCgoKCgoK
+                  tag: h1yYEdQ5IHcvz3UL7W+ZHQ==
+                  ciphertext: RmuSIEhbLyex+iTU
             "})?,
         ExpectedOutput::failure().stderr(indoc! {"
-            Error: kdf.type: unknown variant `argon3`, expected `argon2` at line 2 column 9
+            Error: kdf: unknown variant `argon3`, expected `argon2` at line 2 column 3
         "})
     );
     Ok(())
@@ -120,14 +121,15 @@ fn try_decrypt_with_invalid_kdf_algorithm() -> anyhow::Result<()> {
                   memory: 131072
                   iterations: 4
                   parallelism: 4
+                  salt: GxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxs=
                 cipher:
                   type: ChaCha20Poly1305
-                salt: GxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxs=
-                nonce: CgoKCgoKCgoKCgoK
-                ciphertext: RmuSIEhbLyex+iTUh1yYEdQ5IHcvz3UL7W+ZHQ==
+                  nonce: CgoKCgoKCgoKCgoK
+                  tag: h1yYEdQ5IHcvz3UL7W+ZHQ==
+                  ciphertext: RmuSIEhbLyex+iTU
             "})?,
         ExpectedOutput::failure().stderr(indoc! {"
-            Error: unknown variant `argon2`, expected one of `argon2i`, `argon2d`, `argon2id`
+            Error: kdf: unknown variant `argon2`, expected one of `argon2i`, `argon2d`, `argon2id` at line 2 column 3
         "})
     );
     Ok(())
@@ -149,11 +151,12 @@ fn try_decrypt_with_invalid_kdf_memory() -> anyhow::Result<()> {
                   memory: 131071
                   iterations: 4
                   parallelism: 4
+                  salt: GxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxs=
                 cipher:
                   type: ChaCha20Poly1305
-                salt: GxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxs=
-                nonce: CgoKCgoKCgoKCgoK
-                ciphertext: RmuSIEhbLyex+iTUh1yYEdQ5IHcvz3UL7W+ZHQ==
+                  nonce: CgoKCgoKCgoKCgoK
+                  tag: h1yYEdQ5IHcvz3UL7W+ZHQ==
+                  ciphertext: RmuSIEhbLyex+iTU
             "})?,
         ExpectedOutput::failure().stderr(indoc! {"
             Error: Decryption error
@@ -178,11 +181,12 @@ fn try_decrypt_with_invalid_kdf_iterations() -> anyhow::Result<()> {
                   memory: 131072
                   iterations: 1
                   parallelism: 4
+                  salt: GxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxs=
                 cipher:
                   type: ChaCha20Poly1305
-                salt: GxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxs=
-                nonce: CgoKCgoKCgoKCgoK
-                ciphertext: RmuSIEhbLyex+iTUh1yYEdQ5IHcvz3UL7W+ZHQ==
+                  nonce: CgoKCgoKCgoKCgoK
+                  tag: h1yYEdQ5IHcvz3UL7W+ZHQ==
+                  ciphertext: RmuSIEhbLyex+iTU
             "})?,
         ExpectedOutput::failure().stderr(indoc! {"
             Error: Decryption error
@@ -207,11 +211,12 @@ fn try_decrypt_with_invalid_kdf_parallelism() -> anyhow::Result<()> {
                   memory: 131072
                   iterations: 4
                   parallelism: 1
+                  salt: GxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxs=
                 cipher:
                   type: ChaCha20Poly1305
-                salt: GxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxs=
-                nonce: CgoKCgoKCgoKCgoK
-                ciphertext: RmuSIEhbLyex+iTUh1yYEdQ5IHcvz3UL7W+ZHQ==
+                  nonce: CgoKCgoKCgoKCgoK
+                  tag: h1yYEdQ5IHcvz3UL7W+ZHQ==
+                  ciphertext: RmuSIEhbLyex+iTU
             "})?,
         ExpectedOutput::failure().stderr(indoc! {"
             Error: Decryption error
@@ -236,14 +241,15 @@ fn try_decrypt_with_invalid_cipher_type() -> anyhow::Result<()> {
                   memory: 131072
                   iterations: 4
                   parallelism: 4
+                  salt: GxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxs=
                 cipher:
                   type: ChaCha20Poly1304
-                salt: GxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxs=
-                nonce: CgoKCgoKCgoKCgoK
-                ciphertext: RmuSIEhbLyex+iTUh1yYEdQ5IHcvz3UL7W+ZHQ==
+                  nonce: CgoKCgoKCgoKCgoK
+                  tag: h1yYEdQ5IHcvz3UL7W+ZHQ==
+                  ciphertext: RmuSIEhbLyex+iTU
             "})?,
         ExpectedOutput::failure().stderr(indoc! {"
-            Error: cipher.type: unknown variant `ChaCha20Poly1304`, expected `ChaCha20Poly1305` at line 9 column 9
+            Error: cipher: unknown variant `ChaCha20Poly1304`, expected `ChaCha20Poly1305` at line 10 column 3
         "})
     );
     Ok(())
@@ -265,11 +271,12 @@ fn try_decrypt_with_invalid_salt() -> anyhow::Result<()> {
                   memory: 131072
                   iterations: 4
                   parallelism: 4
+                  salt: CxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxs=
                 cipher:
                   type: ChaCha20Poly1305
-                salt: CxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxs=
-                nonce: CgoKCgoKCgoKCgoK
-                ciphertext: RmuSIEhbLyex+iTUh1yYEdQ5IHcvz3UL7W+ZHQ==
+                  nonce: CgoKCgoKCgoKCgoK
+                  tag: h1yYEdQ5IHcvz3UL7W+ZHQ==
+                  ciphertext: RmuSIEhbLyex+iTU
             "})?,
         ExpectedOutput::failure().stderr(indoc! {"
             Error: Decryption error
@@ -294,11 +301,12 @@ fn try_decrypt_with_invalid_nonce() -> anyhow::Result<()> {
                   memory: 131072
                   iterations: 4
                   parallelism: 4
+                  salt: GxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxs=
                 cipher:
                   type: ChaCha20Poly1305
-                salt: GxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxs=
-                nonce: GgoKCgoKCgoKCgoK
-                ciphertext: RmuSIEhbLyex+iTUh1yYEdQ5IHcvz3UL7W+ZHQ==
+                  nonce: GgoKCgoKCgoKCgoK
+                  tag: h1yYEdQ5IHcvz3UL7W+ZHQ==
+                  ciphertext: RmuSIEhbLyex+iTU
             "})?,
         ExpectedOutput::failure().stderr(indoc! {"
             Error: Decryption error
