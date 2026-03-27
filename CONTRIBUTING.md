@@ -117,6 +117,7 @@ cargo llvm-cov --features deterministic --html --open
 
   If a change includes multiple aspects (e.g., a bug fix and test updates),
   choose the type based on the **highest impact on the production artifact**.
+- Limit commit message line length to 72 characters.
 
 ## Version determination
 
