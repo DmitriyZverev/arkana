@@ -118,25 +118,22 @@ mod version_serde {
 }
 
 #[derive(Error, Debug)]
-pub enum CryptoError {
-    #[error("Hashing error")]
-    Hashing,
-}
-
-#[derive(Error, Debug)]
 pub enum EncryptError {
-    #[error("Hashing error")]
-    Hashing,
-    #[error(transparent)]
-    Crypto(#[from] CryptoError),
+    #[error("Failed to generate random salt")]
+    #[cfg(not(feature = "deterministic"))]
+    SaltGeneration,
+    #[error("Key derivation failed")]
+    KeyDerivation,
+    #[error("Encryption failed")]
+    Encryption,
 }
 
 #[derive(Error, Debug)]
 pub enum DecryptError {
-    #[error("Decryption error")]
+    #[error("Key derivation failed")]
+    KeyDerivation,
+    #[error("Decryption failed")]
     Decryption,
-    #[error(transparent)]
-    Crypto(#[from] CryptoError),
 }
 
 #[derive(Default)]
@@ -190,7 +187,7 @@ impl Argon2 {
         &self,
         salt: &[u8],
         password: &[u8],
-    ) -> Result<Zeroizing<[u8; KEY_LEN]>, CryptoError> {
+    ) -> Result<Zeroizing<[u8; KEY_LEN]>, argon2::Error> {
         let mut key = Zeroizing::new([0u8; KEY_LEN]);
         argon2::Argon2::new(
             self.algorithm,
@@ -200,11 +197,9 @@ impl Argon2 {
                 self.iterations,
                 self.parallelism,
                 Some(KEY_LEN),
-            )
-            .map_err(|_| CryptoError::Hashing)?,
+            )?,
         )
-        .hash_password_into(password, salt, key.as_mut())
-        .map_err(|_| CryptoError::Hashing)?;
+        .hash_password_into(password, salt, key.as_mut())?;
         Ok(key)
     }
 }
@@ -262,7 +257,7 @@ fn generate_salt() -> Result<[u8; SALT_LEN], EncryptError> {
     let mut salt = [0u8; SALT_LEN];
     OsRng
         .try_fill_bytes(&mut salt)
-        .map_err(|_| EncryptError::Hashing)?;
+        .map_err(|_| EncryptError::SaltGeneration)?;
     Ok(salt)
 }
 
@@ -279,7 +274,9 @@ fn generate_nonce() -> [u8; NONCE_LEN] {
 pub fn encrypt(encrypt_params: EncryptParams) -> Result<Envelope, EncryptError> {
     let salt = generate_salt()?;
     let key = match &encrypt_params.kdf {
-        Kdf::Argon2(argon2) => argon2.derive_key(&salt, &encrypt_params.password)?,
+        Kdf::Argon2(argon2) => argon2
+            .derive_key(&salt, &encrypt_params.password)
+            .map_err(|_| EncryptError::KeyDerivation)?,
     };
 
     let (nonce, ciphertext, tag) = match &encrypt_params.cipher {
@@ -288,7 +285,7 @@ pub fn encrypt(encrypt_params: EncryptParams) -> Result<Envelope, EncryptError> 
             let mut buffer = encrypt_params.data;
             let tag = ChaCha20Poly1305::new(Key::from_slice(key.as_ref()))
                 .encrypt_in_place_detached(Nonce::from_slice(&nonce), b"", &mut buffer)
-                .map_err(|_| EncryptError::Hashing)?;
+                .map_err(|_| EncryptError::Encryption)?;
             (nonce, buffer, tag.into())
         }
     };
@@ -309,7 +306,9 @@ pub fn encrypt(encrypt_params: EncryptParams) -> Result<Envelope, EncryptError> 
 
 pub fn decrypt(envelope: Envelope, password: &[u8]) -> Result<Vec<u8>, DecryptError> {
     let key = match &envelope.kdf.r#type {
-        Kdf::Argon2(argon2) => argon2.derive_key(&envelope.kdf.salt, password)?,
+        Kdf::Argon2(argon2) => argon2
+            .derive_key(&envelope.kdf.salt, password)
+            .map_err(|_| DecryptError::KeyDerivation)?,
     };
     let mut buffer = envelope.cipher.ciphertext;
     ChaCha20Poly1305::new(Key::from_slice(key.as_ref()))

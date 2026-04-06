@@ -69,7 +69,7 @@ fn try_decrypt_with_invalid_password() -> anyhow::Result<()> {
             .arg(password_file.path())
             .pass_stdin(fixtures::DEFAULT.envelope()?)?,
         ExpectedOutput::failure().stderr(indoc! {"
-            Error: Decryption error
+            Error: Decryption failed
         "})
     );
     Ok(())
@@ -159,7 +159,7 @@ fn try_decrypt_with_invalid_kdf_memory() -> anyhow::Result<()> {
                   ciphertext: RmuSIEhbLyex+iTU
             "})?,
         ExpectedOutput::failure().stderr(indoc! {"
-            Error: Decryption error
+            Error: Decryption failed
         "})
     );
     Ok(())
@@ -189,7 +189,7 @@ fn try_decrypt_with_invalid_kdf_iterations() -> anyhow::Result<()> {
                   ciphertext: RmuSIEhbLyex+iTU
             "})?,
         ExpectedOutput::failure().stderr(indoc! {"
-            Error: Decryption error
+            Error: Decryption failed
         "})
     );
     Ok(())
@@ -219,7 +219,7 @@ fn try_decrypt_with_invalid_kdf_parallelism() -> anyhow::Result<()> {
                   ciphertext: RmuSIEhbLyex+iTU
             "})?,
         ExpectedOutput::failure().stderr(indoc! {"
-            Error: Decryption error
+            Error: Decryption failed
         "})
     );
     Ok(())
@@ -279,7 +279,7 @@ fn try_decrypt_with_invalid_salt() -> anyhow::Result<()> {
                   ciphertext: RmuSIEhbLyex+iTU
             "})?,
         ExpectedOutput::failure().stderr(indoc! {"
-            Error: Decryption error
+            Error: Decryption failed
         "})
     );
     Ok(())
@@ -309,7 +309,7 @@ fn try_decrypt_with_invalid_nonce() -> anyhow::Result<()> {
                   ciphertext: RmuSIEhbLyex+iTU
             "})?,
         ExpectedOutput::failure().stderr(indoc! {"
-            Error: Decryption error
+            Error: Decryption failed
         "})
     );
     Ok(())
