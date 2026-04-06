@@ -1,4 +1,5 @@
-use crate::crypto::{Argon2, Cipher, Kdf};
+use crate::crypto::{CipherParams, KdfParams};
+use crate::envelope::Argon2Params;
 use argon2::{Algorithm, Version};
 use clap::{Args, Parser, Subcommand, ValueEnum};
 use std::fmt::Display;
@@ -22,10 +23,10 @@ pub struct CipherArgs {
     cipher_type: CipherType,
 }
 
-impl From<CipherArgs> for Cipher {
+impl From<CipherArgs> for CipherParams {
     fn from(cipher: CipherArgs) -> Self {
         match cipher.cipher_type {
-            CipherType::ChaCha20Poly1305 => Cipher::ChaCha20Poly1305,
+            CipherType::ChaCha20Poly1305 => CipherParams::ChaCha20Poly1305,
         }
     }
 }
@@ -103,19 +104,19 @@ pub struct Argon2Args {
     #[arg(long = "kdf-argon2-version", default_value_t)]
     version: Argon2Version,
     /// Argon2 memory to use for key derivation.
-    #[arg(long = "kdf-argon2-memory", default_value_t = Argon2::DEFAULT_MEMORY)]
+    #[arg(long = "kdf-argon2-memory", default_value_t = Argon2Params::DEFAULT_MEMORY)]
     memory: u32,
     /// Argon2 iterations to use for key derivation.
-    #[arg(long = "kdf-argon2-iterations", default_value_t = Argon2::DEFAULT_ITERATIONS)]
+    #[arg(long = "kdf-argon2-iterations", default_value_t = Argon2Params::DEFAULT_ITERATIONS)]
     iterations: u32,
     /// Argon2 parallelism to use for key derivation.
-    #[arg(long = "kdf-argon2-parallelism", default_value_t = Argon2::DEFAULT_PARALLELISM)]
+    #[arg(long = "kdf-argon2-parallelism", default_value_t = Argon2Params::DEFAULT_PARALLELISM)]
     parallelism: u32,
 }
 
-impl From<Argon2Args> for Argon2 {
+impl From<Argon2Args> for Argon2Params {
     fn from(argon2_args: Argon2Args) -> Self {
-        Argon2 {
+        Argon2Params {
             algorithm: argon2_args.algorithm.into(),
             version: argon2_args.version.into(),
             memory: argon2_args.memory,
@@ -147,10 +148,12 @@ pub struct KdfArgs {
     argon2: Argon2Args,
 }
 
-impl From<KdfArgs> for Kdf {
+impl From<KdfArgs> for KdfParams {
     fn from(kdf: KdfArgs) -> Self {
         match kdf.kdf_type {
-            KdfType::Argon2 => Kdf::Argon2(kdf.argon2.into()),
+            KdfType::Argon2 => KdfParams::Argon2 {
+                params: kdf.argon2.into(),
+            },
         }
     }
 }

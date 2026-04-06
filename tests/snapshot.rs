@@ -101,7 +101,7 @@ fn try_decrypt_with_invalid_kdf_type() -> anyhow::Result<()> {
                   ciphertext: RmuSIEhbLyex+iTU
             "})?,
         ExpectedOutput::failure().stderr(indoc! {"
-            Error: kdf: unknown variant `argon3`, expected `argon2` at line 2 column 3
+            Error: kdf.type: unknown variant `argon3`, expected `argon2` at line 2 column 9
         "})
     );
     Ok(())
@@ -131,7 +131,7 @@ fn try_decrypt_with_invalid_kdf_algorithm() -> anyhow::Result<()> {
                   ciphertext: RmuSIEhbLyex+iTU
             "})?,
         ExpectedOutput::failure().stderr(indoc! {"
-            Error: kdf: unknown variant `argon2`, expected one of `argon2i`, `argon2d`, `argon2id` at line 2 column 3
+            Error: unknown variant `argon2`, expected one of `argon2i`, `argon2d`, `argon2id`
         "})
     );
     Ok(())
@@ -251,7 +251,7 @@ fn try_decrypt_with_invalid_cipher_type() -> anyhow::Result<()> {
                   ciphertext: RmuSIEhbLyex+iTU
             "})?,
         ExpectedOutput::failure().stderr(indoc! {"
-            Error: cipher: unknown variant `ChaCha20Poly1304`, expected `ChaCha20Poly1305` at line 10 column 3
+            Error: cipher.type: unknown variant `ChaCha20Poly1304`, expected `ChaCha20Poly1305` at line 10 column 9
         "})
     );
     Ok(())
