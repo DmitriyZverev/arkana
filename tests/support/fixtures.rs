@@ -13,8 +13,8 @@ impl Fixture {
         self.file_path("plaintext.txt")
     }
 
-    pub fn encrypted_container_file_path(&self) -> PathBuf {
-        self.file_path("encrypted_container.yml")
+    pub fn envelope_file_path(&self) -> PathBuf {
+        self.file_path("envelope.yml")
     }
 
     pub fn password(&self) -> Result<String, std::io::Error> {
@@ -25,8 +25,8 @@ impl Fixture {
         std::fs::read_to_string(self.plaintext_file_path())
     }
 
-    pub fn encrypted_container(&self) -> Result<String, std::io::Error> {
-        std::fs::read_to_string(self.encrypted_container_file_path())
+    pub fn envelope(&self) -> Result<String, std::io::Error> {
+        std::fs::read_to_string(self.envelope_file_path())
     }
 
     fn file_path(&self, file_name: &str) -> PathBuf {

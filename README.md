@@ -14,7 +14,7 @@ _A modern CLI tool for password-based encryption with human-readable output._
 - **Secure Key Derivation**: `Argon2id` with configurable parameters
 - **Flexible I/O**: Stdin/stdout by default, with optional `--input-file` / `--output-file` flags
 - **Configurable Encryption Parameters**: Override KDF and cipher settings per-invocation via CLI flags
-- **YAML Output Format**: Human-readable encrypted containers
+- **YAML Output Format**: Human-readable encrypted envelopes
 
 ## Usage
 
@@ -84,7 +84,7 @@ cd /path/to/dir && arcana encrypt --input-file secret.txt --output-file encrypte
 arcana --cwd /path/to/dir encrypt --input-file secret.txt --output-file encrypted.yml
 ```
 
-## Encrypted Container Format
+## Envelope Format
 
 The encrypted data is stored in a human-readable YAML format that describes all necessary settings for decryption:
 

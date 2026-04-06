@@ -15,7 +15,7 @@ fn encrypt_default() -> anyhow::Result<()> {
             .arg("--password-file")
             .arg(fixtures::DEFAULT.password_file_path())
             .pass_stdin(fixtures::DEFAULT.plaintext()?)?,
-        ExpectedOutput::success().stdout(fixtures::DEFAULT.encrypted_container()?)
+        ExpectedOutput::success().stdout(fixtures::DEFAULT.envelope()?)
     );
     Ok(())
 }
@@ -27,7 +27,7 @@ fn decrypt_default() -> anyhow::Result<()> {
             .arg("decrypt")
             .arg("--password-file")
             .arg(fixtures::DEFAULT.password_file_path())
-            .pass_stdin(fixtures::DEFAULT.encrypted_container()?)?,
+            .pass_stdin(fixtures::DEFAULT.envelope()?)?,
         ExpectedOutput::success().stdout(fixtures::DEFAULT.plaintext()?)
     );
     Ok(())
@@ -41,7 +41,7 @@ fn encrypt_long_text() -> anyhow::Result<()> {
             .arg("--password-file")
             .arg(fixtures::LONG_TEXT.password_file_path())
             .pass_stdin(fixtures::LONG_TEXT.plaintext()?)?,
-        ExpectedOutput::success().stdout(fixtures::LONG_TEXT.encrypted_container()?)
+        ExpectedOutput::success().stdout(fixtures::LONG_TEXT.envelope()?)
     );
     Ok(())
 }
@@ -53,7 +53,7 @@ fn decrypt_long_text() -> anyhow::Result<()> {
             .arg("decrypt")
             .arg("--password-file")
             .arg(fixtures::LONG_TEXT.password_file_path())
-            .pass_stdin(fixtures::LONG_TEXT.encrypted_container()?)?,
+            .pass_stdin(fixtures::LONG_TEXT.envelope()?)?,
         ExpectedOutput::success().stdout(fixtures::LONG_TEXT.plaintext()?)
     );
     Ok(())
@@ -67,7 +67,7 @@ fn try_decrypt_with_invalid_password() -> anyhow::Result<()> {
             .arg("decrypt")
             .arg("--password-file")
             .arg(password_file.path())
-            .pass_stdin(fixtures::DEFAULT.encrypted_container()?)?,
+            .pass_stdin(fixtures::DEFAULT.envelope()?)?,
         ExpectedOutput::failure().stderr(indoc! {"
             Error: Decryption error
         "})
@@ -325,7 +325,7 @@ fn encrypt_with_input_file() -> anyhow::Result<()> {
             .arg("--input-file")
             .arg(fixtures::DEFAULT.plaintext_file_path())
             .output()?,
-        ExpectedOutput::success().stdout(fixtures::DEFAULT.encrypted_container()?)
+        ExpectedOutput::success().stdout(fixtures::DEFAULT.envelope()?)
     );
     Ok(())
 }
@@ -340,7 +340,7 @@ fn encrypt_with_input_file_short_alias() -> anyhow::Result<()> {
             .arg("-i")
             .arg(fixtures::DEFAULT.plaintext_file_path())
             .output()?,
-        ExpectedOutput::success().stdout(fixtures::DEFAULT.encrypted_container()?)
+        ExpectedOutput::success().stdout(fixtures::DEFAULT.envelope()?)
     );
     Ok(())
 }
@@ -355,7 +355,7 @@ fn encrypt_with_input_file_long_alias() -> anyhow::Result<()> {
             .arg("--input")
             .arg(fixtures::DEFAULT.plaintext_file_path())
             .output()?,
-        ExpectedOutput::success().stdout(fixtures::DEFAULT.encrypted_container()?)
+        ExpectedOutput::success().stdout(fixtures::DEFAULT.envelope()?)
     );
     Ok(())
 }
@@ -370,7 +370,7 @@ fn encrypt_with_input_file_and_ignore_stdin() -> anyhow::Result<()> {
             .arg("--input-file")
             .arg(fixtures::DEFAULT.plaintext_file_path())
             .pass_stdin("Hello everyone!")?,
-        ExpectedOutput::success().stdout(fixtures::DEFAULT.encrypted_container()?)
+        ExpectedOutput::success().stdout(fixtures::DEFAULT.envelope()?)
     );
     Ok(())
 }
@@ -388,7 +388,7 @@ fn encrypt_with_output_file() -> anyhow::Result<()> {
             .pass_stdin(fixtures::DEFAULT.plaintext()?)?,
         ExpectedOutput::success()
     );
-    assert_file!(output_file.path(), fixtures::DEFAULT.encrypted_container()?);
+    assert_file!(output_file.path(), fixtures::DEFAULT.envelope()?);
     Ok(())
 }
 
@@ -405,7 +405,7 @@ fn encrypt_with_output_file_short_alias() -> anyhow::Result<()> {
             .pass_stdin(fixtures::DEFAULT.plaintext()?)?,
         ExpectedOutput::success()
     );
-    assert_file!(output_file.path(), fixtures::DEFAULT.encrypted_container()?);
+    assert_file!(output_file.path(), fixtures::DEFAULT.envelope()?);
     Ok(())
 }
 
@@ -422,7 +422,7 @@ fn encrypt_with_output_file_long_alias() -> anyhow::Result<()> {
             .pass_stdin(fixtures::DEFAULT.plaintext()?)?,
         ExpectedOutput::success()
     );
-    assert_file!(output_file.path(), fixtures::DEFAULT.encrypted_container()?);
+    assert_file!(output_file.path(), fixtures::DEFAULT.envelope()?);
     Ok(())
 }
 
@@ -441,7 +441,7 @@ fn encrypt_with_input_and_output_files() -> anyhow::Result<()> {
             .output()?,
         ExpectedOutput::success()
     );
-    assert_file!(output_file.path(), fixtures::DEFAULT.encrypted_container()?);
+    assert_file!(output_file.path(), fixtures::DEFAULT.envelope()?);
     Ok(())
 }
 
@@ -465,7 +465,7 @@ fn encrypt_with_cwd_and_relative_input_and_output_files() -> anyhow::Result<()> 
             .output()?,
         ExpectedOutput::success()
     );
-    assert_file!(output_file.path(), fixtures::DEFAULT.encrypted_container()?);
+    assert_file!(output_file.path(), fixtures::DEFAULT.envelope()?);
     Ok(())
 }
 
@@ -519,7 +519,7 @@ fn decrypt_with_input_file() -> anyhow::Result<()> {
             .arg("--password-file")
             .arg(fixtures::DEFAULT.password_file_path())
             .arg("--input-file")
-            .arg(fixtures::DEFAULT.encrypted_container_file_path())
+            .arg(fixtures::DEFAULT.envelope_file_path())
             .output()?,
         ExpectedOutput::success().stdout(fixtures::DEFAULT.plaintext()?)
     );
@@ -534,7 +534,7 @@ fn decrypt_with_input_file_short_alias() -> anyhow::Result<()> {
             .arg("--password-file")
             .arg(fixtures::DEFAULT.password_file_path())
             .arg("-i")
-            .arg(fixtures::DEFAULT.encrypted_container_file_path())
+            .arg(fixtures::DEFAULT.envelope_file_path())
             .output()?,
         ExpectedOutput::success().stdout(fixtures::DEFAULT.plaintext()?)
     );
@@ -549,7 +549,7 @@ fn decrypt_with_input_file_long_alias() -> anyhow::Result<()> {
             .arg("--password-file")
             .arg(fixtures::DEFAULT.password_file_path())
             .arg("--input")
-            .arg(fixtures::DEFAULT.encrypted_container_file_path())
+            .arg(fixtures::DEFAULT.envelope_file_path())
             .output()?,
         ExpectedOutput::success().stdout(fixtures::DEFAULT.plaintext()?)
     );
@@ -564,7 +564,7 @@ fn decrypt_with_input_file_and_ignore_stdin() -> anyhow::Result<()> {
             .arg("--password-file")
             .arg(fixtures::DEFAULT.password_file_path())
             .arg("--input-file")
-            .arg(fixtures::DEFAULT.encrypted_container_file_path())
+            .arg(fixtures::DEFAULT.envelope_file_path())
             .pass_stdin("Ignored input")?,
         ExpectedOutput::success().stdout(fixtures::DEFAULT.plaintext()?)
     );
@@ -581,7 +581,7 @@ fn decrypt_with_output_file() -> anyhow::Result<()> {
             .arg(fixtures::DEFAULT.password_file_path())
             .arg("--output-file")
             .arg(output_file.path())
-            .pass_stdin(fixtures::DEFAULT.encrypted_container()?)?,
+            .pass_stdin(fixtures::DEFAULT.envelope()?)?,
         ExpectedOutput::success()
     );
     assert_file!(output_file.path(), fixtures::DEFAULT.plaintext()?);
@@ -598,7 +598,7 @@ fn decrypt_with_output_file_short_alias() -> anyhow::Result<()> {
             .arg(fixtures::DEFAULT.password_file_path())
             .arg("-o")
             .arg(output_file.path())
-            .pass_stdin(fixtures::DEFAULT.encrypted_container()?)?,
+            .pass_stdin(fixtures::DEFAULT.envelope()?)?,
         ExpectedOutput::success()
     );
     assert_file!(output_file.path(), fixtures::DEFAULT.plaintext()?);
@@ -615,7 +615,7 @@ fn decrypt_with_output_file_long_alias() -> anyhow::Result<()> {
             .arg(fixtures::DEFAULT.password_file_path())
             .arg("--output")
             .arg(output_file.path())
-            .pass_stdin(fixtures::DEFAULT.encrypted_container()?)?,
+            .pass_stdin(fixtures::DEFAULT.envelope()?)?,
         ExpectedOutput::success()
     );
     assert_file!(output_file.path(), fixtures::DEFAULT.plaintext()?);
@@ -631,7 +631,7 @@ fn decrypt_with_input_and_output_files() -> anyhow::Result<()> {
             .arg("--password-file")
             .arg(fixtures::DEFAULT.password_file_path())
             .arg("--input-file")
-            .arg(fixtures::DEFAULT.encrypted_container_file_path())
+            .arg(fixtures::DEFAULT.envelope_file_path())
             .arg("--output-file")
             .arg(output_file.path())
             .output()?,
@@ -645,10 +645,7 @@ fn decrypt_with_input_and_output_files() -> anyhow::Result<()> {
 fn decrypt_with_cwd_and_relative_input_and_output_files() -> anyhow::Result<()> {
     let current_dir = create_temp_dir()?;
     let password_file = create_temp_file_in(current_dir.path(), &fixtures::DEFAULT.password()?)?;
-    let input_file = create_temp_file_in(
-        current_dir.path(),
-        &fixtures::DEFAULT.encrypted_container()?,
-    )?;
+    let input_file = create_temp_file_in(current_dir.path(), &fixtures::DEFAULT.envelope()?)?;
     let output_file = create_temp_file_in(current_dir.path(), "")?;
     assert_cmd!(
         arcana_cmd()
@@ -718,7 +715,7 @@ fn encrypt_with_cipher_type_cha_cha_20_poly_1305_argument() -> anyhow::Result<()
             .arg("--cipher-type")
             .arg("ChaCha20Poly1305")
             .pass_stdin(fixtures::DEFAULT.plaintext()?)?,
-        ExpectedOutput::success().stdout(fixtures::DEFAULT.encrypted_container()?)
+        ExpectedOutput::success().stdout(fixtures::DEFAULT.envelope()?)
     );
     Ok(())
 }
@@ -754,7 +751,7 @@ fn encrypt_with_kdf_type_argon2_argument() -> anyhow::Result<()> {
             .arg("--kdf-type")
             .arg("argon2")
             .pass_stdin(fixtures::DEFAULT.plaintext()?)?,
-        ExpectedOutput::success().stdout(fixtures::DEFAULT.encrypted_container()?)
+        ExpectedOutput::success().stdout(fixtures::DEFAULT.envelope()?)
     );
     Ok(())
 }
@@ -791,7 +788,7 @@ fn encrypt_with_kdf_argon2_algorithm_argon2i_argument() -> anyhow::Result<()> {
             .arg("argon2i")
             .pass_stdin(fixtures::DEFAULT_KDF_ARGON2_ALGORITHM_ARGON2I.plaintext()?)?,
         ExpectedOutput::success()
-            .stdout(fixtures::DEFAULT_KDF_ARGON2_ALGORITHM_ARGON2I.encrypted_container()?)
+            .stdout(fixtures::DEFAULT_KDF_ARGON2_ALGORITHM_ARGON2I.envelope()?)
     );
     Ok(())
 }
@@ -803,7 +800,7 @@ fn decrypt_with_kdf_argon2_algorithm_argon2i_argument() -> anyhow::Result<()> {
             .arg("decrypt")
             .arg("--password-file")
             .arg(fixtures::DEFAULT_KDF_ARGON2_ALGORITHM_ARGON2I.password_file_path())
-            .pass_stdin(fixtures::DEFAULT_KDF_ARGON2_ALGORITHM_ARGON2I.encrypted_container()?)?,
+            .pass_stdin(fixtures::DEFAULT_KDF_ARGON2_ALGORITHM_ARGON2I.envelope()?)?,
         ExpectedOutput::success()
             .stdout(fixtures::DEFAULT_KDF_ARGON2_ALGORITHM_ARGON2I.plaintext()?)
     );
@@ -821,7 +818,7 @@ fn encrypt_with_kdf_argon2_algorithm_argon2d_argument() -> anyhow::Result<()> {
             .arg("argon2d")
             .pass_stdin(fixtures::DEFAULT_KDF_ARGON2_ALGORITHM_ARGON2D.plaintext()?)?,
         ExpectedOutput::success()
-            .stdout(fixtures::DEFAULT_KDF_ARGON2_ALGORITHM_ARGON2D.encrypted_container()?)
+            .stdout(fixtures::DEFAULT_KDF_ARGON2_ALGORITHM_ARGON2D.envelope()?)
     );
     Ok(())
 }
@@ -833,7 +830,7 @@ fn decrypt_with_kdf_argon2_algorithm_argon2d_argument() -> anyhow::Result<()> {
             .arg("decrypt")
             .arg("--password-file")
             .arg(fixtures::DEFAULT_KDF_ARGON2_ALGORITHM_ARGON2D.password_file_path())
-            .pass_stdin(fixtures::DEFAULT_KDF_ARGON2_ALGORITHM_ARGON2D.encrypted_container()?)?,
+            .pass_stdin(fixtures::DEFAULT_KDF_ARGON2_ALGORITHM_ARGON2D.envelope()?)?,
         ExpectedOutput::success()
             .stdout(fixtures::DEFAULT_KDF_ARGON2_ALGORITHM_ARGON2D.plaintext()?)
     );
@@ -871,8 +868,7 @@ fn encrypt_with_kdf_argon2_version_16_argument() -> anyhow::Result<()> {
             .arg("--kdf-argon2-version")
             .arg("16")
             .pass_stdin(fixtures::DEFAULT_KDF_ARGON2_VERSION_16.plaintext()?)?,
-        ExpectedOutput::success()
-            .stdout(fixtures::DEFAULT_KDF_ARGON2_VERSION_16.encrypted_container()?)
+        ExpectedOutput::success().stdout(fixtures::DEFAULT_KDF_ARGON2_VERSION_16.envelope()?)
     );
     Ok(())
 }
@@ -905,7 +901,7 @@ fn decrypt_with_kdf_argon2_version_16_argument() -> anyhow::Result<()> {
             .arg("decrypt")
             .arg("--password-file")
             .arg(fixtures::DEFAULT_KDF_ARGON2_VERSION_16.password_file_path())
-            .pass_stdin(fixtures::DEFAULT_KDF_ARGON2_VERSION_16.encrypted_container()?)?,
+            .pass_stdin(fixtures::DEFAULT_KDF_ARGON2_VERSION_16.envelope()?)?,
         ExpectedOutput::success().stdout(fixtures::DEFAULT_KDF_ARGON2_VERSION_16.plaintext()?)
     );
     Ok(())
@@ -921,8 +917,7 @@ fn encrypt_with_kdf_argon2_memory_65536_argument() -> anyhow::Result<()> {
             .arg("--kdf-argon2-memory")
             .arg("65536")
             .pass_stdin(fixtures::DEFAULT_KDF_ARGON2_MEMORY_65536.plaintext()?)?,
-        ExpectedOutput::success()
-            .stdout(fixtures::DEFAULT_KDF_ARGON2_MEMORY_65536.encrypted_container()?)
+        ExpectedOutput::success().stdout(fixtures::DEFAULT_KDF_ARGON2_MEMORY_65536.envelope()?)
     );
     Ok(())
 }
@@ -954,7 +949,7 @@ fn decrypt_with_kdf_argon2_memory_65536_argument() -> anyhow::Result<()> {
             .arg("decrypt")
             .arg("--password-file")
             .arg(fixtures::DEFAULT_KDF_ARGON2_MEMORY_65536.password_file_path())
-            .pass_stdin(fixtures::DEFAULT_KDF_ARGON2_MEMORY_65536.encrypted_container()?)?,
+            .pass_stdin(fixtures::DEFAULT_KDF_ARGON2_MEMORY_65536.envelope()?)?,
         ExpectedOutput::success().stdout(fixtures::DEFAULT_KDF_ARGON2_MEMORY_65536.plaintext()?)
     );
     Ok(())
@@ -970,8 +965,7 @@ fn encrypt_with_kdf_argon2_iterations_1_argument() -> anyhow::Result<()> {
             .arg("--kdf-argon2-iterations")
             .arg("1")
             .pass_stdin(fixtures::DEFAULT_KDF_ARGON2_ITERATIONS_1.plaintext()?)?,
-        ExpectedOutput::success()
-            .stdout(fixtures::DEFAULT_KDF_ARGON2_ITERATIONS_1.encrypted_container()?)
+        ExpectedOutput::success().stdout(fixtures::DEFAULT_KDF_ARGON2_ITERATIONS_1.envelope()?)
     );
     Ok(())
 }
@@ -1003,7 +997,7 @@ fn decrypt_with_kdf_argon2_iterations_1_argument() -> anyhow::Result<()> {
             .arg("decrypt")
             .arg("--password-file")
             .arg(fixtures::DEFAULT_KDF_ARGON2_ITERATIONS_1.password_file_path())
-            .pass_stdin(fixtures::DEFAULT_KDF_ARGON2_ITERATIONS_1.encrypted_container()?)?,
+            .pass_stdin(fixtures::DEFAULT_KDF_ARGON2_ITERATIONS_1.envelope()?)?,
         ExpectedOutput::success().stdout(fixtures::DEFAULT_KDF_ARGON2_ITERATIONS_1.plaintext()?)
     );
     Ok(())
@@ -1019,8 +1013,7 @@ fn encrypt_with_kdf_argon2_parallelism_1_argument() -> anyhow::Result<()> {
             .arg("--kdf-argon2-parallelism")
             .arg("1")
             .pass_stdin(fixtures::DEFAULT_KDF_ARGON2_PARALLELISM_1.plaintext()?)?,
-        ExpectedOutput::success()
-            .stdout(fixtures::DEFAULT_KDF_ARGON2_PARALLELISM_1.encrypted_container()?)
+        ExpectedOutput::success().stdout(fixtures::DEFAULT_KDF_ARGON2_PARALLELISM_1.envelope()?)
     );
     Ok(())
 }
@@ -1052,7 +1045,7 @@ fn decrypt_with_kdf_argon2_parallelism_1_argument() -> anyhow::Result<()> {
             .arg("decrypt")
             .arg("--password-file")
             .arg(fixtures::DEFAULT_KDF_ARGON2_PARALLELISM_1.password_file_path())
-            .pass_stdin(fixtures::DEFAULT_KDF_ARGON2_PARALLELISM_1.encrypted_container()?)?,
+            .pass_stdin(fixtures::DEFAULT_KDF_ARGON2_PARALLELISM_1.envelope()?)?,
         ExpectedOutput::success().stdout(fixtures::DEFAULT_KDF_ARGON2_PARALLELISM_1.plaintext()?)
     );
     Ok(())
@@ -1072,7 +1065,7 @@ fn encrypt_with_fastest_kdf_arguments() -> anyhow::Result<()> {
             .arg("--kdf-argon2-parallelism")
             .arg("4")
             .pass_stdin(fixtures::FASTEST.plaintext()?)?,
-        ExpectedOutput::success().stdout(fixtures::FASTEST.encrypted_container()?)
+        ExpectedOutput::success().stdout(fixtures::FASTEST.envelope()?)
     );
     Ok(())
 }
@@ -1084,7 +1077,7 @@ fn decrypt_with_fastest_kdf_arguments() -> anyhow::Result<()> {
             .arg("decrypt")
             .arg("--password-file")
             .arg(fixtures::FASTEST.password_file_path())
-            .pass_stdin(fixtures::FASTEST.encrypted_container()?)?,
+            .pass_stdin(fixtures::FASTEST.envelope()?)?,
         ExpectedOutput::success().stdout(fixtures::FASTEST.plaintext()?)
     );
     Ok(())

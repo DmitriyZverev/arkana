@@ -222,7 +222,7 @@ impl Default for Kdf {
 }
 
 #[derive(Deserialize, Serialize)]
-pub struct KdfContainer {
+pub struct KdfSection {
     #[serde(flatten)]
     pub r#type: Kdf,
     #[serde(with = "base64_serde")]
@@ -230,7 +230,7 @@ pub struct KdfContainer {
 }
 
 #[derive(Deserialize, Serialize)]
-pub struct CipherContainer {
+pub struct CipherSection {
     #[serde(flatten)]
     pub r#type: Cipher,
     #[serde(with = "base64_serde")]
@@ -242,9 +242,9 @@ pub struct CipherContainer {
 }
 
 #[derive(Deserialize, Serialize)]
-pub struct EncryptedContainer {
-    pub kdf: KdfContainer,
-    pub cipher: CipherContainer,
+pub struct Envelope {
+    pub kdf: KdfSection,
+    pub cipher: CipherSection,
 }
 
 const SALT_LEN: usize = 32;
@@ -276,7 +276,7 @@ fn generate_nonce() -> [u8; NONCE_LEN] {
     ChaCha20Poly1305::generate_nonce(OsRng).into()
 }
 
-pub fn encrypt(encrypt_params: EncryptParams) -> Result<EncryptedContainer, EncryptError> {
+pub fn encrypt(encrypt_params: EncryptParams) -> Result<Envelope, EncryptError> {
     let salt = generate_salt()?;
     let key = match &encrypt_params.kdf {
         Kdf::Argon2(argon2) => argon2.derive_key(&salt, &encrypt_params.password)?,
@@ -293,34 +293,31 @@ pub fn encrypt(encrypt_params: EncryptParams) -> Result<EncryptedContainer, Encr
         }
     };
 
-    Ok(EncryptedContainer {
-        cipher: CipherContainer {
+    Ok(Envelope {
+        cipher: CipherSection {
             r#type: encrypt_params.cipher,
             ciphertext,
             nonce,
             tag,
         },
-        kdf: KdfContainer {
+        kdf: KdfSection {
             r#type: encrypt_params.kdf,
             salt,
         },
     })
 }
 
-pub fn decrypt(
-    encrypted_container: EncryptedContainer,
-    password: &[u8],
-) -> Result<Vec<u8>, DecryptError> {
-    let key = match &encrypted_container.kdf.r#type {
-        Kdf::Argon2(argon2) => argon2.derive_key(&encrypted_container.kdf.salt, password)?,
+pub fn decrypt(envelope: Envelope, password: &[u8]) -> Result<Vec<u8>, DecryptError> {
+    let key = match &envelope.kdf.r#type {
+        Kdf::Argon2(argon2) => argon2.derive_key(&envelope.kdf.salt, password)?,
     };
-    let mut buffer = encrypted_container.cipher.ciphertext;
+    let mut buffer = envelope.cipher.ciphertext;
     ChaCha20Poly1305::new(Key::from_slice(key.as_ref()))
         .decrypt_in_place_detached(
-            Nonce::from_slice(&encrypted_container.cipher.nonce),
+            Nonce::from_slice(&envelope.cipher.nonce),
             b"",
             &mut buffer,
-            Tag::from_slice(&encrypted_container.cipher.tag),
+            Tag::from_slice(&envelope.cipher.tag),
         )
         .map_err(|_| DecryptError::Decryption)?;
 
