@@ -24,12 +24,6 @@ _A modern CLI tool for password-based encryption with human-readable output._
 # Read from stdin, write to stdout
 echo "secret message" | arcana encrypt > encrypted.yml
 
-# Read from file, write to stdout
-arcana encrypt --input-file secret.txt > encrypted.yml
-
-# Read from stdin, write to file
-echo "secret message" | arcana encrypt --output-file encrypted.yml
-
 # Read from file, write to file
 arcana encrypt --input-file secret.txt --output-file encrypted.yml
 ```
@@ -40,12 +34,6 @@ arcana encrypt --input-file secret.txt --output-file encrypted.yml
 # Read from stdin, write to stdout
 arcana decrypt < encrypted.yml > decrypted.txt
 
-# Read from file, write to stdout
-arcana decrypt --input-file encrypted.yml > decrypted.txt
-
-# Read from stdin, write to file
-arcana decrypt --output-file decrypted.txt < encrypted.yml
-
 # Read from file, write to file
 arcana decrypt --input-file encrypted.yml --output-file decrypted.txt
 ```
@@ -55,7 +43,11 @@ arcana decrypt --input-file encrypted.yml --output-file decrypted.txt
 
 ### Encryption Parameters
 
-Use `--kdf-*` and `--cipher-type` flags to override encryption parameters. When omitted, secure defaults are used.
+Use `--kdf-*` and `--cipher-type` flags to override encryption parameters. When omitted, the following defaults are
+used:
+
+- **Argon2id**: memory 128 MiB, 4 iterations, parallelism 4
+- **ChaCha20-Poly1305**
 
 ```bash
 # Encrypt with a custom Argon2 algorithm
@@ -112,10 +104,12 @@ cipher:
   ciphertext: RmuSIEhbLyex+iTU
 ```
 
-## Security Parameters
+## See also
 
-- **Argon2id**: Memory-hard key derivation (128 MiB, 4 iterations, parallelism 4)
-- **ChaCha20-Poly1305**: Authenticated encryption with 256-bit keys
-- **Salt**: 256-bit random salt per encryption
-- **Nonce**: 96-bit random nonce per encryption
-- **Tag**: 128-bit authentication tag (detached)
+- [ROADMAP.md](ROADMAP.md) — development plan and milestones
+- [PRINCIPLES.md](PRINCIPLES.md) — design principles
+- [CONTRIBUTING.md](CONTRIBUTING.md) — development setup and workflow
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
