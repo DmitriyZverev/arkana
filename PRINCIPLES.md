@@ -15,7 +15,7 @@ Default parameters must provide strong security without any configuration.
 A user who specifies no flags must get protection aligned with current
 recommendations.
 
-## Encrypted container
+## Envelope
 
 ### 1. Readability
 
