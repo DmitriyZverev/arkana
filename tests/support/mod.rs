@@ -82,7 +82,7 @@ pub fn create_temp_dir() -> Result<tempfile::TempDir, std::io::Error> {
 
 pub fn hex_lines(data: &[u8], bytes_per_line: usize) -> String {
     data.chunks(bytes_per_line)
-        .map(hex::encode_upper)
+        .map(|chunk| data_encoding::HEXUPPER.encode(chunk))
         .collect::<Vec<_>>()
         .join("\n")
 }

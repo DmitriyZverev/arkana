@@ -3,7 +3,7 @@ use crate::envelope::Argon2Params;
 use serde::{Deserialize, Serialize};
 
 mod base64_serde {
-    use base64::{Engine, engine::general_purpose::STANDARD};
+    use data_encoding::BASE64;
     use serde::{Deserialize, Deserializer, Serializer};
 
     pub trait Base64Bytes: Sized {
@@ -37,7 +37,7 @@ mod base64_serde {
     where
         S: Serializer,
     {
-        let encoded = STANDARD.encode(value.to_bytes());
+        let encoded = BASE64.encode(value.to_bytes());
         let wrapped = encoded
             .as_bytes()
             .chunks(64)
@@ -53,7 +53,9 @@ mod base64_serde {
     {
         let s = String::deserialize(deserializer)?;
         let cleaned: String = s.lines().collect();
-        let bytes = STANDARD.decode(cleaned).map_err(serde::de::Error::custom)?;
+        let bytes = BASE64
+            .decode(cleaned.as_bytes())
+            .map_err(serde::de::Error::custom)?;
         T::from_bytes(bytes).map_err(serde::de::Error::custom)
     }
 }
