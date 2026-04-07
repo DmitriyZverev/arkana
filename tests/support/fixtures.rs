@@ -29,6 +29,14 @@ impl Fixture {
         std::fs::read_to_string(self.envelope_file_path())
     }
 
+    pub fn envelope_bin_file_path(&self) -> PathBuf {
+        self.file_path("envelope.bin")
+    }
+
+    pub fn envelope_bin(&self) -> Result<Vec<u8>, std::io::Error> {
+        std::fs::read(self.envelope_bin_file_path())
+    }
+
     fn file_path(&self, file_name: &str) -> PathBuf {
         PathBuf::from("tests/fixtures")
             .join(self.name)

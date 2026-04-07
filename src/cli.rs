@@ -158,6 +158,21 @@ impl From<KdfArgs> for KdfParams {
     }
 }
 
+#[derive(Debug, Clone, ValueEnum, Default)]
+pub enum Format {
+    #[default]
+    #[value(name = "yaml")]
+    Yaml,
+    #[value(name = "binary")]
+    Binary,
+}
+
+impl Display for Format {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        display_value(self, f)
+    }
+}
+
 #[derive(Debug, Args)]
 pub struct IoArgs {
     /// Read password from a file instead of prompting for it
@@ -169,6 +184,9 @@ pub struct IoArgs {
     /// Write output to a file instead of standard output
     #[arg(long, short = 'o', alias = "output")]
     pub output_file: Option<PathBuf>,
+    /// Envelope format
+    #[arg(long, short = 'f', default_value_t)]
+    pub format: Format,
 }
 
 #[derive(Debug, Subcommand)]

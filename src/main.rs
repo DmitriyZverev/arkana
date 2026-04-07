@@ -3,7 +3,7 @@ mod crypto;
 mod envelope;
 mod password;
 
-use crate::cli::{CliArgs, SubCommand};
+use crate::cli::{CliArgs, Format, SubCommand};
 use crate::crypto::{EncryptParams, decrypt, encrypt};
 use crate::password::read_password;
 use anyhow::Context;
@@ -70,19 +70,29 @@ fn main() -> anyhow::Result<()> {
                 cipher: cipher.into(),
             };
             let envelope = encrypt(encrypt_params)?;
-            write_output(
-                serde_yaml::to_string::<envelope::text::Envelope>(&envelope.into())?.as_bytes(),
-                output_file,
-                &cwd,
-            )?;
+            let output = match io.format {
+                Format::Yaml => {
+                    serde_yaml::to_string::<envelope::text::Envelope>(&envelope.into())?
+                        .into_bytes()
+                }
+                Format::Binary => {
+                    let mut binary_data = Vec::new();
+                    ciborium::into_writer(&envelope, &mut binary_data)?;
+                    binary_data
+                }
+            };
+            write_output(&output, output_file, &cwd)?;
         }
         Some(SubCommand::Decrypt { io }) => {
             let input_file = resolve_path(&cwd, io.input_file)?;
             let output_file = resolve_path(&cwd, io.output_file)?;
             let password_file = resolve_path(&cwd, io.password_file)?;
             let data = read_input(input_file, &cwd)?;
-            let envelope = serde_yaml::from_slice::<envelope::text::Envelope>(&data)?;
-            let decrypted_text = decrypt(envelope.into(), &read_password(password_file)?)?;
+            let envelope: envelope::Envelope = match io.format {
+                Format::Yaml => serde_yaml::from_slice::<envelope::text::Envelope>(&data)?.into(),
+                Format::Binary => ciborium::from_reader(data.as_slice())?,
+            };
+            let decrypted_text = decrypt(envelope, &read_password(password_file)?)?;
             write_output(&decrypted_text, output_file, &cwd)?;
         }
         None => {

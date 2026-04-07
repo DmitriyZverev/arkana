@@ -79,3 +79,10 @@ pub fn create_temp_file_in(
 pub fn create_temp_dir() -> Result<tempfile::TempDir, std::io::Error> {
     tempfile::TempDir::new()
 }
+
+pub fn hex_lines(data: &[u8], bytes_per_line: usize) -> String {
+    data.chunks(bytes_per_line)
+        .map(hex::encode_upper)
+        .collect::<Vec<_>>()
+        .join("\n")
+}

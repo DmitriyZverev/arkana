@@ -85,6 +85,7 @@ pub enum Kdf {
     Argon2 {
         #[serde(flatten)]
         params: Argon2Params,
+        #[serde(with = "serde_bytes")]
         salt: [u8; Kdf::ARGON2_SALT_LEN],
     },
 }
@@ -98,8 +99,11 @@ impl Kdf {
 pub enum Cipher {
     #[serde(rename = "ChaCha20Poly1305")]
     ChaCha20Poly1305 {
+        #[serde(with = "serde_bytes")]
         nonce: [u8; Cipher::CHA_CHA20_NONCE_LEN],
+        #[serde(with = "serde_bytes")]
         tag: [u8; Cipher::POLY1305_TAG_LEN],
+        #[serde(with = "serde_bytes")]
         ciphertext: Vec<u8>,
     },
 }

@@ -1084,3 +1084,97 @@ fn decrypt_with_fastest_kdf_arguments() -> anyhow::Result<()> {
     );
     Ok(())
 }
+
+#[test]
+fn encrypt_with_binary_format_default() -> anyhow::Result<()> {
+    assert_cmd_binary!(
+        arcana_cmd()
+            .arg("encrypt")
+            .arg("--format")
+            .arg("binary")
+            .arg("--password-file")
+            .arg(fixtures::DEFAULT.password_file_path())
+            .pass_stdin(fixtures::DEFAULT.plaintext()?)?,
+        ExpectedOutput::success().stdout(fixtures::DEFAULT.envelope_bin()?)
+    );
+    Ok(())
+}
+
+#[test]
+fn decrypt_with_binary_format() -> anyhow::Result<()> {
+    assert_cmd!(
+        arcana_cmd()
+            .arg("decrypt")
+            .arg("--format")
+            .arg("binary")
+            .arg("--password-file")
+            .arg(fixtures::DEFAULT.password_file_path())
+            .pass_stdin(fixtures::DEFAULT.envelope_bin()?)?,
+        ExpectedOutput::success().stdout(fixtures::DEFAULT.plaintext()?)
+    );
+    Ok(())
+}
+
+#[test]
+fn encrypt_with_yaml_format() -> anyhow::Result<()> {
+    assert_cmd!(
+        arcana_cmd()
+            .arg("encrypt")
+            .arg("--format")
+            .arg("yaml")
+            .arg("--password-file")
+            .arg(fixtures::DEFAULT.password_file_path())
+            .pass_stdin(fixtures::DEFAULT.plaintext()?)?,
+        ExpectedOutput::success().stdout(fixtures::DEFAULT.envelope()?)
+    );
+    Ok(())
+}
+
+#[test]
+fn decrypt_with_yaml_format() -> anyhow::Result<()> {
+    assert_cmd!(
+        arcana_cmd()
+            .arg("decrypt")
+            .arg("--format")
+            .arg("yaml")
+            .arg("--password-file")
+            .arg(fixtures::DEFAULT.password_file_path())
+            .pass_stdin(fixtures::DEFAULT.envelope()?)?,
+        ExpectedOutput::success().stdout(fixtures::DEFAULT.plaintext()?)
+    );
+    Ok(())
+}
+
+#[test]
+fn try_decrypt_yaml_envelope_with_binary_format() -> anyhow::Result<()> {
+    assert_cmd!(
+        arcana_cmd()
+            .arg("decrypt")
+            .arg("--format")
+            .arg("binary")
+            .arg("--password-file")
+            .arg(fixtures::DEFAULT.password_file_path())
+            .pass_stdin(fixtures::DEFAULT.envelope()?)?,
+        ExpectedOutput::failure().stderr(indoc! {r#"
+            Error: Semantic(None, "invalid type: string, expected map")
+        "#})
+    );
+    Ok(())
+}
+
+#[test]
+fn try_decrypt_binary_envelope_with_yaml_format() -> anyhow::Result<()> {
+    assert_cmd!(
+        arcana_cmd()
+            .arg("decrypt")
+            .arg("--format")
+            .arg("yaml")
+            .arg("--password-file")
+            .arg(fixtures::DEFAULT.password_file_path())
+            .pass_stdin(fixtures::DEFAULT.envelope_bin()?)?,
+        ExpectedOutput::failure().stderr(indoc! {"
+            Error: invalid leading UTF-8 octet
+        "})
+    );
+    Ok(())
+}

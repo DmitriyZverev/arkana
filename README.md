@@ -14,7 +14,7 @@ _A modern CLI tool for password-based encryption with human-readable output._
 - **Secure Key Derivation**: `Argon2id` with configurable parameters
 - **Flexible I/O**: Stdin/stdout by default, with optional `--input-file` / `--output-file` flags
 - **Configurable Encryption Parameters**: Override KDF and cipher settings per-invocation via CLI flags
-- **YAML Output Format**: Human-readable encrypted envelopes
+- **Multiple Output Formats**: Human-readable YAML (default) or compact binary (CBOR) via `--format`
 
 ## Usage
 
@@ -72,6 +72,18 @@ arcana encrypt \
 > Encryption parameters are stored in the container and are used automatically during decryption — no flags are needed
 > on `arcana decrypt`.
 
+### Output Format
+
+Use `--format` to select the envelope format. The default is `yaml`.
+
+```bash
+# Encrypt to binary (CBOR) format
+arcana encrypt --format binary --input-file secret.txt --output-file encrypted.bin
+
+# Decrypt from binary format
+arcana decrypt --format binary --input-file encrypted.bin --output-file decrypted.txt
+```
+
 ### Override Working Directory
 
 Use the `--cwd` global flag to set the working directory for resolving all relative file paths:
@@ -86,7 +98,12 @@ arcana --cwd /path/to/dir encrypt --input-file secret.txt --output-file encrypte
 
 ## Envelope Format
 
-The encrypted data is stored in a human-readable YAML format that describes all necessary settings for decryption:
+The encrypted data is stored in a self-describing envelope that contains all parameters needed for decryption.
+Two formats are supported: YAML (default, human-readable) and binary (CBOR, compact).
+
+### YAML
+
+The default format is a human-readable YAML document:
 
 ```yaml
 kdf:
@@ -103,6 +120,11 @@ cipher:
   tag: h1yYEdQ5IHcvz3UL7W+ZHQ==
   ciphertext: RmuSIEhbLyex+iTU
 ```
+
+### Binary
+
+The binary format uses [CBOR](https://cbor.io/) encoding of the same fields.
+It is more compact than YAML and suitable for machine-to-machine workflows.
 
 ## See also
 

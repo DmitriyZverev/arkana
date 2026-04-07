@@ -22,6 +22,31 @@ macro_rules! format_cmd_output {
 }
 
 #[macro_export]
+macro_rules! format_cmd_output_hex {
+    ($code:expr, $stdout:expr, $stderr:expr) => {
+        format_cmd_output!(
+            $code,
+            support::hex_lines($stdout, 32),
+            String::from_utf8_lossy($stderr)
+        )
+    };
+}
+
+#[macro_export]
+macro_rules! assert_cmd_binary {
+    ($output:expr, $expected:expr) => {
+        let output = $output;
+        let expected = $expected;
+
+        pretty_assertions::assert_eq!(
+            format_cmd_output_hex!(&output.status.code(), &output.stdout, &output.stderr),
+            format_cmd_output_hex!(&expected.code, &expected.stdout, &expected.stderr),
+            "Command output mismatch"
+        );
+    };
+}
+
+#[macro_export]
 macro_rules! format_cmd_output_utf8 {
     ($code:expr, $stdout:expr, $stderr:expr) => {
         format_cmd_output!(
