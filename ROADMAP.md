@@ -87,11 +87,98 @@ arcana --config /path/to/config.toml encrypt < decrypted.txt > encrypted.yml
 
 CLI flags (Step 3) take precedence over config file values.
 
-### Step 5 — Named secret storage `Planned`
+### Step 5 — Encoding field `Planned`
+
+Add an `encoding` field to the YAML envelope that controls how binary values
+(`salt`, `nonce`, `tag`, `ciphertext`) are represented. Supported values:
+`base16`, `base32`, `base64`.
+
+```yaml
+encoding: base16 | base32 | base64
+kdf:
+  type: argon2
+  # ...
+  salt: <encoded 256-bit salt>
+cipher:
+  type: ChaCha20Poly1305
+  nonce: <encoded 96-bit nonce>
+  tag: <encoded 128-bit authentication tag>
+  ciphertext: <encoded ciphertext>
+```
+
+The default encoding is `base64` — existing behavior is unchanged.
+
+A new `--encoding` flag is available during encryption:
+
+```shell
+arcana encrypt --encoding base16 < decrypted.txt > encrypted.yml
+```
+
+During decryption the `encoding` field is read from the envelope — no flag
+is needed.
+
+### Step 6 — Binary container format `Planned`
+
+Add `--format` flag to `encrypt` and `decrypt` commands with two supported values:
+`yaml` (default) and `binary`. The binary format serializes the encrypted container
+using CBOR (Concise Binary Object Representation) — a compact, binary encoding of the
+same fields as the YAML container.
+
+```shell
+arcana encrypt --format binary < decrypted.txt > encrypted.bin
+arcana decrypt --format binary < encrypted.bin > decrypted.txt
+```
+
+The default format is `yaml` — existing behavior is unchanged.
+
+The binary format does not include the `encoding` field (Step 5) — all binary
+values are stored as raw bytes in CBOR. The `--encoding` flag is ignored when
+`--format binary` is used.
+
+### Step 7 — QR code format `Planned`
+
+Add `qr` as a new value for the `--format` flag, enabling QR code images as
+an alternative container format. Useful for physical backups and paper storage.
+
+```shell
+arcana encrypt --format qr < decrypted.txt > qr_codes.tar
+
+# tar archive can contain multiple related QR code images
+arcana decrypt --format qr < qr_codes.tar > decrypted.txt
+arcana decrypt --format qr --input qr_codes.tar --output decrypted.txt
+
+# or a single QR code jpeg image
+arcana decrypt --format qr < qr_code.jpeg > decrypted.txt
+arcana decrypt --format qr --input qr_code.jpeg --output decrypted.txt
+
+# or a single QR code png image
+arcana decrypt --format qr < qr_code.png > decrypted.txt
+arcana decrypt --format qr --input qr_code.png --output decrypted.txt
+```
+
+Encrypt always outputs a TAR archive containing one or more PNG images. When the
+encrypted container exceeds the capacity of a single QR code, it is split across
+multiple independent symbols, each readable by any standard QR scanner.
+
+Decrypt accepts a TAR archive, a PNG, or a JPEG image — auto-detected from the input.
+Images within a TAR archive need not be ordered.
+
+Each QR code symbol encodes a binary payload in the following format:
+
+```
+[2 bytes] index    — 1-based position of this symbol in the sequence (u16 big-endian)
+[2 bytes] total    — total number of symbols in the sequence (u16 big-endian)
+[32 bytes] sha256  — SHA-256 checksum of the complete encrypted container, identical
+                     across all symbols; used to group symbols belonging to the same
+                     container and to verify integrity after assembly
+[N bytes] fragment — a binary fragment of the CBOR-encoded encrypted container
+```
+
+### Step 8 — Named secret storage `Planned`
 
 Introduce a secret registry stored in `$HOME/.arcana/secrets/`. Each encryption
 creates a new versioned snapshot of the secret, making it possible to track and
-restore previous versions.
+restore previous versions. Secrets are always stored in YAML format.
 
 The secrets directory can be overridden via `--secrets-dir` or via `config.toml`:
 
@@ -201,7 +288,7 @@ arcana secret rename <secret-name> <new-secret-name>
 
 Renames all version files of the secret in `$HOME/.arcana/secrets/`.
 
-### Step 6 — Interactive mode (TUI) `Planned`
+### Step 9 — Interactive mode (TUI) `Planned`
 
 Run the tool without arguments to launch a terminal user interface (TUI) for browsing,
 decrypting, editing, and re-encrypting stored secrets.
