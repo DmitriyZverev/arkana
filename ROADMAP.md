@@ -135,7 +135,27 @@ The binary format does not include the `encoding` field (Step 5) — all binary
 values are stored as raw bytes in CBOR. The `--encoding` flag is ignored when
 `--format binary` is used.
 
-### Step 7 — QR code format `Planned`
+### Step 7 — Format conversion `Planned`
+
+Add a `convert` command that transforms an encrypted envelope from one format
+to another without decryption. The envelope content is preserved exactly —
+no password is required and no re-encryption occurs.
+
+```shell
+arcana convert --from-format yaml --to-format binary --input envelope.yml --output envelope.bin
+arcana convert --from-format binary --to-format yaml --input envelope.bin --output envelope.yml
+```
+
+Both `--from-format` and `--to-format` are required. Supported values match
+the `--format` flag: `yaml`, `binary`, and (after Step 8) `qr`.
+
+Standard I/O is supported:
+
+```shell
+arcana convert --from-format yaml --to-format binary < envelope.yml > envelope.bin
+```
+
+### Step 8 — QR code format `Planned`
 
 Add `qr` as a new value for the `--format` flag, enabling QR code images as
 an alternative container format. Useful for physical backups and paper storage.
@@ -176,7 +196,7 @@ Each QR code symbol encodes a binary payload in the following format:
 [N bytes] fragment — a binary fragment of the CBOR-encoded encrypted container
 ```
 
-### Step 8 — PDF render (`arcana render`) `Planned`
+### Step 9 — PDF render (`arcana render`) `Planned`
 
 Add a new `render` command that produces a printable PDF document from an encrypted
 envelope. The PDF serves as a physical backup — it contains QR codes (CBOR-encoded)
@@ -205,7 +225,7 @@ The PDF consists of two sections, in order:
 
 1. **QR code pages** — each page contains up to 6 QR codes arranged in a 2×3 grid
    (2 columns, 3 rows). QR codes use version 10 and encode the same binary payload
-   format as `--format qr` (Step 7). If there are more than 6 QR codes, they
+   format as `--format qr` (Step 8). If there are more than 6 QR codes, they
    continue on later pages.
 
 2. **Envelope detail pages** — a formatted, human-readable representation of the
@@ -219,7 +239,7 @@ The PDF consists of two sections, in order:
 - SHA-256 checksum of the CBOR-encoded envelope (same checksum as in QR payload)
 - Timestamp of PDF generation
 
-### Step 9 — Named secret storage `Planned`
+### Step 10 — Named secret storage `Planned`
 
 Introduce a secret registry stored in `$HOME/.arcana/secrets/`. Each encryption
 creates a new versioned snapshot of the secret, making it possible to track and
@@ -333,7 +353,7 @@ arcana secret rename <secret-name> <new-secret-name>
 
 Renames all version files of the secret in `$HOME/.arcana/secrets/`.
 
-### Step 10 — Interactive mode (TUI) `Planned`
+### Step 11 — Interactive mode (TUI) `Planned`
 
 Run the tool without arguments to launch a terminal user interface (TUI) for browsing,
 decrypting, editing, and re-encrypting stored secrets.
