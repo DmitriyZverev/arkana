@@ -161,11 +161,13 @@ encrypted container exceeds the capacity of a single QR code, it is split across
 multiple independent symbols, each readable by any standard QR scanner.
 
 Decrypt accepts a TAR archive, a PNG, or a JPEG image — auto-detected from the input.
+A single image may contain multiple QR codes (e.g., a photo of a printed page).
 Images within a TAR archive need not be ordered.
 
 Each QR code symbol encodes a binary payload in the following format:
 
 ```
+[1 byte]  version  — format version (currently 0x01)
 [2 bytes] index    — 1-based position of this symbol in the sequence (u16 big-endian)
 [2 bytes] total    — total number of symbols in the sequence (u16 big-endian)
 [32 bytes] sha256  — SHA-256 checksum of the complete encrypted container, identical
