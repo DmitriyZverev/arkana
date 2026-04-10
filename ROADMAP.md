@@ -176,7 +176,50 @@ Each QR code symbol encodes a binary payload in the following format:
 [N bytes] fragment — a binary fragment of the CBOR-encoded encrypted container
 ```
 
-### Step 8 — Named secret storage `Planned`
+### Step 8 — PDF render (`arcana render`) `Planned`
+
+Add a new `render` command that produces a printable PDF document from an encrypted
+envelope. The PDF serves as a physical backup — it contains QR codes (CBOR-encoded)
+and a formatted human-readable representation of the envelope fields.
+
+```shell
+# From stdin (default format: yaml):
+arcana encrypt | arcana render --output backup.pdf
+
+# From file:
+arcana render --input envelope.yaml --output backup.pdf
+
+# Binary format:
+arcana encrypt --format binary | arcana render --format binary --output backup.pdf
+
+# To stdout:
+arcana encrypt | arcana render > backup.pdf
+```
+
+`render` accepts an envelope in any supported format via `--format`
+(`yaml`, `binary`, `qr`; default: `yaml`). The output is always a PDF file.
+
+**PDF layout:**
+
+The PDF consists of two sections, in order:
+
+1. **QR code pages** — each page contains up to 6 QR codes arranged in a 2×3 grid
+   (2 columns, 3 rows). QR codes use version 10 and encode the same binary payload
+   format as `--format qr` (Step 7). If there are more than 6 QR codes, they
+   continue on later pages.
+
+2. **Envelope detail pages** — a formatted, human-readable representation of the
+   envelope fields (KDF parameters, cipher type, nonce, tag, truncated ciphertext)
+   with graphical elements (lines, tables). This is not raw YAML — it is a
+   custom-rendered representation.
+
+**Page metadata (on every page):**
+
+- Page number / total pages
+- SHA-256 checksum of the CBOR-encoded envelope (same checksum as in QR payload)
+- Timestamp of PDF generation
+
+### Step 9 — Named secret storage `Planned`
 
 Introduce a secret registry stored in `$HOME/.arcana/secrets/`. Each encryption
 creates a new versioned snapshot of the secret, making it possible to track and
@@ -290,7 +333,7 @@ arcana secret rename <secret-name> <new-secret-name>
 
 Renames all version files of the secret in `$HOME/.arcana/secrets/`.
 
-### Step 9 — Interactive mode (TUI) `Planned`
+### Step 10 — Interactive mode (TUI) `Planned`
 
 Run the tool without arguments to launch a terminal user interface (TUI) for browsing,
 decrypting, editing, and re-encrypting stored secrets.
