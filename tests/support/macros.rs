@@ -15,8 +15,19 @@ macro_rules! format_cmd_output {
         format!(
             "--------------\nexit code: {}\n--- stdout ---\n{}\n--- stderr ---\n{}\n--------------",
             $code.map_or("none".to_string(), |c| c.to_string()),
+            $stdout,
+            $stderr,
+        )
+    };
+}
+
+#[macro_export]
+macro_rules! format_cmd_output_utf8 {
+    ($code:expr, $stdout:expr, $stderr:expr) => {
+        format_cmd_output!(
+            $code,
             String::from_utf8_lossy($stdout),
-            String::from_utf8_lossy($stderr),
+            String::from_utf8_lossy($stderr)
         )
     };
 }
@@ -28,8 +39,8 @@ macro_rules! assert_cmd {
         let expected = $expected;
 
         pretty_assertions::assert_eq!(
-            format_cmd_output!(&output.status.code(), &output.stdout, &output.stderr),
-            format_cmd_output!(&expected.code, &expected.stdout, &expected.stderr),
+            format_cmd_output_utf8!(&output.status.code(), &output.stdout, &output.stderr),
+            format_cmd_output_utf8!(&expected.code, &expected.stdout, &expected.stderr),
             "Command output mismatch"
         );
     };
