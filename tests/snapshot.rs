@@ -1,4 +1,6 @@
-mod support;
+#![cfg(feature = "deterministic")]
+
+pub mod support;
 
 use indoc::indoc;
 use std::env::current_dir;
