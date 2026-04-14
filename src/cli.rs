@@ -205,6 +205,21 @@ pub enum SubCommand {
         #[command(flatten)]
         io: IoArgs,
     },
+    /// Converts an encrypted envelope between formats without decryption
+    Convert {
+        /// Source envelope format
+        #[arg(long, short = 'f', alias = "from")]
+        from_format: Format,
+        /// Target envelope format
+        #[arg(long, short = 't', alias = "to")]
+        to_format: Format,
+        /// Read input from a file instead of standard input
+        #[arg(long, short = 'i', alias = "input")]
+        input_file: Option<PathBuf>,
+        /// Write output to a file instead of standard output
+        #[arg(long, short = 'o', alias = "output")]
+        output_file: Option<PathBuf>,
+    },
 }
 
 #[derive(Parser, Debug)]
