@@ -135,7 +135,7 @@ The binary format does not include the `encoding` field (Step 5) — all binary
 values are stored as raw bytes in CBOR. The `--encoding` flag is ignored when
 `--format binary` is used.
 
-### Step 7 — Format conversion `Planned`
+### Step 7 — Format conversion `Done`
 
 Add a `convert` command that transforms an encrypted envelope from one format
 to another without decryption. The envelope content is preserved exactly —

@@ -95,6 +95,32 @@ fn main() -> anyhow::Result<()> {
             let decrypted_text = decrypt(envelope, &read_password(password_file)?)?;
             write_output(&decrypted_text, output_file, &cwd)?;
         }
+        Some(SubCommand::Convert {
+            from_format,
+            to_format,
+            input_file,
+            output_file,
+        }) => {
+            let input_file = resolve_path(&cwd, input_file)?;
+            let output_file = resolve_path(&cwd, output_file)?;
+            let data = read_input(input_file, &cwd)?;
+            let envelope: envelope::Envelope = match from_format {
+                Format::Yaml => serde_yaml::from_slice::<envelope::text::Envelope>(&data)?.into(),
+                Format::Binary => ciborium::from_reader(data.as_slice())?,
+            };
+            let output = match to_format {
+                Format::Yaml => {
+                    serde_yaml::to_string::<envelope::text::Envelope>(&envelope.into())?
+                        .into_bytes()
+                }
+                Format::Binary => {
+                    let mut binary_data = Vec::new();
+                    ciborium::into_writer(&envelope, &mut binary_data)?;
+                    binary_data
+                }
+            };
+            write_output(&output, output_file, &cwd)?;
+        }
         None => {
             return Err(anyhow::anyhow!("No command specified"));
         }

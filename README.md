@@ -84,6 +84,19 @@ arcana encrypt --format binary --input-file secret.txt --output-file encrypted.b
 arcana decrypt --format binary --input-file encrypted.bin --output-file decrypted.txt
 ```
 
+### Convert Between Formats
+
+Use `arcana convert` to transform an encrypted envelope from one format to another without
+decryption. No password is required.
+
+```bash
+# YAML to binary
+arcana convert --from-format yaml --to-format binary < encrypted.yml > encrypted.bin
+
+# Binary to YAML
+arcana convert --from-format binary --to-format yaml --input-file encrypted.bin --output-file encrypted.yml
+```
+
 ### Override Working Directory
 
 Use the `--cwd` global flag to set the working directory for resolving all relative file paths:
