@@ -1,9 +1,10 @@
 mod cli;
 mod crypto;
+mod envelope;
 mod password;
 
 use crate::cli::{CliArgs, SubCommand};
-use crate::crypto::{EncryptParams, Envelope, decrypt, encrypt};
+use crate::crypto::{EncryptParams, decrypt, encrypt};
 use crate::password::read_password;
 use anyhow::Context;
 use clap::Parser;
@@ -70,7 +71,7 @@ fn main() -> anyhow::Result<()> {
             };
             let envelope = encrypt(encrypt_params)?;
             write_output(
-                serde_yaml::to_string(&envelope)?.as_bytes(),
+                serde_yaml::to_string::<envelope::text::Envelope>(&envelope.into())?.as_bytes(),
                 output_file,
                 &cwd,
             )?;
@@ -80,8 +81,8 @@ fn main() -> anyhow::Result<()> {
             let output_file = resolve_path(&cwd, io.output_file)?;
             let password_file = resolve_path(&cwd, io.password_file)?;
             let data = read_input(input_file, &cwd)?;
-            let envelope = serde_yaml::from_slice::<Envelope>(&data)?;
-            let decrypted_text = decrypt(envelope, &read_password(password_file)?)?;
+            let envelope = serde_yaml::from_slice::<envelope::text::Envelope>(&data)?;
+            let decrypted_text = decrypt(envelope.into(), &read_password(password_file)?)?;
             write_output(&decrypted_text, output_file, &cwd)?;
         }
         None => {
