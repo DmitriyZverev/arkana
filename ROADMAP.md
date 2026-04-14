@@ -117,7 +117,7 @@ arcana encrypt --encoding base16 < decrypted.txt > encrypted.yml
 During decryption the `encoding` field is read from the envelope — no flag
 is needed.
 
-### Step 6 — Binary container format `Planned`
+### Step 6 — Binary container format `Done`
 
 Add `--format` flag to `encrypt` and `decrypt` commands with two supported values:
 `yaml` (default) and `binary`. The binary format serializes the encrypted container
