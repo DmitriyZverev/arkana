@@ -1,63 +1,63 @@
 use crate::envelope;
 use crate::envelope::Argon2Params;
+use data_encoding::{BASE32, BASE64, HEXUPPER, HEXUPPER_PERMISSIVE};
 use serde::{Deserialize, Serialize};
 
-mod base64_serde {
-    use data_encoding::BASE64;
-    use serde::{Deserialize, Deserializer, Serializer};
+#[derive(thiserror::Error, Debug)]
+pub enum DecodeError {
+    #[error("Invalid length: expected {expected}, actual {actual}")]
+    InvalidLength { expected: usize, actual: usize },
+    #[error(transparent)]
+    Decode(data_encoding::DecodeError),
+}
 
-    pub trait Base64Bytes: Sized {
-        fn to_bytes(&self) -> &[u8];
-        fn from_bytes(bytes: Vec<u8>) -> Result<Self, String>;
+#[derive(thiserror::Error, Debug)]
+pub enum Error {
+    #[error("Decoding error: {0}")]
+    Decode(DecodeError),
+}
+
+fn encode_bytes(bytes: &[u8], encoding: &Encoding) -> String {
+    let encoded = match encoding {
+        Encoding::Base16 => HEXUPPER.encode(bytes),
+        Encoding::Base32 => BASE32.encode(bytes),
+        Encoding::Base64 => BASE64.encode(bytes),
+    };
+    encoded
+        .as_bytes()
+        .chunks(64)
+        .map(|chunk| std::str::from_utf8(chunk).expect("Encoding is ASCII"))
+        .collect::<Vec<_>>()
+        .join("\n")
+}
+
+fn decode_bytes(s: &str, encoding: &Encoding) -> Result<Vec<u8>, data_encoding::DecodeError> {
+    let cleaned: String = s.lines().collect();
+    match encoding {
+        Encoding::Base16 => HEXUPPER_PERMISSIVE.decode(cleaned.as_bytes()),
+        Encoding::Base32 => BASE32.decode(cleaned.as_bytes()),
+        Encoding::Base64 => BASE64.decode(cleaned.as_bytes()),
     }
+}
 
-    impl Base64Bytes for Vec<u8> {
-        fn to_bytes(&self) -> &[u8] {
-            self
-        }
+fn decode_fixed<const N: usize>(s: &str, encoding: &Encoding) -> Result<[u8; N], DecodeError> {
+    let bytes = decode_bytes(s, encoding).map_err(DecodeError::Decode)?;
+    let len = bytes.len();
+    bytes.try_into().map_err(|_| DecodeError::InvalidLength {
+        expected: N,
+        actual: len,
+    })
+}
 
-        fn from_bytes(bytes: Vec<u8>) -> Result<Self, String> {
-            Ok(bytes)
-        }
-    }
-
-    impl<const N: usize> Base64Bytes for [u8; N] {
-        fn to_bytes(&self) -> &[u8] {
-            self
-        }
-
-        fn from_bytes(bytes: Vec<u8>) -> Result<Self, String> {
-            bytes
-                .try_into()
-                .map_err(|_| format!("expected {} bytes", N))
-        }
-    }
-
-    pub fn serialize<S, T: Base64Bytes>(value: &T, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        let encoded = BASE64.encode(value.to_bytes());
-        let wrapped = encoded
-            .as_bytes()
-            .chunks(64)
-            .map(|chunk| std::str::from_utf8(chunk).unwrap())
-            .collect::<Vec<_>>()
-            .join("\n");
-        serializer.serialize_str(&wrapped)
-    }
-
-    pub fn deserialize<'de, D, T: Base64Bytes>(deserializer: D) -> Result<T, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        let s = String::deserialize(deserializer)?;
-        let cleaned: String = s.lines().collect();
-        let bytes = BASE64
-            .decode(cleaned.as_bytes())
-            .map_err(serde::de::Error::custom)?;
-        T::from_bytes(bytes).map_err(serde::de::Error::custom)
-    }
+#[derive(Serialize, Deserialize, Default, Copy, Clone)]
+pub enum Encoding {
+    #[serde(rename = "base16")]
+    Base16,
+    #[serde(rename = "base32")]
+    Base32,
+    #[default]
+    #[serde(rename = "base64")]
+    Base64,
 }
 
 #[derive(Deserialize, Serialize)]
@@ -65,44 +65,42 @@ mod base64_serde {
 pub enum Cipher {
     #[serde(rename = "ChaCha20Poly1305")]
     ChaCha20Poly1305 {
-        #[serde(with = "base64_serde")]
-        nonce: [u8; envelope::Cipher::CHA_CHA20_NONCE_LEN],
-        #[serde(with = "base64_serde")]
-        tag: [u8; envelope::Cipher::POLY1305_TAG_LEN],
-        #[serde(with = "base64_serde")]
-        ciphertext: Vec<u8>,
+        nonce: String,
+        tag: String,
+        ciphertext: String,
     },
 }
 
-impl From<envelope::Cipher> for Cipher {
-    fn from(cipher: envelope::Cipher) -> Self {
+impl Cipher {
+    fn encode(cipher: envelope::Cipher, encoding: &Encoding) -> Self {
         match cipher {
             envelope::Cipher::ChaCha20Poly1305 {
                 nonce,
                 tag,
                 ciphertext,
             } => Cipher::ChaCha20Poly1305 {
-                nonce,
-                tag,
-                ciphertext,
+                nonce: encode_bytes(&nonce, encoding),
+                tag: encode_bytes(&tag, encoding),
+                ciphertext: encode_bytes(&ciphertext, encoding),
             },
         }
     }
 }
 
-impl From<Cipher> for envelope::Cipher {
-    fn from(cipher: Cipher) -> envelope::Cipher {
-        match cipher {
+impl envelope::Cipher {
+    fn decode(cipher: Cipher, encoding: &Encoding) -> Result<Self, Error> {
+        Ok(match cipher {
             Cipher::ChaCha20Poly1305 {
                 nonce,
                 tag,
                 ciphertext,
             } => envelope::Cipher::ChaCha20Poly1305 {
-                nonce,
-                tag,
-                ciphertext,
+                nonce: decode_fixed(&nonce, encoding).map_err(Error::Decode)?,
+                tag: decode_fixed(&tag, encoding).map_err(Error::Decode)?,
+                ciphertext: decode_bytes(&ciphertext, encoding)
+                    .map_err(|e| Error::Decode(DecodeError::Decode(e)))?,
             },
-        }
+        })
     }
 }
 
@@ -113,47 +111,56 @@ pub enum Kdf {
     Argon2 {
         #[serde(flatten)]
         params: Argon2Params,
-        #[serde(with = "base64_serde")]
-        salt: [u8; envelope::Kdf::ARGON2_SALT_LEN],
+        salt: String,
     },
 }
 
-impl From<envelope::Kdf> for Kdf {
-    fn from(kdf: envelope::Kdf) -> Self {
+impl Kdf {
+    fn encode(kdf: envelope::Kdf, encoding: &Encoding) -> Self {
         match kdf {
-            envelope::Kdf::Argon2 { params, salt } => Kdf::Argon2 { params, salt },
+            envelope::Kdf::Argon2 { params, salt } => Kdf::Argon2 {
+                params,
+                salt: encode_bytes(&salt, encoding),
+            },
         }
     }
 }
 
-impl From<Kdf> for envelope::Kdf {
-    fn from(kdf: Kdf) -> Self {
-        match kdf {
-            Kdf::Argon2 { params, salt } => envelope::Kdf::Argon2 { params, salt },
-        }
+impl envelope::Kdf {
+    fn decode(kdf: Kdf, encoding: &Encoding) -> Result<Self, Error> {
+        Ok(match kdf {
+            Kdf::Argon2 { params, salt } => envelope::Kdf::Argon2 {
+                params,
+                salt: decode_fixed(&salt, encoding).map_err(Error::Decode)?,
+            },
+        })
     }
 }
 
 #[derive(Deserialize, Serialize)]
 pub struct Envelope {
+    pub encoding: Encoding,
     pub kdf: Kdf,
     pub cipher: Cipher,
 }
 
-impl From<envelope::Envelope> for Envelope {
-    fn from(envelope: envelope::Envelope) -> Self {
+impl Envelope {
+    pub fn encode(envelope: envelope::Envelope, encoding: Encoding) -> Self {
         Envelope {
-            kdf: envelope.kdf.into(),
-            cipher: envelope.cipher.into(),
+            encoding,
+            kdf: Kdf::encode(envelope.kdf, &encoding),
+            cipher: Cipher::encode(envelope.cipher, &encoding),
         }
     }
 }
 
-impl From<Envelope> for envelope::Envelope {
-    fn from(envelope: Envelope) -> Self {
-        envelope::Envelope {
-            kdf: envelope.kdf.into(),
-            cipher: envelope.cipher.into(),
-        }
+impl TryFrom<Envelope> for envelope::Envelope {
+    type Error = Error;
+
+    fn try_from(envelope: Envelope) -> Result<Self, Error> {
+        Ok(envelope::Envelope {
+            kdf: envelope::Kdf::decode(envelope.kdf, &envelope.encoding)?,
+            cipher: envelope::Cipher::decode(envelope.cipher, &envelope.encoding)?,
+        })
     }
 }

@@ -1,0 +1,14 @@
+encoding: base32
+kdf:
+  type: argon2
+  algorithm: argon2id
+  version: 19
+  memory: 32
+  iterations: 1
+  parallelism: 4
+  salt: DMNRWGY3DMNRWGY3DMNRWGY3DMNRWGY3DMNRWGY3DMNRWGY3DMNQ====
+cipher:
+  type: ChaCha20Poly1305
+  nonce: BIFAUCQKBIFAUCQKBIFA====
+  tag: YNEQJV4WALQLQY77YZK5QPJ5CI======
+  ciphertext: VM2OKTE6GCUASJDPSFMA====

@@ -173,6 +173,33 @@ impl Display for Format {
     }
 }
 
+#[derive(Debug, Clone, Copy, ValueEnum, Default)]
+pub enum Encoding {
+    #[value(name = "base16")]
+    Base16,
+    #[value(name = "base32")]
+    Base32,
+    #[default]
+    #[value(name = "base64")]
+    Base64,
+}
+
+impl Display for Encoding {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        display_value(self, f)
+    }
+}
+
+impl From<Encoding> for crate::envelope::text::Encoding {
+    fn from(encoding: Encoding) -> Self {
+        match encoding {
+            Encoding::Base16 => crate::envelope::text::Encoding::Base16,
+            Encoding::Base32 => crate::envelope::text::Encoding::Base32,
+            Encoding::Base64 => crate::envelope::text::Encoding::Base64,
+        }
+    }
+}
+
 #[derive(Debug, Args)]
 pub struct IoArgs {
     /// Read password from a file instead of prompting for it
@@ -195,6 +222,9 @@ pub enum SubCommand {
     Encrypt {
         #[command(flatten)]
         io: IoArgs,
+        /// Binary encoding for YAML format (base16, base32, base64)
+        #[arg(long, short = 'e', default_value_t)]
+        encoding: Encoding,
         #[command(flatten)]
         kdf: KdfArgs,
         #[command(flatten)]
@@ -213,6 +243,9 @@ pub enum SubCommand {
         /// Target envelope format
         #[arg(long, short = 't', alias = "to")]
         to_format: Format,
+        /// Binary encoding for YAML output (base16, base32, base64)
+        #[arg(long, short = 'e', default_value_t)]
+        encoding: Encoding,
         /// Read input from a file instead of standard input
         #[arg(long, short = 'i', alias = "input")]
         input_file: Option<PathBuf>,

@@ -64,4 +64,13 @@ pub static DEFAULT_KDF_ARGON2_VERSION_16: Fixture = Fixture {
     name: "default_kdf_argon2_version_16",
 };
 pub static FASTEST: Fixture = Fixture { name: "fastest" };
+pub static FASTEST_BASE16: Fixture = Fixture {
+    name: "fastest_base16",
+};
+pub static FASTEST_BASE32: Fixture = Fixture {
+    name: "fastest_base32",
+};
+pub static FASTEST_BASE16_LOWERCASE: Fixture = Fixture {
+    name: "fastest_base16_lowercase",
+};
 pub static LONG_TEXT: Fixture = Fixture { name: "long_text" };
