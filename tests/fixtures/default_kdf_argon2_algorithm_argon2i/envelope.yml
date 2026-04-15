@@ -1,3 +1,4 @@
+encoding: base64
 kdf:
   type: argon2
   algorithm: argon2i

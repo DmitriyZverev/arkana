@@ -72,6 +72,31 @@ arcana encrypt \
 > Encryption parameters are stored in the container and are used automatically during decryption — no flags are needed
 > on `arcana decrypt`.
 
+### Encoding
+
+Use `--encoding` to choose how binary values (`salt`, `nonce`, `tag`, `ciphertext`) are represented
+in the YAML envelope. Supported values: `base16`, `base32`, `base64` (default).
+
+```bash
+# Encrypt with base16 encoding
+arcana encrypt --encoding base16 --input-file secret.txt --output-file encrypted.yml
+
+# Encrypt with base32 encoding
+arcana encrypt --encoding base32 --input-file secret.txt --output-file encrypted.yml
+```
+
+During decryption the encoding is read from the envelope — no flag is needed.
+
+The `--encoding` flag is also available in `arcana convert` when converting to YAML format:
+
+```bash
+# Convert binary to YAML with base16 encoding
+arcana convert --from-format binary --to-format yaml --encoding base16 < encrypted.bin > encrypted.yml
+```
+
+> [!NOTE]
+> The `--encoding` flag has no effect when `--format binary` is used — binary format stores raw bytes.
+
 ### Output Format
 
 Use `--format` to select the envelope format. The default is `yaml`.
@@ -119,6 +144,7 @@ Two formats are supported: YAML (default, human-readable) and binary (CBOR, comp
 The default format is a human-readable YAML document:
 
 ```yaml
+encoding: base64
 kdf:
   type: argon2
   algorithm: argon2id
@@ -133,6 +159,8 @@ cipher:
   tag: h1yYEdQ5IHcvz3UL7W+ZHQ==
   ciphertext: RmuSIEhbLyex+iTU
 ```
+
+The `encoding` field specifies how binary values are encoded.
 
 ### Binary
 

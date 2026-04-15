@@ -86,6 +86,7 @@ fn try_decrypt_with_invalid_kdf_type() -> anyhow::Result<()> {
             .arg("--password-file")
             .arg(password_file.path())
             .pass_stdin(indoc! {"
+                encoding: base64
                 kdf:
                   type: argon3
                   algorithm: argon2id
@@ -101,7 +102,7 @@ fn try_decrypt_with_invalid_kdf_type() -> anyhow::Result<()> {
                   ciphertext: RmuSIEhbLyex+iTU
             "})?,
         ExpectedOutput::failure().stderr(indoc! {"
-            Error: kdf.type: unknown variant `argon3`, expected `argon2` at line 2 column 9
+            Error: kdf.type: unknown variant `argon3`, expected `argon2` at line 3 column 9
         "})
     );
     Ok(())
@@ -116,6 +117,7 @@ fn try_decrypt_with_invalid_kdf_algorithm() -> anyhow::Result<()> {
             .arg("--password-file")
             .arg(password_file.path())
             .pass_stdin(indoc! {"
+                encoding: base64
                 kdf:
                   type: argon2
                   algorithm: argon2
@@ -146,6 +148,7 @@ fn try_decrypt_with_invalid_kdf_memory() -> anyhow::Result<()> {
             .arg("--password-file")
             .arg(password_file.path())
             .pass_stdin(indoc! {"
+                encoding: base64
                 kdf:
                   type: argon2
                   algorithm: argon2id
@@ -176,6 +179,7 @@ fn try_decrypt_with_invalid_kdf_iterations() -> anyhow::Result<()> {
             .arg("--password-file")
             .arg(password_file.path())
             .pass_stdin(indoc! {"
+                encoding: base64
                 kdf:
                   type: argon2
                   algorithm: argon2id
@@ -206,6 +210,7 @@ fn try_decrypt_with_invalid_kdf_parallelism() -> anyhow::Result<()> {
             .arg("--password-file")
             .arg(password_file.path())
             .pass_stdin(indoc! {"
+                encoding: base64
                 kdf:
                   type: argon2
                   algorithm: argon2id
@@ -236,6 +241,7 @@ fn try_decrypt_with_invalid_cipher_type() -> anyhow::Result<()> {
             .arg("--password-file")
             .arg(password_file.path())
             .pass_stdin(indoc! {"
+                encoding: base64
                 kdf:
                   type: argon2
                   algorithm: argon2id
@@ -251,7 +257,7 @@ fn try_decrypt_with_invalid_cipher_type() -> anyhow::Result<()> {
                   ciphertext: RmuSIEhbLyex+iTU
             "})?,
         ExpectedOutput::failure().stderr(indoc! {"
-            Error: cipher.type: unknown variant `ChaCha20Poly1304`, expected `ChaCha20Poly1305` at line 10 column 9
+            Error: cipher.type: unknown variant `ChaCha20Poly1304`, expected `ChaCha20Poly1305` at line 11 column 9
         "})
     );
     Ok(())
@@ -266,6 +272,7 @@ fn try_decrypt_with_invalid_salt() -> anyhow::Result<()> {
             .arg("--password-file")
             .arg(password_file.path())
             .pass_stdin(indoc! {"
+                encoding: base64
                 kdf:
                   type: argon2
                   algorithm: argon2id
@@ -296,6 +303,7 @@ fn try_decrypt_with_invalid_nonce() -> anyhow::Result<()> {
             .arg("--password-file")
             .arg(password_file.path())
             .pass_stdin(indoc! {"
+                encoding: base64
                 kdf:
                   type: argon2
                   algorithm: argon2id
@@ -1299,5 +1307,318 @@ fn convert_from_binary_to_yaml_with_input_and_output_files_long_alias() -> anyho
         ExpectedOutput::success()
     );
     assert_file!(output_file.path(), fixtures::DEFAULT.envelope()?);
+    Ok(())
+}
+
+#[test]
+fn encrypt_with_encoding_base16() -> anyhow::Result<()> {
+    assert_cmd!(
+        arcana_cmd()
+            .arg("encrypt")
+            .arg("--encoding")
+            .arg("base16")
+            .arg("--password-file")
+            .arg(fixtures::FASTEST_BASE16.password_file_path())
+            .arg("--kdf-argon2-memory")
+            .arg("32")
+            .arg("--kdf-argon2-iterations")
+            .arg("1")
+            .arg("--kdf-argon2-parallelism")
+            .arg("4")
+            .pass_stdin(fixtures::FASTEST_BASE16.plaintext()?)?,
+        ExpectedOutput::success().stdout(fixtures::FASTEST_BASE16.envelope()?)
+    );
+    Ok(())
+}
+
+#[test]
+fn encrypt_with_encoding_base32() -> anyhow::Result<()> {
+    assert_cmd!(
+        arcana_cmd()
+            .arg("encrypt")
+            .arg("--encoding")
+            .arg("base32")
+            .arg("--password-file")
+            .arg(fixtures::FASTEST_BASE32.password_file_path())
+            .arg("--kdf-argon2-memory")
+            .arg("32")
+            .arg("--kdf-argon2-iterations")
+            .arg("1")
+            .arg("--kdf-argon2-parallelism")
+            .arg("4")
+            .pass_stdin(fixtures::FASTEST_BASE32.plaintext()?)?,
+        ExpectedOutput::success().stdout(fixtures::FASTEST_BASE32.envelope()?)
+    );
+    Ok(())
+}
+
+#[test]
+fn encrypt_with_encoding_base64_matches_default() -> anyhow::Result<()> {
+    assert_cmd!(
+        arcana_cmd()
+            .arg("encrypt")
+            .arg("--encoding")
+            .arg("base64")
+            .arg("--password-file")
+            .arg(fixtures::FASTEST.password_file_path())
+            .arg("--kdf-argon2-memory")
+            .arg("32")
+            .arg("--kdf-argon2-iterations")
+            .arg("1")
+            .arg("--kdf-argon2-parallelism")
+            .arg("4")
+            .pass_stdin(fixtures::FASTEST.plaintext()?)?,
+        ExpectedOutput::success().stdout(fixtures::FASTEST.envelope()?)
+    );
+    Ok(())
+}
+
+#[test]
+fn decrypt_with_encoding_base16() -> anyhow::Result<()> {
+    assert_cmd!(
+        arcana_cmd()
+            .arg("decrypt")
+            .arg("--password-file")
+            .arg(fixtures::FASTEST_BASE16.password_file_path())
+            .pass_stdin(fixtures::FASTEST_BASE16.envelope()?)?,
+        ExpectedOutput::success().stdout(fixtures::FASTEST_BASE16.plaintext()?)
+    );
+    Ok(())
+}
+
+#[test]
+fn decrypt_with_encoding_base16_lowercase() -> anyhow::Result<()> {
+    assert_cmd!(
+        arcana_cmd()
+            .arg("decrypt")
+            .arg("--password-file")
+            .arg(fixtures::FASTEST_BASE16_LOWERCASE.password_file_path())
+            .pass_stdin(fixtures::FASTEST_BASE16_LOWERCASE.envelope()?)?,
+        ExpectedOutput::success().stdout(fixtures::FASTEST_BASE16_LOWERCASE.plaintext()?)
+    );
+    Ok(())
+}
+
+#[test]
+fn decrypt_with_encoding_base32() -> anyhow::Result<()> {
+    assert_cmd!(
+        arcana_cmd()
+            .arg("decrypt")
+            .arg("--password-file")
+            .arg(fixtures::FASTEST_BASE32.password_file_path())
+            .pass_stdin(fixtures::FASTEST_BASE32.envelope()?)?,
+        ExpectedOutput::success().stdout(fixtures::FASTEST_BASE32.plaintext()?)
+    );
+    Ok(())
+}
+
+#[test]
+fn try_encrypt_with_encoding_invalid() -> anyhow::Result<()> {
+    let password_file = create_temp_file("test_password_123")?;
+    assert_cmd!(
+        arcana_cmd()
+            .arg("encrypt")
+            .arg("--password-file")
+            .arg(password_file.path())
+            .arg("--encoding")
+            .arg("invalid")
+            .output()?,
+        ExpectedOutput::code(2).stderr(indoc! {"
+            error: invalid value 'invalid' for '--encoding <ENCODING>'
+              [possible values: base16, base32, base64]
+
+            For more information, try '--help'.
+        "})
+    );
+    Ok(())
+}
+
+#[test]
+fn convert_from_yaml_base16_to_yaml_base64() -> anyhow::Result<()> {
+    assert_cmd!(
+        arcana_cmd()
+            .arg("convert")
+            .arg("--from-format")
+            .arg("yaml")
+            .arg("--to-format")
+            .arg("yaml")
+            .arg("--encoding")
+            .arg("base64")
+            .pass_stdin(fixtures::FASTEST_BASE16.envelope()?)?,
+        ExpectedOutput::success().stdout(fixtures::FASTEST.envelope()?)
+    );
+    Ok(())
+}
+
+#[test]
+fn convert_from_binary_to_yaml_base16() -> anyhow::Result<()> {
+    assert_cmd!(
+        arcana_cmd()
+            .arg("convert")
+            .arg("--from-format")
+            .arg("binary")
+            .arg("--to-format")
+            .arg("yaml")
+            .arg("--encoding")
+            .arg("base16")
+            .pass_stdin(fixtures::FASTEST_BASE16.envelope_bin()?)?,
+        ExpectedOutput::success().stdout(fixtures::FASTEST_BASE16.envelope()?)
+    );
+    Ok(())
+}
+
+#[test]
+fn convert_from_yaml_base16_lowercase_to_yaml_base16() -> anyhow::Result<()> {
+    assert_cmd!(
+        arcana_cmd()
+            .arg("convert")
+            .arg("--from-format")
+            .arg("yaml")
+            .arg("--to-format")
+            .arg("yaml")
+            .arg("--encoding")
+            .arg("base16")
+            .pass_stdin(fixtures::FASTEST_BASE16_LOWERCASE.envelope()?)?,
+        ExpectedOutput::success().stdout(fixtures::FASTEST_BASE16.envelope()?)
+    );
+    Ok(())
+}
+
+#[test]
+fn convert_from_yaml_base16_to_binary() -> anyhow::Result<()> {
+    assert_cmd_binary!(
+        arcana_cmd()
+            .arg("convert")
+            .arg("--from-format")
+            .arg("yaml")
+            .arg("--to-format")
+            .arg("binary")
+            .pass_stdin(fixtures::FASTEST_BASE16.envelope()?)?,
+        ExpectedOutput::success().stdout(fixtures::FASTEST_BASE16.envelope_bin()?)
+    );
+    Ok(())
+}
+
+#[test]
+fn try_decrypt_with_invalid_salt_length() -> anyhow::Result<()> {
+    let password_file = create_temp_file("test_password_123")?;
+    assert_cmd!(
+        arcana_cmd()
+            .arg("decrypt")
+            .arg("--password-file")
+            .arg(password_file.path())
+            .pass_stdin(indoc! {"
+                encoding: base64
+                kdf:
+                  type: argon2
+                  algorithm: argon2id
+                  version: 19
+                  memory: 131072
+                  iterations: 4
+                  parallelism: 4
+                  salt: GxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGw==
+                cipher:
+                  type: ChaCha20Poly1305
+                  nonce: CgoKCgoKCgoKCgoK
+                  tag: h1yYEdQ5IHcvz3UL7W+ZHQ==
+                  ciphertext: RmuSIEhbLyex+iTU
+            "})?,
+        ExpectedOutput::failure().stderr(indoc! {"
+            Error: Decoding error: Invalid length: expected 32, actual 31
+        "})
+    );
+    Ok(())
+}
+
+#[test]
+fn try_decrypt_with_invalid_nonce_length() -> anyhow::Result<()> {
+    let password_file = create_temp_file("test_password_123")?;
+    assert_cmd!(
+        arcana_cmd()
+            .arg("decrypt")
+            .arg("--password-file")
+            .arg(password_file.path())
+            .pass_stdin(indoc! {"
+                encoding: base64
+                kdf:
+                  type: argon2
+                  algorithm: argon2id
+                  version: 19
+                  memory: 131072
+                  iterations: 4
+                  parallelism: 4
+                  salt: GxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxs=
+                cipher:
+                  type: ChaCha20Poly1305
+                  nonce: CgoKCgoKCgoKCgo=
+                  tag: h1yYEdQ5IHcvz3UL7W+ZHQ==
+                  ciphertext: RmuSIEhbLyex+iTU
+            "})?,
+        ExpectedOutput::failure().stderr(indoc! {"
+            Error: Decoding error: Invalid length: expected 12, actual 11
+        "})
+    );
+    Ok(())
+}
+
+#[test]
+fn try_decrypt_with_invalid_tag_length() -> anyhow::Result<()> {
+    let password_file = create_temp_file("test_password_123")?;
+    assert_cmd!(
+        arcana_cmd()
+            .arg("decrypt")
+            .arg("--password-file")
+            .arg(password_file.path())
+            .pass_stdin(indoc! {"
+                encoding: base64
+                kdf:
+                  type: argon2
+                  algorithm: argon2id
+                  version: 19
+                  memory: 131072
+                  iterations: 4
+                  parallelism: 4
+                  salt: GxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxs=
+                cipher:
+                  type: ChaCha20Poly1305
+                  nonce: CgoKCgoKCgoKCgoK
+                  tag: h1yYEdQ5IHcvz3UL7W+Z
+                  ciphertext: RmuSIEhbLyex+iTU
+            "})?,
+        ExpectedOutput::failure().stderr(indoc! {"
+            Error: Decoding error: Invalid length: expected 16, actual 15
+        "})
+    );
+    Ok(())
+}
+
+#[test]
+fn try_decrypt_with_invalid_encoding_value() -> anyhow::Result<()> {
+    let password_file = create_temp_file("test_password_123")?;
+    assert_cmd!(
+        arcana_cmd()
+            .arg("decrypt")
+            .arg("--password-file")
+            .arg(password_file.path())
+            .pass_stdin(indoc! {"
+                encoding: base58
+                kdf:
+                  type: argon2
+                  algorithm: argon2id
+                  version: 19
+                  memory: 131072
+                  iterations: 4
+                  parallelism: 4
+                  salt: GxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxs=
+                cipher:
+                  type: ChaCha20Poly1305
+                  nonce: CgoKCgoKCgoKCgoK
+                  tag: h1yYEdQ5IHcvz3UL7W+ZHQ==
+                  ciphertext: RmuSIEhbLyex+iTU
+            "})?,
+        ExpectedOutput::failure().stderr(indoc! {"
+            Error: encoding: unknown variant `base58`, expected one of `base16`, `base32`, `base64` at line 1 column 11
+        "})
+    );
     Ok(())
 }

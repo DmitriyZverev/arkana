@@ -59,7 +59,12 @@ fn main() -> anyhow::Result<()> {
         None => std::env::current_dir()?,
     };
     match cli_args.command {
-        Some(SubCommand::Encrypt { io, kdf, cipher }) => {
+        Some(SubCommand::Encrypt {
+            io,
+            encoding,
+            kdf,
+            cipher,
+        }) => {
             let input_file = resolve_path(&cwd, io.input_file)?;
             let output_file = resolve_path(&cwd, io.output_file)?;
             let password_file = resolve_path(&cwd, io.password_file)?;
@@ -72,8 +77,8 @@ fn main() -> anyhow::Result<()> {
             let envelope = encrypt(encrypt_params)?;
             let output = match io.format {
                 Format::Yaml => {
-                    serde_yaml::to_string::<envelope::text::Envelope>(&envelope.into())?
-                        .into_bytes()
+                    let text_envelope = envelope::text::Envelope::encode(envelope, encoding.into());
+                    serde_yaml::to_string(&text_envelope)?.into_bytes()
                 }
                 Format::Binary => {
                     let mut binary_data = Vec::new();
@@ -89,7 +94,9 @@ fn main() -> anyhow::Result<()> {
             let password_file = resolve_path(&cwd, io.password_file)?;
             let data = read_input(input_file, &cwd)?;
             let envelope: envelope::Envelope = match io.format {
-                Format::Yaml => serde_yaml::from_slice::<envelope::text::Envelope>(&data)?.into(),
+                Format::Yaml => {
+                    serde_yaml::from_slice::<envelope::text::Envelope>(&data)?.try_into()?
+                }
                 Format::Binary => ciborium::from_reader(data.as_slice())?,
             };
             let decrypted_text = decrypt(envelope, &read_password(password_file)?)?;
@@ -98,6 +105,7 @@ fn main() -> anyhow::Result<()> {
         Some(SubCommand::Convert {
             from_format,
             to_format,
+            encoding,
             input_file,
             output_file,
         }) => {
@@ -105,13 +113,15 @@ fn main() -> anyhow::Result<()> {
             let output_file = resolve_path(&cwd, output_file)?;
             let data = read_input(input_file, &cwd)?;
             let envelope: envelope::Envelope = match from_format {
-                Format::Yaml => serde_yaml::from_slice::<envelope::text::Envelope>(&data)?.into(),
+                Format::Yaml => {
+                    serde_yaml::from_slice::<envelope::text::Envelope>(&data)?.try_into()?
+                }
                 Format::Binary => ciborium::from_reader(data.as_slice())?,
             };
             let output = match to_format {
                 Format::Yaml => {
-                    serde_yaml::to_string::<envelope::text::Envelope>(&envelope.into())?
-                        .into_bytes()
+                    let text_envelope = envelope::text::Envelope::encode(envelope, encoding.into());
+                    serde_yaml::to_string(&text_envelope)?.into_bytes()
                 }
                 Format::Binary => {
                     let mut binary_data = Vec::new();

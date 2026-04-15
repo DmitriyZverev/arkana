@@ -87,7 +87,7 @@ arcana --config /path/to/config.toml encrypt < decrypted.txt > encrypted.yml
 
 CLI flags (Step 3) take precedence over config file values.
 
-### Step 5 — Encoding field `Planned`
+### Step 5 — Encoding field `Done`
 
 Add an `encoding` field to the YAML envelope that controls how binary values
 (`salt`, `nonce`, `tag`, `ciphertext`) are represented. Supported values:
