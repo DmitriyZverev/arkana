@@ -80,11 +80,7 @@ fn main() -> anyhow::Result<()> {
                     let text_envelope = envelope::text::Envelope::encode(envelope, encoding.into());
                     serde_yaml::to_string(&text_envelope)?.into_bytes()
                 }
-                Format::Binary => {
-                    let mut binary_data = Vec::new();
-                    ciborium::into_writer(&envelope, &mut binary_data)?;
-                    binary_data
-                }
+                Format::Binary => envelope::binary::serialize(&envelope)?,
             };
             write_output(&output, output_file, &cwd)?;
         }
@@ -97,7 +93,7 @@ fn main() -> anyhow::Result<()> {
                 Format::Yaml => {
                     serde_yaml::from_slice::<envelope::text::Envelope>(&data)?.try_into()?
                 }
-                Format::Binary => ciborium::from_reader(data.as_slice())?,
+                Format::Binary => envelope::binary::deserialize(&data)?,
             };
             let decrypted_text = decrypt(envelope, &read_password(password_file)?)?;
             write_output(&decrypted_text, output_file, &cwd)?;
@@ -116,18 +112,14 @@ fn main() -> anyhow::Result<()> {
                 Format::Yaml => {
                     serde_yaml::from_slice::<envelope::text::Envelope>(&data)?.try_into()?
                 }
-                Format::Binary => ciborium::from_reader(data.as_slice())?,
+                Format::Binary => envelope::binary::deserialize(&data)?,
             };
             let output = match to_format {
                 Format::Yaml => {
                     let text_envelope = envelope::text::Envelope::encode(envelope, encoding.into());
                     serde_yaml::to_string(&text_envelope)?.into_bytes()
                 }
-                Format::Binary => {
-                    let mut binary_data = Vec::new();
-                    ciborium::into_writer(&envelope, &mut binary_data)?;
-                    binary_data
-                }
+                Format::Binary => envelope::binary::serialize(&envelope)?,
             };
             write_output(&output, output_file, &cwd)?;
         }

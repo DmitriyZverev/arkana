@@ -635,7 +635,7 @@ fn try_decrypt_yaml_envelope_with_binary_format() -> anyhow::Result<()> {
             .arg(fixtures::DEFAULT.password_file_path())
             .pass_stdin(fixtures::DEFAULT.envelope()?)?,
         ExpectedOutput::failure().stderr(indoc! {r#"
-            Error: Semantic(None, "invalid type: string, expected map")
+            Error: Invalid format: not an arcana binary envelope
         "#})
     );
     Ok(())
@@ -652,7 +652,125 @@ fn try_decrypt_binary_envelope_with_yaml_format() -> anyhow::Result<()> {
             .arg(fixtures::DEFAULT.password_file_path())
             .pass_stdin(fixtures::DEFAULT.envelope_bin()?)?,
         ExpectedOutput::failure().stderr(indoc! {"
-            Error: invalid leading UTF-8 octet
+            Error: control characters are not allowed at position 6
+        "})
+    );
+    Ok(())
+}
+
+#[test]
+fn try_decrypt_binary_invalid_params() -> anyhow::Result<()> {
+    let mut data = fixtures::DEFAULT.envelope_bin()?;
+    // replace "argon2" with "argon3" in CBOR params to make kdf.type invalid
+    let pos = data.windows(6).position(|w| w == b"argon2").unwrap();
+    data[pos + 5] = b'3';
+    assert_cmd!(
+        arcana_cmd()
+            .arg("decrypt")
+            .arg("--format")
+            .arg("binary")
+            .arg("--password-file")
+            .arg(fixtures::DEFAULT.password_file_path())
+            .pass_stdin(data.as_slice())?,
+        ExpectedOutput::failure().stderr(indoc! {"
+            Error: CBOR error: Semantic(None, \"unknown variant `argon3`, expected `argon2`\")
+        "})
+    );
+    Ok(())
+}
+
+#[test]
+fn try_decrypt_binary_header_too_short() -> anyhow::Result<()> {
+    let mut data = vec![0u8; 10];
+    data[..6].copy_from_slice(b"arcana");
+    assert_cmd!(
+        arcana_cmd()
+            .arg("decrypt")
+            .arg("--format")
+            .arg("binary")
+            .arg("--password-file")
+            .arg(fixtures::DEFAULT.password_file_path())
+            .pass_stdin(data.as_slice())?,
+        ExpectedOutput::failure().stderr(indoc! {"
+            Error: Input too short: expected 11 bytes, got 10
+        "})
+    );
+    Ok(())
+}
+
+#[test]
+fn try_decrypt_binary_invalid_magic() -> anyhow::Result<()> {
+    let mut data = fixtures::DEFAULT.envelope_bin()?;
+    data[..6].copy_from_slice(b"foobar");
+    assert_cmd!(
+        arcana_cmd()
+            .arg("decrypt")
+            .arg("--format")
+            .arg("binary")
+            .arg("--password-file")
+            .arg(fixtures::DEFAULT.password_file_path())
+            .pass_stdin(data.as_slice())?,
+        ExpectedOutput::failure().stderr(indoc! {"
+            Error: Invalid format: not an arcana binary envelope
+        "})
+    );
+    Ok(())
+}
+
+#[test]
+fn try_decrypt_binary_unsupported_version() -> anyhow::Result<()> {
+    let mut data = fixtures::DEFAULT.envelope_bin()?;
+    data[6] = 2;
+    assert_cmd!(
+        arcana_cmd()
+            .arg("decrypt")
+            .arg("--format")
+            .arg("binary")
+            .arg("--password-file")
+            .arg(fixtures::DEFAULT.password_file_path())
+            .pass_stdin(data.as_slice())?,
+        ExpectedOutput::failure().stderr(indoc! {"
+            Error: Unsupported version: 2
+        "})
+    );
+    Ok(())
+}
+
+#[test]
+fn try_decrypt_binary_params_too_short() -> anyhow::Result<()> {
+    let data = fixtures::DEFAULT.envelope_bin()?;
+    assert_cmd!(
+        arcana_cmd()
+            .arg("decrypt")
+            .arg("--format")
+            .arg("binary")
+            .arg("--password-file")
+            .arg(fixtures::DEFAULT.password_file_path())
+            .pass_stdin(data[..12].as_ref())?,
+        ExpectedOutput::failure().stderr(indoc! {"
+            Error: Input too short: expected 204 bytes, got 12
+        "})
+    );
+    Ok(())
+}
+
+#[test]
+fn try_decrypt_binary_trailing_bytes() -> anyhow::Result<()> {
+    let mut data = fixtures::DEFAULT.envelope_bin()?;
+    // layout: [ magic: 6B ][ version: 1B ][ params_len: 4B ][ params: CBOR ][ ciphertext ]
+    let params_len = u32::from_be_bytes(data[7..11].try_into()?) as usize;
+    data[7..11].copy_from_slice(&((params_len as u32 + 1).to_be_bytes()));
+    data.insert(11 + params_len, 0xff);
+    assert_cmd!(
+        arcana_cmd()
+            .arg("decrypt")
+            .arg("--format")
+            .arg("binary")
+            .arg("--password-file")
+            .arg(fixtures::DEFAULT.password_file_path())
+            .pass_stdin(data.as_slice())?,
+        ExpectedOutput::failure().stderr(indoc! {"
+            Error: Trailing bytes after params
         "})
     );
     Ok(())
