@@ -1,3 +1,4 @@
+pub mod binary;
 pub mod text;
 
 use argon2::{Algorithm, Version};
@@ -118,9 +119,7 @@ pub struct EnvelopeParams {
     pub cipher: CipherParams,
 }
 
-#[derive(Deserialize, Serialize)]
 pub struct Envelope {
     pub params: EnvelopeParams,
-    #[serde(with = "serde_bytes")]
     pub ciphertext: Vec<u8>,
 }

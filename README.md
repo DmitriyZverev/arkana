@@ -14,7 +14,7 @@ _A modern CLI tool for password-based encryption with human-readable output._
 - **Secure Key Derivation**: `Argon2id` with configurable parameters
 - **Flexible I/O**: Stdin/stdout by default, with optional `--input-file` / `--output-file` flags
 - **Configurable Encryption Parameters**: Override KDF and cipher settings per-invocation via CLI flags
-- **Multiple Output Formats**: Human-readable YAML (default) or compact binary (CBOR) via `--format`
+- **Multiple Output Formats**: Human-readable YAML (default) or compact binary via `--format`
 
 ## Usage
 
@@ -102,7 +102,7 @@ arcana convert --from-format binary --to-format yaml --encoding base16 < encrypt
 Use `--format` to select the envelope format. The default is `yaml`.
 
 ```bash
-# Encrypt to binary (CBOR) format
+# Encrypt to binary format
 arcana encrypt --format binary --input-file secret.txt --output-file encrypted.bin
 
 # Decrypt from binary format
@@ -137,7 +137,7 @@ arcana --cwd /path/to/dir encrypt --input-file secret.txt --output-file encrypte
 ## Envelope Format
 
 The encrypted data is stored in a self-describing envelope that contains all parameters needed for decryption.
-Two formats are supported: YAML (default, human-readable) and binary (CBOR, compact).
+Two formats are supported: YAML (default, human-readable) and binary (compact).
 
 ### YAML
 
@@ -165,8 +165,23 @@ The `encoding` field specifies how binary values are encoded.
 
 ### Binary
 
-The binary format uses [CBOR](https://cbor.io/) encoding of the same fields.
-It is more compact than YAML and suitable for machine-to-machine workflows.
+The binary format is a compact, machine-readable encoding with the following layout:
+
+```
+[ magic: 6B ][ version: 1B ][ params_len: 4B ][ params: CBOR ][ ciphertext ]
+```
+
+| Field        | Size               | Description                                                                       |
+|--------------|--------------------|-----------------------------------------------------------------------------------|
+| `magic`      | 6 bytes            | Format identifier, always `0x61 0x72 0x63 0x61 0x6E 0x61` (ASCII string `arcana`) |
+| `version`    | 1 byte             | Format version; only `0x01` (`1`) is supported                                    |
+| `params_len` | 4 bytes (BE)       | Length of the `params` section in bytes                                           |
+| `params`     | `params_len` bytes | [CBOR](https://cbor.io/)-encoded encryption parameters                            |
+| `ciphertext` | remainder          | Raw encrypted bytes, occupies the rest of the file                                |
+
+The `params` CBOR document contains the same fields as the YAML `params` section,
+but binary values are stored as raw bytes rather than encoded strings.
+The `ciphertext` section is likewise stored as raw bytes.
 
 ## See also
 
