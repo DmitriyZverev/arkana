@@ -62,51 +62,40 @@ pub enum Encoding {
 
 #[derive(Deserialize, Serialize)]
 #[serde(tag = "type")]
-pub enum Cipher {
+pub enum CipherParams {
     #[serde(rename = "ChaCha20Poly1305")]
-    ChaCha20Poly1305 {
-        nonce: String,
-        tag: String,
-        ciphertext: String,
-    },
+    ChaCha20Poly1305 { nonce: String, tag: String },
 }
 
-impl Cipher {
-    fn encode(cipher: envelope::Cipher, encoding: &Encoding) -> Self {
+impl CipherParams {
+    fn encode(cipher: envelope::CipherParams, encoding: &Encoding) -> Self {
         match cipher {
-            envelope::Cipher::ChaCha20Poly1305 {
-                nonce,
-                tag,
-                ciphertext,
-            } => Cipher::ChaCha20Poly1305 {
-                nonce: encode_bytes(&nonce, encoding),
-                tag: encode_bytes(&tag, encoding),
-                ciphertext: encode_bytes(&ciphertext, encoding),
-            },
+            envelope::CipherParams::ChaCha20Poly1305 { nonce, tag } => {
+                CipherParams::ChaCha20Poly1305 {
+                    nonce: encode_bytes(&nonce, encoding),
+                    tag: encode_bytes(&tag, encoding),
+                }
+            }
         }
     }
 }
 
-impl envelope::Cipher {
-    fn decode(cipher: Cipher, encoding: &Encoding) -> Result<Self, Error> {
+impl envelope::CipherParams {
+    fn decode(cipher: CipherParams, encoding: &Encoding) -> Result<Self, Error> {
         Ok(match cipher {
-            Cipher::ChaCha20Poly1305 {
-                nonce,
-                tag,
-                ciphertext,
-            } => envelope::Cipher::ChaCha20Poly1305 {
-                nonce: decode_fixed(&nonce, encoding).map_err(Error::Decode)?,
-                tag: decode_fixed(&tag, encoding).map_err(Error::Decode)?,
-                ciphertext: decode_bytes(&ciphertext, encoding)
-                    .map_err(|e| Error::Decode(DecodeError::Decode(e)))?,
-            },
+            CipherParams::ChaCha20Poly1305 { nonce, tag } => {
+                envelope::CipherParams::ChaCha20Poly1305 {
+                    nonce: decode_fixed(&nonce, encoding).map_err(Error::Decode)?,
+                    tag: decode_fixed(&tag, encoding).map_err(Error::Decode)?,
+                }
+            }
         })
     }
 }
 
 #[derive(Deserialize, Serialize)]
 #[serde(tag = "type")]
-pub enum Kdf {
+pub enum KdfParams {
     #[serde(rename = "argon2")]
     Argon2 {
         #[serde(flatten)]
@@ -115,10 +104,10 @@ pub enum Kdf {
     },
 }
 
-impl Kdf {
-    fn encode(kdf: envelope::Kdf, encoding: &Encoding) -> Self {
+impl KdfParams {
+    fn encode(kdf: envelope::KdfParams, encoding: &Encoding) -> Self {
         match kdf {
-            envelope::Kdf::Argon2 { params, salt } => Kdf::Argon2 {
+            envelope::KdfParams::Argon2 { params, salt } => KdfParams::Argon2 {
                 params,
                 salt: encode_bytes(&salt, encoding),
             },
@@ -126,10 +115,10 @@ impl Kdf {
     }
 }
 
-impl envelope::Kdf {
-    fn decode(kdf: Kdf, encoding: &Encoding) -> Result<Self, Error> {
+impl envelope::KdfParams {
+    fn decode(kdf: KdfParams, encoding: &Encoding) -> Result<Self, Error> {
         Ok(match kdf {
-            Kdf::Argon2 { params, salt } => envelope::Kdf::Argon2 {
+            KdfParams::Argon2 { params, salt } => envelope::KdfParams::Argon2 {
                 params,
                 salt: decode_fixed(&salt, encoding).map_err(Error::Decode)?,
             },
@@ -138,18 +127,27 @@ impl envelope::Kdf {
 }
 
 #[derive(Deserialize, Serialize)]
+pub struct EnvelopeParams {
+    pub kdf: KdfParams,
+    pub cipher: CipherParams,
+}
+
+#[derive(Deserialize, Serialize)]
 pub struct Envelope {
     pub encoding: Encoding,
-    pub kdf: Kdf,
-    pub cipher: Cipher,
+    pub params: EnvelopeParams,
+    pub ciphertext: String,
 }
 
 impl Envelope {
     pub fn encode(envelope: envelope::Envelope, encoding: Encoding) -> Self {
         Envelope {
             encoding,
-            kdf: Kdf::encode(envelope.kdf, &encoding),
-            cipher: Cipher::encode(envelope.cipher, &encoding),
+            params: EnvelopeParams {
+                kdf: KdfParams::encode(envelope.params.kdf, &encoding),
+                cipher: CipherParams::encode(envelope.params.cipher, &encoding),
+            },
+            ciphertext: encode_bytes(&envelope.ciphertext, &encoding),
         }
     }
 }
@@ -159,8 +157,12 @@ impl TryFrom<Envelope> for envelope::Envelope {
 
     fn try_from(envelope: Envelope) -> Result<Self, Error> {
         Ok(envelope::Envelope {
-            kdf: envelope::Kdf::decode(envelope.kdf, &envelope.encoding)?,
-            cipher: envelope::Cipher::decode(envelope.cipher, &envelope.encoding)?,
+            params: envelope::EnvelopeParams {
+                kdf: envelope::KdfParams::decode(envelope.params.kdf, &envelope.encoding)?,
+                cipher: envelope::CipherParams::decode(envelope.params.cipher, &envelope.encoding)?,
+            },
+            ciphertext: decode_bytes(&envelope.ciphertext, &envelope.encoding)
+                .map_err(|e| Error::Decode(DecodeError::Decode(e)))?,
         })
     }
 }

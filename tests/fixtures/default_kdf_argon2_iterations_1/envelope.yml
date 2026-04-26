@@ -1,14 +1,15 @@
 encoding: base64
-kdf:
-  type: argon2
-  algorithm: argon2id
-  version: 19
-  memory: 131072
-  iterations: 1
-  parallelism: 4
-  salt: GxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxs=
-cipher:
-  type: ChaCha20Poly1305
-  nonce: CgoKCgoKCgoKCgoK
-  tag: y6KoLfoYc26flMZFJVK0Rw==
-  ciphertext: h/O22gCFdueWZpGI
+params:
+  kdf:
+    type: argon2
+    algorithm: argon2id
+    version: 19
+    memory: 131072
+    iterations: 1
+    parallelism: 4
+    salt: GxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxs=
+  cipher:
+    type: ChaCha20Poly1305
+    nonce: CgoKCgoKCgoKCgoK
+    tag: y6KoLfoYc26flMZFJVK0Rw==
+ciphertext: h/O22gCFdueWZpGI

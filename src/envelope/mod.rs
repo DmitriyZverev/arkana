@@ -80,42 +80,47 @@ impl Default for Argon2Params {
 
 #[derive(Deserialize, Serialize)]
 #[serde(tag = "type")]
-pub enum Kdf {
+pub enum KdfParams {
     #[serde(rename = "argon2")]
     Argon2 {
         #[serde(flatten)]
         params: Argon2Params,
         #[serde(with = "serde_bytes")]
-        salt: [u8; Kdf::ARGON2_SALT_LEN],
+        salt: [u8; KdfParams::ARGON2_SALT_LEN],
     },
 }
 
-impl Kdf {
+impl KdfParams {
     pub const ARGON2_SALT_LEN: usize = 32;
 }
 
 #[derive(Deserialize, Serialize)]
 #[serde(tag = "type")]
-pub enum Cipher {
+pub enum CipherParams {
     #[serde(rename = "ChaCha20Poly1305")]
     ChaCha20Poly1305 {
         #[serde(with = "serde_bytes")]
-        nonce: [u8; Cipher::CHA_CHA20_NONCE_LEN],
+        nonce: [u8; CipherParams::CHA_CHA20_NONCE_LEN],
         #[serde(with = "serde_bytes")]
-        tag: [u8; Cipher::POLY1305_TAG_LEN],
-        #[serde(with = "serde_bytes")]
-        ciphertext: Vec<u8>,
+        tag: [u8; CipherParams::POLY1305_TAG_LEN],
     },
 }
 
-impl Cipher {
+impl CipherParams {
     pub const CHA_CHA20_KEY_LEN: usize = 32;
     pub const CHA_CHA20_NONCE_LEN: usize = 12;
     pub const POLY1305_TAG_LEN: usize = 16;
 }
 
 #[derive(Deserialize, Serialize)]
+pub struct EnvelopeParams {
+    pub kdf: KdfParams,
+    pub cipher: CipherParams,
+}
+
+#[derive(Deserialize, Serialize)]
 pub struct Envelope {
-    pub kdf: Kdf,
-    pub cipher: Cipher,
+    pub params: EnvelopeParams,
+    #[serde(with = "serde_bytes")]
+    pub ciphertext: Vec<u8>,
 }

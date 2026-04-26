@@ -61,22 +61,23 @@ fn try_decrypt_with_invalid_kdf_type() -> anyhow::Result<()> {
             .arg(password_file.path())
             .pass_stdin(indoc! {"
                 encoding: base64
-                kdf:
-                  type: argon3
-                  algorithm: argon2id
-                  version: 19
-                  memory: 131072
-                  iterations: 4
-                  parallelism: 4
-                  salt: GxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxs=
-                cipher:
-                  type: ChaCha20Poly1305
-                  nonce: CgoKCgoKCgoKCgoK
-                  tag: h1yYEdQ5IHcvz3UL7W+ZHQ==
-                  ciphertext: RmuSIEhbLyex+iTU
+                params:
+                  kdf:
+                    type: argon3
+                    algorithm: argon2id
+                    version: 19
+                    memory: 131072
+                    iterations: 4
+                    parallelism: 4
+                    salt: GxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxs=
+                  cipher:
+                    type: ChaCha20Poly1305
+                    nonce: CgoKCgoKCgoKCgoK
+                    tag: h1yYEdQ5IHcvz3UL7W+ZHQ==
+                ciphertext: RmuSIEhbLyex+iTU
             "})?,
         ExpectedOutput::failure().stderr(indoc! {"
-            Error: kdf.type: unknown variant `argon3`, expected `argon2` at line 3 column 9
+            Error: params.kdf.type: unknown variant `argon3`, expected `argon2` at line 4 column 11
         "})
     );
     Ok(())
@@ -92,22 +93,23 @@ fn try_decrypt_with_invalid_kdf_algorithm() -> anyhow::Result<()> {
             .arg(password_file.path())
             .pass_stdin(indoc! {"
                 encoding: base64
-                kdf:
-                  type: argon2
-                  algorithm: argon2
-                  version: 19
-                  memory: 131072
-                  iterations: 4
-                  parallelism: 4
-                  salt: GxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxs=
-                cipher:
-                  type: ChaCha20Poly1305
-                  nonce: CgoKCgoKCgoKCgoK
-                  tag: h1yYEdQ5IHcvz3UL7W+ZHQ==
-                  ciphertext: RmuSIEhbLyex+iTU
+                params:
+                  kdf:
+                    type: argon2
+                    algorithm: argon2
+                    version: 19
+                    memory: 131072
+                    iterations: 4
+                    parallelism: 4
+                    salt: GxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxs=
+                  cipher:
+                    type: ChaCha20Poly1305
+                    nonce: CgoKCgoKCgoKCgoK
+                    tag: h1yYEdQ5IHcvz3UL7W+ZHQ==
+                ciphertext: RmuSIEhbLyex+iTU
             "})?,
         ExpectedOutput::failure().stderr(indoc! {"
-            Error: unknown variant `argon2`, expected one of `argon2i`, `argon2d`, `argon2id`
+            Error: params: unknown variant `argon2`, expected one of `argon2i`, `argon2d`, `argon2id` at line 3 column 3
         "})
     );
     Ok(())
@@ -123,19 +125,20 @@ fn try_decrypt_with_invalid_kdf_memory() -> anyhow::Result<()> {
             .arg(password_file.path())
             .pass_stdin(indoc! {"
                 encoding: base64
-                kdf:
-                  type: argon2
-                  algorithm: argon2id
-                  version: 19
-                  memory: 131071
-                  iterations: 4
-                  parallelism: 4
-                  salt: GxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxs=
-                cipher:
-                  type: ChaCha20Poly1305
-                  nonce: CgoKCgoKCgoKCgoK
-                  tag: h1yYEdQ5IHcvz3UL7W+ZHQ==
-                  ciphertext: RmuSIEhbLyex+iTU
+                params:
+                  kdf:
+                    type: argon2
+                    algorithm: argon2id
+                    version: 19
+                    memory: 131071
+                    iterations: 4
+                    parallelism: 4
+                    salt: GxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxs=
+                  cipher:
+                    type: ChaCha20Poly1305
+                    nonce: CgoKCgoKCgoKCgoK
+                    tag: h1yYEdQ5IHcvz3UL7W+ZHQ==
+                ciphertext: RmuSIEhbLyex+iTU
             "})?,
         ExpectedOutput::failure().stderr(indoc! {"
             Error: Decryption failed
@@ -154,19 +157,20 @@ fn try_decrypt_with_invalid_kdf_iterations() -> anyhow::Result<()> {
             .arg(password_file.path())
             .pass_stdin(indoc! {"
                 encoding: base64
-                kdf:
-                  type: argon2
-                  algorithm: argon2id
-                  version: 19
-                  memory: 131072
-                  iterations: 1
-                  parallelism: 4
-                  salt: GxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxs=
-                cipher:
-                  type: ChaCha20Poly1305
-                  nonce: CgoKCgoKCgoKCgoK
-                  tag: h1yYEdQ5IHcvz3UL7W+ZHQ==
-                  ciphertext: RmuSIEhbLyex+iTU
+                params:
+                  kdf:
+                    type: argon2
+                    algorithm: argon2id
+                    version: 19
+                    memory: 131072
+                    iterations: 1
+                    parallelism: 4
+                    salt: GxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxs=
+                  cipher:
+                    type: ChaCha20Poly1305
+                    nonce: CgoKCgoKCgoKCgoK
+                    tag: h1yYEdQ5IHcvz3UL7W+ZHQ==
+                ciphertext: RmuSIEhbLyex+iTU
             "})?,
         ExpectedOutput::failure().stderr(indoc! {"
             Error: Decryption failed
@@ -185,19 +189,20 @@ fn try_decrypt_with_invalid_kdf_parallelism() -> anyhow::Result<()> {
             .arg(password_file.path())
             .pass_stdin(indoc! {"
                 encoding: base64
-                kdf:
-                  type: argon2
-                  algorithm: argon2id
-                  version: 19
-                  memory: 131072
-                  iterations: 4
-                  parallelism: 1
-                  salt: GxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxs=
-                cipher:
-                  type: ChaCha20Poly1305
-                  nonce: CgoKCgoKCgoKCgoK
-                  tag: h1yYEdQ5IHcvz3UL7W+ZHQ==
-                  ciphertext: RmuSIEhbLyex+iTU
+                params:
+                  kdf:
+                    type: argon2
+                    algorithm: argon2id
+                    version: 19
+                    memory: 131072
+                    iterations: 4
+                    parallelism: 1
+                    salt: GxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxs=
+                  cipher:
+                    type: ChaCha20Poly1305
+                    nonce: CgoKCgoKCgoKCgoK
+                    tag: h1yYEdQ5IHcvz3UL7W+ZHQ==
+                ciphertext: RmuSIEhbLyex+iTU
             "})?,
         ExpectedOutput::failure().stderr(indoc! {"
             Error: Decryption failed
@@ -216,22 +221,23 @@ fn try_decrypt_with_invalid_cipher_type() -> anyhow::Result<()> {
             .arg(password_file.path())
             .pass_stdin(indoc! {"
                 encoding: base64
-                kdf:
-                  type: argon2
-                  algorithm: argon2id
-                  version: 19
-                  memory: 131072
-                  iterations: 4
-                  parallelism: 4
-                  salt: GxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxs=
-                cipher:
-                  type: ChaCha20Poly1304
-                  nonce: CgoKCgoKCgoKCgoK
-                  tag: h1yYEdQ5IHcvz3UL7W+ZHQ==
-                  ciphertext: RmuSIEhbLyex+iTU
+                params:
+                  kdf:
+                    type: argon2
+                    algorithm: argon2id
+                    version: 19
+                    memory: 131072
+                    iterations: 4
+                    parallelism: 4
+                    salt: GxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxs=
+                  cipher:
+                    type: ChaCha20Poly1304
+                    nonce: CgoKCgoKCgoKCgoK
+                    tag: h1yYEdQ5IHcvz3UL7W+ZHQ==
+                ciphertext: RmuSIEhbLyex+iTU
             "})?,
         ExpectedOutput::failure().stderr(indoc! {"
-            Error: cipher.type: unknown variant `ChaCha20Poly1304`, expected `ChaCha20Poly1305` at line 11 column 9
+            Error: params.cipher.type: unknown variant `ChaCha20Poly1304`, expected `ChaCha20Poly1305` at line 12 column 11
         "})
     );
     Ok(())
@@ -247,19 +253,20 @@ fn try_decrypt_with_invalid_salt() -> anyhow::Result<()> {
             .arg(password_file.path())
             .pass_stdin(indoc! {"
                 encoding: base64
-                kdf:
-                  type: argon2
-                  algorithm: argon2id
-                  version: 19
-                  memory: 131072
-                  iterations: 4
-                  parallelism: 4
-                  salt: CxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxs=
-                cipher:
-                  type: ChaCha20Poly1305
-                  nonce: CgoKCgoKCgoKCgoK
-                  tag: h1yYEdQ5IHcvz3UL7W+ZHQ==
-                  ciphertext: RmuSIEhbLyex+iTU
+                params:
+                  kdf:
+                    type: argon2
+                    algorithm: argon2id
+                    version: 19
+                    memory: 131072
+                    iterations: 4
+                    parallelism: 4
+                    salt: CxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxs=
+                  cipher:
+                    type: ChaCha20Poly1305
+                    nonce: CgoKCgoKCgoKCgoK
+                    tag: h1yYEdQ5IHcvz3UL7W+ZHQ==
+                ciphertext: RmuSIEhbLyex+iTU
             "})?,
         ExpectedOutput::failure().stderr(indoc! {"
             Error: Decryption failed
@@ -278,19 +285,20 @@ fn try_decrypt_with_invalid_nonce() -> anyhow::Result<()> {
             .arg(password_file.path())
             .pass_stdin(indoc! {"
                 encoding: base64
-                kdf:
-                  type: argon2
-                  algorithm: argon2id
-                  version: 19
-                  memory: 131072
-                  iterations: 4
-                  parallelism: 4
-                  salt: GxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxs=
-                cipher:
-                  type: ChaCha20Poly1305
-                  nonce: GgoKCgoKCgoKCgoK
-                  tag: h1yYEdQ5IHcvz3UL7W+ZHQ==
-                  ciphertext: RmuSIEhbLyex+iTU
+                params:
+                  kdf:
+                    type: argon2
+                    algorithm: argon2id
+                    version: 19
+                    memory: 131072
+                    iterations: 4
+                    parallelism: 4
+                    salt: GxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxs=
+                  cipher:
+                    type: ChaCha20Poly1305
+                    nonce: GgoKCgoKCgoKCgoK
+                    tag: h1yYEdQ5IHcvz3UL7W+ZHQ==
+                ciphertext: RmuSIEhbLyex+iTU
             "})?,
         ExpectedOutput::failure().stderr(indoc! {"
             Error: Decryption failed
@@ -699,19 +707,20 @@ fn try_decrypt_with_invalid_salt_length() -> anyhow::Result<()> {
             .arg(password_file.path())
             .pass_stdin(indoc! {"
                 encoding: base64
-                kdf:
-                  type: argon2
-                  algorithm: argon2id
-                  version: 19
-                  memory: 131072
-                  iterations: 4
-                  parallelism: 4
-                  salt: GxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGw==
-                cipher:
-                  type: ChaCha20Poly1305
-                  nonce: CgoKCgoKCgoKCgoK
-                  tag: h1yYEdQ5IHcvz3UL7W+ZHQ==
-                  ciphertext: RmuSIEhbLyex+iTU
+                params:
+                  kdf:
+                    type: argon2
+                    algorithm: argon2id
+                    version: 19
+                    memory: 131072
+                    iterations: 4
+                    parallelism: 4
+                    salt: GxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGw==
+                  cipher:
+                    type: ChaCha20Poly1305
+                    nonce: CgoKCgoKCgoKCgoK
+                    tag: h1yYEdQ5IHcvz3UL7W+ZHQ==
+                ciphertext: RmuSIEhbLyex+iTU
             "})?,
         ExpectedOutput::failure().stderr(indoc! {"
             Error: Decoding error: Invalid length: expected 32, actual 31
@@ -730,19 +739,20 @@ fn try_decrypt_with_invalid_nonce_length() -> anyhow::Result<()> {
             .arg(password_file.path())
             .pass_stdin(indoc! {"
                 encoding: base64
-                kdf:
-                  type: argon2
-                  algorithm: argon2id
-                  version: 19
-                  memory: 131072
-                  iterations: 4
-                  parallelism: 4
-                  salt: GxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxs=
-                cipher:
-                  type: ChaCha20Poly1305
-                  nonce: CgoKCgoKCgoKCgo=
-                  tag: h1yYEdQ5IHcvz3UL7W+ZHQ==
-                  ciphertext: RmuSIEhbLyex+iTU
+                params:
+                  kdf:
+                    type: argon2
+                    algorithm: argon2id
+                    version: 19
+                    memory: 131072
+                    iterations: 4
+                    parallelism: 4
+                    salt: GxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxs=
+                  cipher:
+                    type: ChaCha20Poly1305
+                    nonce: CgoKCgoKCgoKCgo=
+                    tag: h1yYEdQ5IHcvz3UL7W+ZHQ==
+                ciphertext: RmuSIEhbLyex+iTU
             "})?,
         ExpectedOutput::failure().stderr(indoc! {"
             Error: Decoding error: Invalid length: expected 12, actual 11
@@ -761,19 +771,20 @@ fn try_decrypt_with_invalid_tag_length() -> anyhow::Result<()> {
             .arg(password_file.path())
             .pass_stdin(indoc! {"
                 encoding: base64
-                kdf:
-                  type: argon2
-                  algorithm: argon2id
-                  version: 19
-                  memory: 131072
-                  iterations: 4
-                  parallelism: 4
-                  salt: GxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxs=
-                cipher:
-                  type: ChaCha20Poly1305
-                  nonce: CgoKCgoKCgoKCgoK
-                  tag: h1yYEdQ5IHcvz3UL7W+Z
-                  ciphertext: RmuSIEhbLyex+iTU
+                params:
+                  kdf:
+                    type: argon2
+                    algorithm: argon2id
+                    version: 19
+                    memory: 131072
+                    iterations: 4
+                    parallelism: 4
+                    salt: GxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxs=
+                  cipher:
+                    type: ChaCha20Poly1305
+                    nonce: CgoKCgoKCgoKCgoK
+                    tag: h1yYEdQ5IHcvz3UL7W+Z
+                ciphertext: RmuSIEhbLyex+iTU
             "})?,
         ExpectedOutput::failure().stderr(indoc! {"
             Error: Decoding error: Invalid length: expected 16, actual 15
@@ -792,19 +803,20 @@ fn try_decrypt_with_invalid_encoding_value() -> anyhow::Result<()> {
             .arg(password_file.path())
             .pass_stdin(indoc! {"
                 encoding: base58
-                kdf:
-                  type: argon2
-                  algorithm: argon2id
-                  version: 19
-                  memory: 131072
-                  iterations: 4
-                  parallelism: 4
-                  salt: GxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxs=
-                cipher:
-                  type: ChaCha20Poly1305
-                  nonce: CgoKCgoKCgoKCgoK
-                  tag: h1yYEdQ5IHcvz3UL7W+ZHQ==
-                  ciphertext: RmuSIEhbLyex+iTU
+                params:
+                  kdf:
+                    type: argon2
+                    algorithm: argon2id
+                    version: 19
+                    memory: 131072
+                    iterations: 4
+                    parallelism: 4
+                    salt: GxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxs=
+                  cipher:
+                    type: ChaCha20Poly1305
+                    nonce: CgoKCgoKCgoKCgoK
+                    tag: h1yYEdQ5IHcvz3UL7W+ZHQ==
+                ciphertext: RmuSIEhbLyex+iTU
             "})?,
         ExpectedOutput::failure().stderr(indoc! {"
             Error: encoding: unknown variant `base58`, expected one of `base16`, `base32`, `base64` at line 1 column 11
