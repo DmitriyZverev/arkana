@@ -1,17 +1,18 @@
 encoding: base64
-kdf:
-  type: argon2
-  algorithm: argon2id
-  version: 19
-  memory: 131072
-  iterations: 4
-  parallelism: 4
-  salt: GxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxs=
-cipher:
-  type: ChaCha20Poly1305
-  nonce: CgoKCgoKCgoKCgoK
-  tag: eor6Vnih8jrArnn/iS5hSQ==
-  ciphertext: |-
-    QmGMKUpbMTiw4y3VNcyRczjoWe3tDsafehFLdnVsACiAdBg4AH91oORjkONGmEN+
-    QpRkityFXVFY/FdiCmC6+0xo5TZwuhY55fKfiVw1oVUUbQvUu54uiZWc8iibZ+H9
-    80N4XRKNKiFvUA7DbG3rMO+RomI4hyGM0l5S3E5LZEALkoU=
+params:
+  kdf:
+    type: argon2
+    algorithm: argon2id
+    version: 19
+    memory: 131072
+    iterations: 4
+    parallelism: 4
+    salt: GxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxsbGxs=
+  cipher:
+    type: ChaCha20Poly1305
+    nonce: CgoKCgoKCgoKCgoK
+    tag: eor6Vnih8jrArnn/iS5hSQ==
+ciphertext: |-
+  QmGMKUpbMTiw4y3VNcyRczjoWe3tDsafehFLdnVsACiAdBg4AH91oORjkONGmEN+
+  QpRkityFXVFY/FdiCmC6+0xo5TZwuhY55fKfiVw1oVUUbQvUu54uiZWc8iibZ+H9
+  80N4XRKNKiFvUA7DbG3rMO+RomI4hyGM0l5S3E5LZEALkoU=
