@@ -1,4 +1,4 @@
-use crate::envelope::{Envelope, EnvelopeParams};
+use crate::envelope;
 use thiserror::Error;
 
 type Version = u8;
@@ -35,20 +35,25 @@ pub enum DeserializeError {
     Cbor(ciborium::de::Error<std::io::Error>),
 }
 
-pub fn serialize(envelope: &Envelope) -> Result<Vec<u8>, SerializeError> {
+pub fn serialize_header(envelope: &envelope::Envelope) -> Result<Vec<u8>, SerializeError> {
     let mut params_bytes = Vec::new();
     ciborium::into_writer(&envelope.params, &mut params_bytes).map_err(SerializeError::Cbor)?;
     let params_len = params_bytes.len() as ParamsLen;
-    let mut out = Vec::with_capacity(HEADER_LEN + params_bytes.len() + envelope.ciphertext.len());
+    let mut out = Vec::with_capacity(HEADER_LEN + params_bytes.len());
     out.extend_from_slice(MAGIC);
     out.push(VERSION);
     out.extend_from_slice(&params_len.to_be_bytes());
     out.extend_from_slice(&params_bytes);
+    Ok(out)
+}
+
+pub fn serialize(envelope: &envelope::Envelope) -> Result<Vec<u8>, SerializeError> {
+    let mut out = serialize_header(envelope)?;
     out.extend_from_slice(&envelope.ciphertext);
     Ok(out)
 }
 
-pub fn deserialize(data: &[u8]) -> Result<Envelope, DeserializeError> {
+pub fn deserialize(data: &[u8]) -> Result<envelope::Envelope, DeserializeError> {
     let (header, rest) =
         data.split_first_chunk::<HEADER_LEN>()
             .ok_or(DeserializeError::TooShort {
@@ -70,12 +75,12 @@ pub fn deserialize(data: &[u8]) -> Result<Envelope, DeserializeError> {
                 actual: data.len(),
             })?;
     let mut cursor = std::io::Cursor::new(params_bytes);
-    let params: EnvelopeParams =
+    let params: envelope::EnvelopeParams =
         ciborium::from_reader(&mut cursor).map_err(DeserializeError::Cbor)?;
     if cursor.position() as usize != params_bytes.len() {
         return Err(DeserializeError::TrailingBytes);
     }
-    Ok(Envelope {
+    Ok(envelope::Envelope {
         params,
         ciphertext: ciphertext.to_vec(),
     })
