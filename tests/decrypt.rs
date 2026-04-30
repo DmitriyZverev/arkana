@@ -692,7 +692,7 @@ fn try_decrypt_binary_header_too_short() -> anyhow::Result<()> {
             .arg(fixtures::DEFAULT.password_file_path())
             .pass_stdin(data.as_slice())?,
         ExpectedOutput::failure().stderr(indoc! {"
-            Error: Input too short: expected 11 bytes, got 10
+            Error: Input too short: expected 15 bytes, got 10
         "})
     );
     Ok(())
@@ -746,9 +746,9 @@ fn try_decrypt_binary_params_too_short() -> anyhow::Result<()> {
             .arg("binary")
             .arg("--password-file")
             .arg(fixtures::DEFAULT.password_file_path())
-            .pass_stdin(data[..12].as_ref())?,
+            .pass_stdin(data[..16].as_ref())?,
         ExpectedOutput::failure().stderr(indoc! {"
-            Error: Input too short: expected 204 bytes, got 12
+            Error: Input too short: expected 208 bytes, got 16
         "})
     );
     Ok(())
@@ -757,10 +757,10 @@ fn try_decrypt_binary_params_too_short() -> anyhow::Result<()> {
 #[test]
 fn try_decrypt_binary_trailing_bytes() -> anyhow::Result<()> {
     let mut data = fixtures::DEFAULT.envelope_bin()?;
-    // layout: [ magic: 6B ][ version: 1B ][ params_len: 4B ][ params: CBOR ][ ciphertext ]
+    // layout: [ magic: 6B ][ version: 1B ][ params_len: 4B ][ ciphertext_len: 4B ][ params: CBOR ][ ciphertext ]
     let params_len = u32::from_be_bytes(data[7..11].try_into()?) as usize;
     data[7..11].copy_from_slice(&((params_len as u32 + 1).to_be_bytes()));
-    data.insert(11 + params_len, 0xff);
+    data.insert(15 + params_len, 0xff);
     assert_cmd!(
         arcana_cmd()
             .arg("decrypt")
@@ -771,6 +771,46 @@ fn try_decrypt_binary_trailing_bytes() -> anyhow::Result<()> {
             .pass_stdin(data.as_slice())?,
         ExpectedOutput::failure().stderr(indoc! {"
             Error: Trailing bytes after params
+        "})
+    );
+    Ok(())
+}
+
+#[test]
+fn try_decrypt_binary_ciphertext_too_short() -> anyhow::Result<()> {
+    let mut data = fixtures::DEFAULT.envelope_bin()?;
+    let ciphertext_len = u32::from_be_bytes(data[11..15].try_into()?) as usize;
+    data[11..15].copy_from_slice(&((ciphertext_len as u32 + 1).to_be_bytes()));
+    assert_cmd!(
+        arcana_cmd()
+            .arg("decrypt")
+            .arg("--format")
+            .arg("binary")
+            .arg("--password-file")
+            .arg(fixtures::DEFAULT.password_file_path())
+            .pass_stdin(data.as_slice())?,
+        ExpectedOutput::failure().stderr(indoc! {"
+            Error: Input too short: expected 221 bytes, got 220
+        "})
+    );
+    Ok(())
+}
+
+#[test]
+fn try_decrypt_binary_ciphertext_trailing_bytes() -> anyhow::Result<()> {
+    let mut data = fixtures::DEFAULT.envelope_bin()?;
+    let ciphertext_len = u32::from_be_bytes(data[11..15].try_into()?) as usize;
+    data[11..15].copy_from_slice(&((ciphertext_len as u32 - 1).to_be_bytes()));
+    assert_cmd!(
+        arcana_cmd()
+            .arg("decrypt")
+            .arg("--format")
+            .arg("binary")
+            .arg("--password-file")
+            .arg(fixtures::DEFAULT.password_file_path())
+            .pass_stdin(data.as_slice())?,
+        ExpectedOutput::failure().stderr(indoc! {"
+            Error: Trailing bytes after ciphertext
         "})
     );
     Ok(())

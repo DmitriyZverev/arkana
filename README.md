@@ -168,20 +168,24 @@ The `encoding` field specifies how binary values are encoded.
 The binary format is a compact, machine-readable encoding with the following layout:
 
 ```
-[ magic: 6B ][ version: 1B ][ params_len: 4B ][ params: CBOR ][ ciphertext ]
+[ magic: 6B ][ version: 1B ][ params_len: 4B ][ ciphertext_len: 4B ][ params: CBOR ][ ciphertext ]
 ```
 
-| Field        | Size               | Description                                                                       |
-|--------------|--------------------|-----------------------------------------------------------------------------------|
-| `magic`      | 6 bytes            | Format identifier, always `0x61 0x72 0x63 0x61 0x6E 0x61` (ASCII string `arcana`) |
-| `version`    | 1 byte             | Format version; only `0x01` (`1`) is supported                                    |
-| `params_len` | 4 bytes (BE)       | Length of the `params` section in bytes                                           |
-| `params`     | `params_len` bytes | [CBOR](https://cbor.io/)-encoded encryption parameters                            |
-| `ciphertext` | remainder          | Raw encrypted bytes, occupies the rest of the file                                |
+| Field            | Size                   | Description                                                                       |
+|------------------|------------------------|-----------------------------------------------------------------------------------|
+| `magic`          | 6 bytes                | Format identifier, always `0x61 0x72 0x63 0x61 0x6E 0x61` (ASCII string `arcana`) |
+| `version`        | 1 byte                 | Format version; only `0x01` (`1`) is supported                                    |
+| `params_len`     | 4 bytes (BE u32)       | Length of the `params` section in bytes                                           |
+| `ciphertext_len` | 4 bytes (BE u32)       | Length of the `ciphertext` section in bytes                                       |
+| `params`         | `params_len` bytes     | [CBOR](https://cbor.io/)-encoded encryption parameters                            |
+| `ciphertext`     | `ciphertext_len` bytes | Raw encrypted bytes                                                               |
 
 The `params` CBOR document contains the same fields as the YAML `params` section,
 but binary values are stored as raw bytes rather than encoded strings.
 The `ciphertext` section is likewise stored as raw bytes.
+The fixed-size header (`magic` + `version` + `params_len` + `ciphertext_len`) makes the envelope
+self-delimiting — the exact byte boundaries of every section are known after reading the first 15 bytes.
+The maximum supported ciphertext size is 4 294 967 295 bytes (~4 GiB).
 
 ## See also
 
