@@ -1,0 +1,23 @@
+use crate::envelope;
+use crate::envelope::text::Encoding;
+use thiserror::Error;
+
+#[derive(Debug, Error)]
+pub enum DeserializeError {
+    #[error("Decoding error: {0}")]
+    Decode(envelope::text::DecodeError),
+    #[error(transparent)]
+    Deserialize(serde_yaml::Error),
+}
+
+pub fn serialize(envelope: envelope::Envelope, encoding: Encoding) -> serde_yaml::Result<Vec<u8>> {
+    let text_envelope = envelope::text::Envelope::encode(envelope, encoding);
+    Ok(serde_yaml::to_string(&text_envelope)?.into_bytes())
+}
+
+pub fn deserialize(data: &[u8]) -> Result<envelope::Envelope, DeserializeError> {
+    serde_yaml::from_slice::<envelope::text::Envelope>(data)
+        .map_err(DeserializeError::Deserialize)?
+        .try_into()
+        .map_err(DeserializeError::Decode)
+}
