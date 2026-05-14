@@ -76,10 +76,7 @@ fn main() -> anyhow::Result<()> {
             };
             let envelope = encrypt(encrypt_params)?;
             let output = match io.format {
-                Format::Yaml => {
-                    let text_envelope = envelope::text::Envelope::encode(envelope, encoding.into());
-                    serde_yaml::to_string(&text_envelope)?.into_bytes()
-                }
+                Format::Yaml => envelope::yaml::serialize(envelope, encoding.into())?,
                 Format::Binary => envelope::binary::serialize(&envelope)?,
             };
             write_output(&output, output_file, &cwd)?;
@@ -90,9 +87,7 @@ fn main() -> anyhow::Result<()> {
             let password_file = resolve_path(&cwd, io.password_file)?;
             let data = read_input(input_file, &cwd)?;
             let envelope: envelope::Envelope = match io.format {
-                Format::Yaml => {
-                    serde_yaml::from_slice::<envelope::text::Envelope>(&data)?.try_into()?
-                }
+                Format::Yaml => envelope::yaml::deserialize(&data)?,
                 Format::Binary => envelope::binary::deserialize(&data)?,
             };
             let decrypted_text = decrypt(envelope, &read_password(password_file)?)?;
@@ -109,16 +104,11 @@ fn main() -> anyhow::Result<()> {
             let output_file = resolve_path(&cwd, output_file)?;
             let data = read_input(input_file, &cwd)?;
             let envelope: envelope::Envelope = match from_format {
-                Format::Yaml => {
-                    serde_yaml::from_slice::<envelope::text::Envelope>(&data)?.try_into()?
-                }
+                Format::Yaml => envelope::yaml::deserialize(&data)?,
                 Format::Binary => envelope::binary::deserialize(&data)?,
             };
             let output = match to_format {
-                Format::Yaml => {
-                    let text_envelope = envelope::text::Envelope::encode(envelope, encoding.into());
-                    serde_yaml::to_string(&text_envelope)?.into_bytes()
-                }
+                Format::Yaml => envelope::yaml::serialize(envelope, encoding.into())?,
                 Format::Binary => envelope::binary::serialize(&envelope)?,
             };
             write_output(&output, output_file, &cwd)?;

@@ -1,5 +1,6 @@
 pub mod binary;
 pub mod text;
+pub mod yaml;
 
 use argon2::{Algorithm, Version};
 use serde::{Deserialize, Serialize};

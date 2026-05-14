@@ -11,12 +11,6 @@ pub enum DecodeError {
     Decode(data_encoding::DecodeError),
 }
 
-#[derive(thiserror::Error, Debug)]
-pub enum Error {
-    #[error("Decoding error: {0}")]
-    Decode(DecodeError),
-}
-
 fn encode_bytes(bytes: &[u8], encoding: &Encoding) -> String {
     let encoded = match encoding {
         Encoding::Base16 => HEXUPPER.encode(bytes),
@@ -81,12 +75,12 @@ impl CipherParams {
 }
 
 impl envelope::CipherParams {
-    fn decode(cipher: CipherParams, encoding: &Encoding) -> Result<Self, Error> {
+    fn decode(cipher: CipherParams, encoding: &Encoding) -> Result<Self, DecodeError> {
         Ok(match cipher {
             CipherParams::ChaCha20Poly1305 { nonce, tag } => {
                 envelope::CipherParams::ChaCha20Poly1305 {
-                    nonce: decode_fixed(&nonce, encoding).map_err(Error::Decode)?,
-                    tag: decode_fixed(&tag, encoding).map_err(Error::Decode)?,
+                    nonce: decode_fixed(&nonce, encoding)?,
+                    tag: decode_fixed(&tag, encoding)?,
                 }
             }
         })
@@ -116,11 +110,11 @@ impl KdfParams {
 }
 
 impl envelope::KdfParams {
-    fn decode(kdf: KdfParams, encoding: &Encoding) -> Result<Self, Error> {
+    fn decode(kdf: KdfParams, encoding: &Encoding) -> Result<Self, DecodeError> {
         Ok(match kdf {
             KdfParams::Argon2 { params, salt } => envelope::KdfParams::Argon2 {
                 params,
-                salt: decode_fixed(&salt, encoding).map_err(Error::Decode)?,
+                salt: decode_fixed(&salt, encoding)?,
             },
         })
     }
@@ -153,16 +147,16 @@ impl Envelope {
 }
 
 impl TryFrom<Envelope> for envelope::Envelope {
-    type Error = Error;
+    type Error = DecodeError;
 
-    fn try_from(envelope: Envelope) -> Result<Self, Error> {
+    fn try_from(envelope: Envelope) -> Result<Self, DecodeError> {
         Ok(envelope::Envelope {
             params: envelope::EnvelopeParams {
                 kdf: envelope::KdfParams::decode(envelope.params.kdf, &envelope.encoding)?,
                 cipher: envelope::CipherParams::decode(envelope.params.cipher, &envelope.encoding)?,
             },
             ciphertext: decode_bytes(&envelope.ciphertext, &envelope.encoding)
-                .map_err(|e| Error::Decode(DecodeError::Decode(e)))?,
+                .map_err(DecodeError::Decode)?,
         })
     }
 }
