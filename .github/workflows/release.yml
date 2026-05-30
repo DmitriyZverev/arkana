@@ -1,0 +1,98 @@
+name: Release
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build / ${{ matrix.target }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      matrix:
+        include:
+          - target: x86_64-unknown-linux-musl
+            runner: ubuntu-22.04
+            use_cross: true
+          - target: aarch64-unknown-linux-musl
+            runner: ubuntu-22.04
+            use_cross: true
+          - target: x86_64-apple-darwin
+            runner: macos-13
+            use_cross: false
+          - target: aarch64-apple-darwin
+            runner: macos-14
+            use_cross: false
+          - target: x86_64-pc-windows-msvc
+            runner: windows-latest
+            use_cross: false
+    steps:
+      - uses: actions/checkout@v6.0.2
+      - uses: dtolnay/rust-toolchain@1.93.1
+        with:
+          targets: ${{ matrix.target }}
+      - uses: taiki-e/install-action@v2.69.6
+        if: matrix.use_cross
+        with:
+          tool: cross
+      - run: cross build --release --target ${{ matrix.target }}
+        if: matrix.use_cross
+      - run: cargo build --release --target ${{ matrix.target }}
+        if: ${{ !matrix.use_cross }}
+      - name: Package (Unix)
+        if: runner.os != 'Windows'
+        run: |
+          version=$(cargo metadata --no-deps --format-version 1 | jq -r '.packages[0].version')
+          bin="target/${{ matrix.target }}/release/arcana"
+          archive="arcana-${version}-${{ matrix.target }}.tar.gz"
+          tar -czf "$archive" -C "$(dirname "$bin")" "$(basename "$bin")"
+          echo "ASSET=$archive" >> "$GITHUB_ENV"
+      - name: Package (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $version = cargo metadata --no-deps --format-version 1 | jq -r '.packages[0].version'
+          $bin = "target/${{ matrix.target }}/release/arcana.exe"
+          $archive = "arcana-${version}-${{ matrix.target }}.zip"
+          Compress-Archive -Path $bin -DestinationPath $archive
+          echo "ASSET=$archive" >> $env:GITHUB_ENV
+      - uses: actions/upload-artifact@v5.0.0
+        with:
+          name: ${{ matrix.target }}
+          path: ${{ env.ASSET }}
+
+  publish:
+    name: Publish release
+    needs: build
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6.0.2
+      - name: Get version
+        id: version
+        run: |
+          version=$(cargo metadata --no-deps --format-version 1 | jq -r '.packages[0].version')
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "tag=version/$version" >> "$GITHUB_OUTPUT"
+      - name: Check tag does not exist
+        run: |
+          if git ls-remote --tags origin | grep -q "refs/tags/${{ steps.version.outputs.tag }}$"; then
+            echo "Tag ${{ steps.version.outputs.tag }} already exists" >&2
+            exit 1
+          fi
+      - uses: actions/download-artifact@v4.3.0
+        with:
+          path: artifacts
+          merge-multiple: true
+      - name: Generate release notes
+        run: node .github/scripts/generate-release-notes.mjs > $RUNNER_TEMP/notes.md
+      - name: Tag release
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag "${{ steps.version.outputs.tag }}"
+          git push origin "${{ steps.version.outputs.tag }}"
+      - name: Publish
+        run: gh release create "${{ steps.version.outputs.tag }}" artifacts/* --title "v${{ steps.version.outputs.version }}" --notes-file "$RUNNER_TEMP/notes.md"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
