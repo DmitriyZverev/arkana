@@ -6,8 +6,9 @@ const execAsync = promisify(exec);
 
 const BLOCK_TAGS = ['PR', 'BREAKING CHANGE'];
 
-const prevTag = execSync("git tag --sort=-version:refname | grep '^version/' | head -1", {shell: true})
-    .toString().trim();
+const tags = execSync("git tag --sort=-version:refname | grep '^version/'", {shell: true})
+    .toString().trim().split('\n').filter(Boolean);
+const prevTag = tags.length >= 2 ? tags[1] : null;
 
 const range = prevTag ? `${prevTag}..HEAD` : 'HEAD';
 const rawCommits = execSync(`git log ${range} --pretty=format:"%H"`, {shell: true})
@@ -44,15 +45,16 @@ async function parseCommit(hash) {
 
 function formatEntry({subject, body, pr, breakingChange}) {
     const suffix = pr ? ` (${pr})` : '';
-    let entry = `* **${subject}${suffix}**`;
+    let title = `* **${subject}${suffix}**`;
+    let details = '';
     if (body) {
-        entry += '\n\n' + body.split('\n').map(l => `  ${l}`).join('\n');
+        details += body.split('\n').map(l => `  ${l}`).join('\n');
     }
     if (breakingChange) {
         const quoted = breakingChange.split('\n').map(l => `> ${l}`).join('\n');
-        entry += '\n\n  > **BREAKING CHANGE**\n  >\n' + quoted.split('\n').map(l => `  ${l}`).join('\n');
+        details += '\n\n  > **BREAKING CHANGE**\n  >\n' + quoted.split('\n').map(l => `  ${l}`).join('\n');
     }
-    return entry;
+    return `${title}${details ? `\n\n  <details>\n\n${details}\n\n  </details>\n` : ''}`;
 }
 
 const commits = await Promise.all(rawCommits.map(parseCommit));
@@ -85,6 +87,10 @@ if (groups.minor.length) {
 }
 if (groups.patch.length) {
     notes += `## Patch Changes\n\n${groups.patch.join('\n\n')}\n\n`;
+}
+
+if (!notes) {
+    notes = '_Infrastructure-only release. No changes to the production artifact._\n';
 }
 
 process.stdout.write(notes.trimEnd() + '\n');
