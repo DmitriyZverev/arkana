@@ -2,18 +2,18 @@
 
 pub mod support;
 
-use support::{ExpectedOutput, SpawnExt, arcana_cmd, fixtures};
+use support::{ExpectedOutput, SpawnExt, arkana_cmd, fixtures};
 
 #[test]
 fn encrypt_decrypt_default() -> anyhow::Result<()> {
     let plaintext = fixtures::DEFAULT.plaintext()?;
-    let encrypt_output = arcana_cmd()
+    let encrypt_output = arkana_cmd()
         .arg("encrypt")
         .arg("--password-file")
         .arg(fixtures::DEFAULT.password_file_path())
         .pass_stdin(plaintext.clone())?;
     assert_eq!(encrypt_output.status.code(), Some(0));
-    let decrypt_output = arcana_cmd()
+    let decrypt_output = arkana_cmd()
         .arg("decrypt")
         .arg("--password-file")
         .arg(fixtures::DEFAULT.password_file_path())
@@ -25,7 +25,7 @@ fn encrypt_decrypt_default() -> anyhow::Result<()> {
 #[test]
 fn encrypt_decrypt_with_binary_format() -> anyhow::Result<()> {
     let plaintext = fixtures::DEFAULT.plaintext()?;
-    let encrypt_output = arcana_cmd()
+    let encrypt_output = arkana_cmd()
         .arg("encrypt")
         .arg("--format")
         .arg("binary")
@@ -33,7 +33,7 @@ fn encrypt_decrypt_with_binary_format() -> anyhow::Result<()> {
         .arg(fixtures::DEFAULT.password_file_path())
         .pass_stdin(plaintext.clone())?;
     assert_eq!(encrypt_output.status.code(), Some(0));
-    let decrypt_output = arcana_cmd()
+    let decrypt_output = arkana_cmd()
         .arg("decrypt")
         .arg("--format")
         .arg("binary")
@@ -47,7 +47,7 @@ fn encrypt_decrypt_with_binary_format() -> anyhow::Result<()> {
 #[test]
 fn encrypt_decrypt_with_encoding_base16() -> anyhow::Result<()> {
     let plaintext = fixtures::DEFAULT.plaintext()?;
-    let encrypt_output = arcana_cmd()
+    let encrypt_output = arkana_cmd()
         .arg("encrypt")
         .arg("--encoding")
         .arg("base16")
@@ -55,7 +55,7 @@ fn encrypt_decrypt_with_encoding_base16() -> anyhow::Result<()> {
         .arg(fixtures::DEFAULT.password_file_path())
         .pass_stdin(plaintext.clone())?;
     assert_eq!(encrypt_output.status.code(), Some(0));
-    let decrypt_output = arcana_cmd()
+    let decrypt_output = arkana_cmd()
         .arg("decrypt")
         .arg("--password-file")
         .arg(fixtures::DEFAULT.password_file_path())
@@ -67,7 +67,7 @@ fn encrypt_decrypt_with_encoding_base16() -> anyhow::Result<()> {
 #[test]
 fn encrypt_decrypt_with_encoding_base32() -> anyhow::Result<()> {
     let plaintext = fixtures::DEFAULT.plaintext()?;
-    let encrypt_output = arcana_cmd()
+    let encrypt_output = arkana_cmd()
         .arg("encrypt")
         .arg("--encoding")
         .arg("base32")
@@ -75,7 +75,7 @@ fn encrypt_decrypt_with_encoding_base32() -> anyhow::Result<()> {
         .arg(fixtures::DEFAULT.password_file_path())
         .pass_stdin(plaintext.clone())?;
     assert_eq!(encrypt_output.status.code(), Some(0));
-    let decrypt_output = arcana_cmd()
+    let decrypt_output = arkana_cmd()
         .arg("decrypt")
         .arg("--password-file")
         .arg(fixtures::DEFAULT.password_file_path())

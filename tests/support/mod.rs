@@ -57,8 +57,8 @@ impl SpawnExt for Command {
     }
 }
 
-pub fn arcana_cmd() -> Command {
-    Command::new(env!("CARGO_BIN_EXE_arcana"))
+pub fn arkana_cmd() -> Command {
+    Command::new(env!("CARGO_BIN_EXE_arkana"))
 }
 
 pub fn create_temp_file(content: &str) -> Result<tempfile::NamedTempFile, std::io::Error> {
