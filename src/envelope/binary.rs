@@ -5,7 +5,7 @@ type Version = u8;
 type ParamsLen = u32;
 type CiphertextLen = u32;
 
-const MAGIC: &[u8; 6] = b"arcana";
+const MAGIC: &[u8; 6] = b"arkana";
 const VERSION: Version = 1;
 pub(crate) const MAGIC_LEN: usize = MAGIC.len();
 pub(crate) const VERSION_LEN: usize = size_of::<Version>();
@@ -27,7 +27,7 @@ pub enum DeserializeError {
     #[error("Input too short: expected {expected} bytes, got {actual}")]
     TooShort { expected: usize, actual: usize },
 
-    #[error("Invalid format: not an arcana binary envelope")]
+    #[error("Invalid format: not an arkana binary envelope")]
     InvalidMagic,
 
     #[error("Unsupported version: {0}")]

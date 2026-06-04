@@ -1,4 +1,4 @@
-# Arcana
+# Arkana
 
 _A modern CLI tool for password-based encryption with human-readable output._
 
@@ -22,20 +22,20 @@ _A modern CLI tool for password-based encryption with human-readable output._
 
 ```bash
 # Read from stdin, write to stdout
-echo "secret message" | arcana encrypt > encrypted.yml
+echo "secret message" | arkana encrypt > encrypted.yml
 
 # Read from file, write to file
-arcana encrypt --input-file secret.txt --output-file encrypted.yml
+arkana encrypt --input-file secret.txt --output-file encrypted.yml
 ```
 
 ### Decrypt Data
 
 ```bash
 # Read from stdin, write to stdout
-arcana decrypt < encrypted.yml > decrypted.txt
+arkana decrypt < encrypted.yml > decrypted.txt
 
 # Read from file, write to file
-arcana decrypt --input-file encrypted.yml --output-file decrypted.txt
+arkana decrypt --input-file encrypted.yml --output-file decrypted.txt
 ```
 
 > [!NOTE]
@@ -51,13 +51,13 @@ used:
 
 ```bash
 # Encrypt with a custom Argon2 algorithm
-arcana encrypt --kdf-argon2-algorithm argon2i --input-file decrypted.txt
+arkana encrypt --kdf-argon2-algorithm argon2i --input-file decrypted.txt
 
 # Encrypt with reduced memory usage for faster key derivation
-arcana encrypt --kdf-argon2-memory 65536 --input-file decrypted.txt
+arkana encrypt --kdf-argon2-memory 65536 --input-file decrypted.txt
 
 # Encrypt with all parameters explicitly specified
-arcana encrypt \
+arkana encrypt \
   --kdf-type argon2 \
   --kdf-argon2-algorithm argon2id \
   --kdf-argon2-version 19 \
@@ -70,7 +70,7 @@ arcana encrypt \
 
 > [!NOTE]
 > Encryption parameters are stored in the container and are used automatically during decryption — no flags are needed
-> on `arcana decrypt`.
+> on `arkana decrypt`.
 
 ### Encoding
 
@@ -79,19 +79,19 @@ in the YAML envelope. Supported values: `base16`, `base32`, `base64` (default).
 
 ```bash
 # Encrypt with base16 encoding
-arcana encrypt --encoding base16 --input-file secret.txt --output-file encrypted.yml
+arkana encrypt --encoding base16 --input-file secret.txt --output-file encrypted.yml
 
 # Encrypt with base32 encoding
-arcana encrypt --encoding base32 --input-file secret.txt --output-file encrypted.yml
+arkana encrypt --encoding base32 --input-file secret.txt --output-file encrypted.yml
 ```
 
 During decryption the encoding is read from the envelope — no flag is needed.
 
-The `--encoding` flag is also available in `arcana convert` when converting to YAML format:
+The `--encoding` flag is also available in `arkana convert` when converting to YAML format:
 
 ```bash
 # Convert binary to YAML with base16 encoding
-arcana convert --from-format binary --to-format yaml --encoding base16 < encrypted.bin > encrypted.yml
+arkana convert --from-format binary --to-format yaml --encoding base16 < encrypted.bin > encrypted.yml
 ```
 
 > [!NOTE]
@@ -103,23 +103,23 @@ Use `--format` to select the envelope format. The default is `yaml`.
 
 ```bash
 # Encrypt to binary format
-arcana encrypt --format binary --input-file secret.txt --output-file encrypted.bin
+arkana encrypt --format binary --input-file secret.txt --output-file encrypted.bin
 
 # Decrypt from binary format
-arcana decrypt --format binary --input-file encrypted.bin --output-file decrypted.txt
+arkana decrypt --format binary --input-file encrypted.bin --output-file decrypted.txt
 ```
 
 ### Convert Between Formats
 
-Use `arcana convert` to transform an encrypted envelope from one format to another without
+Use `arkana convert` to transform an encrypted envelope from one format to another without
 decryption. No password is required.
 
 ```bash
 # YAML to binary
-arcana convert --from-format yaml --to-format binary < encrypted.yml > encrypted.bin
+arkana convert --from-format yaml --to-format binary < encrypted.yml > encrypted.bin
 
 # Binary to YAML
-arcana convert --from-format binary --to-format yaml --input-file encrypted.bin --output-file encrypted.yml
+arkana convert --from-format binary --to-format yaml --input-file encrypted.bin --output-file encrypted.yml
 ```
 
 ### Override Working Directory
@@ -128,10 +128,10 @@ Use the `--cwd` global flag to set the working directory for resolving all relat
 
 ```bash
 # Without --cwd, relative paths are resolved against the current working directory
-cd /path/to/dir && arcana encrypt --input-file secret.txt --output-file encrypted.yml
+cd /path/to/dir && arkana encrypt --input-file secret.txt --output-file encrypted.yml
 
 # With --cwd, relative paths are resolved against the specified directory
-arcana --cwd /path/to/dir encrypt --input-file secret.txt --output-file encrypted.yml
+arkana --cwd /path/to/dir encrypt --input-file secret.txt --output-file encrypted.yml
 ```
 
 ## Envelope Format
@@ -173,7 +173,7 @@ The binary format is a compact, machine-readable encoding with the following lay
 
 | Field            | Size                   | Description                                                                       |
 |------------------|------------------------|-----------------------------------------------------------------------------------|
-| `magic`          | 6 bytes                | Format identifier, always `0x61 0x72 0x63 0x61 0x6E 0x61` (ASCII string `arcana`) |
+| `magic`          | 6 bytes                | Format identifier, always `0x61 0x72 0x63 0x61 0x6E 0x61` (ASCII string `arkana`) |
 | `version`        | 1 byte                 | Format version; only `0x01` (`1`) is supported                                    |
 | `params_len`     | 4 bytes (BE u32)       | Length of the `params` section in bytes                                           |
 | `ciphertext_len` | 4 bytes (BE u32)       | Length of the `ciphertext` section in bytes                                       |

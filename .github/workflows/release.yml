@@ -42,8 +42,8 @@ jobs:
         if: runner.os != 'Windows'
         run: |
           version=$(cargo metadata --no-deps --format-version 1 | jq -r '.packages[0].version')
-          bin="target/${{ matrix.target }}/release/arcana"
-          archive="arcana-${version}-${{ matrix.target }}.tar.gz"
+          bin="target/${{ matrix.target }}/release/arkana"
+          archive="arkana-${version}-${{ matrix.target }}.tar.gz"
           tar -czf "$archive" -C "$(dirname "$bin")" "$(basename "$bin")"
           echo "ASSET=$archive" >> "$GITHUB_ENV"
       - name: Package (Windows)
@@ -51,8 +51,8 @@ jobs:
         shell: pwsh
         run: |
           $version = cargo metadata --no-deps --format-version 1 | jq -r '.packages[0].version'
-          $bin = "target/${{ matrix.target }}/release/arcana.exe"
-          $archive = "arcana-${version}-${{ matrix.target }}.zip"
+          $bin = "target/${{ matrix.target }}/release/arkana.exe"
+          $archive = "arkana-${version}-${{ matrix.target }}.zip"
           Compress-Archive -Path $bin -DestinationPath $archive
           echo "ASSET=$archive" >> $env:GITHUB_ENV
       - uses: actions/upload-artifact@v7.0.1

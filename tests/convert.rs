@@ -2,12 +2,12 @@
 
 pub mod support;
 
-use support::{ExpectedOutput, SpawnExt, arcana_cmd, create_temp_file, fixtures};
+use support::{ExpectedOutput, SpawnExt, arkana_cmd, create_temp_file, fixtures};
 
 #[test]
 fn convert_from_yaml_to_binary() -> anyhow::Result<()> {
     assert_cmd_binary!(
-        arcana_cmd()
+        arkana_cmd()
             .arg("convert")
             .arg("--from-format")
             .arg("yaml")
@@ -22,7 +22,7 @@ fn convert_from_yaml_to_binary() -> anyhow::Result<()> {
 #[test]
 fn convert_from_binary_to_yaml() -> anyhow::Result<()> {
     assert_cmd!(
-        arcana_cmd()
+        arkana_cmd()
             .arg("convert")
             .arg("--from-format")
             .arg("binary")
@@ -37,7 +37,7 @@ fn convert_from_binary_to_yaml() -> anyhow::Result<()> {
 #[test]
 fn convert_from_yaml_to_yaml() -> anyhow::Result<()> {
     assert_cmd!(
-        arcana_cmd()
+        arkana_cmd()
             .arg("convert")
             .arg("--from-format")
             .arg("yaml")
@@ -52,7 +52,7 @@ fn convert_from_yaml_to_yaml() -> anyhow::Result<()> {
 #[test]
 fn convert_from_binary_to_binary() -> anyhow::Result<()> {
     assert_cmd_binary!(
-        arcana_cmd()
+        arkana_cmd()
             .arg("convert")
             .arg("--from-format")
             .arg("binary")
@@ -68,7 +68,7 @@ fn convert_from_binary_to_binary() -> anyhow::Result<()> {
 fn convert_from_binary_to_yaml_with_input_and_output_files() -> anyhow::Result<()> {
     let output_file = create_temp_file("")?;
     assert_cmd!(
-        arcana_cmd()
+        arkana_cmd()
             .arg("convert")
             .arg("--from-format")
             .arg("binary")
@@ -89,7 +89,7 @@ fn convert_from_binary_to_yaml_with_input_and_output_files() -> anyhow::Result<(
 fn convert_from_binary_to_yaml_with_input_and_output_files_short_alias() -> anyhow::Result<()> {
     let output_file = create_temp_file("")?;
     assert_cmd!(
-        arcana_cmd()
+        arkana_cmd()
             .arg("convert")
             .arg("-f")
             .arg("binary")
@@ -110,7 +110,7 @@ fn convert_from_binary_to_yaml_with_input_and_output_files_short_alias() -> anyh
 fn convert_from_binary_to_yaml_with_input_and_output_files_long_alias() -> anyhow::Result<()> {
     let output_file = create_temp_file("")?;
     assert_cmd!(
-        arcana_cmd()
+        arkana_cmd()
             .arg("convert")
             .arg("--from")
             .arg("binary")
@@ -130,7 +130,7 @@ fn convert_from_binary_to_yaml_with_input_and_output_files_long_alias() -> anyho
 #[test]
 fn convert_from_yaml_base16_to_yaml_with_encoding_base64() -> anyhow::Result<()> {
     assert_cmd!(
-        arcana_cmd()
+        arkana_cmd()
             .arg("convert")
             .arg("--from-format")
             .arg("yaml")
@@ -147,7 +147,7 @@ fn convert_from_yaml_base16_to_yaml_with_encoding_base64() -> anyhow::Result<()>
 #[test]
 fn convert_from_binary_to_yaml_with_encoding_base16() -> anyhow::Result<()> {
     assert_cmd!(
-        arcana_cmd()
+        arkana_cmd()
             .arg("convert")
             .arg("--from-format")
             .arg("binary")
@@ -164,7 +164,7 @@ fn convert_from_binary_to_yaml_with_encoding_base16() -> anyhow::Result<()> {
 #[test]
 fn convert_from_yaml_base16_lowercase_to_yaml_with_encoding_base16() -> anyhow::Result<()> {
     assert_cmd!(
-        arcana_cmd()
+        arkana_cmd()
             .arg("convert")
             .arg("--from-format")
             .arg("yaml")
@@ -181,7 +181,7 @@ fn convert_from_yaml_base16_lowercase_to_yaml_with_encoding_base16() -> anyhow::
 #[test]
 fn convert_from_yaml_base16_to_binary() -> anyhow::Result<()> {
     assert_cmd_binary!(
-        arcana_cmd()
+        arkana_cmd()
             .arg("convert")
             .arg("--from-format")
             .arg("yaml")

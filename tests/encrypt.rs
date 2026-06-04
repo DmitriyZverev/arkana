@@ -4,14 +4,14 @@ pub mod support;
 
 use indoc::indoc;
 use support::{
-    ExpectedOutput, SpawnExt, arcana_cmd, create_temp_dir, create_temp_file, create_temp_file_in,
+    ExpectedOutput, SpawnExt, arkana_cmd, create_temp_dir, create_temp_file, create_temp_file_in,
     fixtures,
 };
 
 #[test]
 fn encrypt_default() -> anyhow::Result<()> {
     assert_cmd!(
-        arcana_cmd()
+        arkana_cmd()
             .arg("encrypt")
             .arg("--password-file")
             .arg(fixtures::DEFAULT.password_file_path())
@@ -24,7 +24,7 @@ fn encrypt_default() -> anyhow::Result<()> {
 #[test]
 fn encrypt_long_text() -> anyhow::Result<()> {
     assert_cmd!(
-        arcana_cmd()
+        arkana_cmd()
             .arg("encrypt")
             .arg("--password-file")
             .arg(fixtures::LONG_TEXT.password_file_path())
@@ -37,7 +37,7 @@ fn encrypt_long_text() -> anyhow::Result<()> {
 #[test]
 fn encrypt_with_input_file() -> anyhow::Result<()> {
     assert_cmd!(
-        arcana_cmd()
+        arkana_cmd()
             .arg("encrypt")
             .arg("--password-file")
             .arg(fixtures::DEFAULT.password_file_path())
@@ -52,7 +52,7 @@ fn encrypt_with_input_file() -> anyhow::Result<()> {
 #[test]
 fn encrypt_with_input_file_short_alias() -> anyhow::Result<()> {
     assert_cmd!(
-        arcana_cmd()
+        arkana_cmd()
             .arg("encrypt")
             .arg("--password-file")
             .arg(fixtures::DEFAULT.password_file_path())
@@ -67,7 +67,7 @@ fn encrypt_with_input_file_short_alias() -> anyhow::Result<()> {
 #[test]
 fn encrypt_with_input_file_long_alias() -> anyhow::Result<()> {
     assert_cmd!(
-        arcana_cmd()
+        arkana_cmd()
             .arg("encrypt")
             .arg("--password-file")
             .arg(fixtures::DEFAULT.password_file_path())
@@ -82,7 +82,7 @@ fn encrypt_with_input_file_long_alias() -> anyhow::Result<()> {
 #[test]
 fn encrypt_with_input_file_and_ignore_stdin() -> anyhow::Result<()> {
     assert_cmd!(
-        arcana_cmd()
+        arkana_cmd()
             .arg("encrypt")
             .arg("--password-file")
             .arg(fixtures::DEFAULT.password_file_path())
@@ -98,7 +98,7 @@ fn encrypt_with_input_file_and_ignore_stdin() -> anyhow::Result<()> {
 fn encrypt_with_output_file() -> anyhow::Result<()> {
     let output_file = create_temp_file("")?;
     assert_cmd!(
-        arcana_cmd()
+        arkana_cmd()
             .arg("encrypt")
             .arg("--password-file")
             .arg(fixtures::DEFAULT.password_file_path())
@@ -115,7 +115,7 @@ fn encrypt_with_output_file() -> anyhow::Result<()> {
 fn encrypt_with_output_file_short_alias() -> anyhow::Result<()> {
     let output_file = create_temp_file("")?;
     assert_cmd!(
-        arcana_cmd()
+        arkana_cmd()
             .arg("encrypt")
             .arg("--password-file")
             .arg(fixtures::DEFAULT.password_file_path())
@@ -132,7 +132,7 @@ fn encrypt_with_output_file_short_alias() -> anyhow::Result<()> {
 fn encrypt_with_output_file_long_alias() -> anyhow::Result<()> {
     let output_file = create_temp_file("")?;
     assert_cmd!(
-        arcana_cmd()
+        arkana_cmd()
             .arg("encrypt")
             .arg("--password-file")
             .arg(fixtures::DEFAULT.password_file_path())
@@ -149,7 +149,7 @@ fn encrypt_with_output_file_long_alias() -> anyhow::Result<()> {
 fn encrypt_with_input_and_output_files() -> anyhow::Result<()> {
     let output_file = create_temp_file("")?;
     assert_cmd!(
-        arcana_cmd()
+        arkana_cmd()
             .arg("encrypt")
             .arg("--password-file")
             .arg(fixtures::DEFAULT.password_file_path())
@@ -171,7 +171,7 @@ fn encrypt_with_cwd_and_relative_input_and_output_files() -> anyhow::Result<()> 
     let input_file = create_temp_file_in(current_dir.path(), &fixtures::DEFAULT.plaintext()?)?;
     let output_file = create_temp_file_in(current_dir.path(), "")?;
     assert_cmd!(
-        arcana_cmd()
+        arkana_cmd()
             .arg("--cwd")
             .arg(current_dir.path())
             .arg("encrypt")
@@ -192,7 +192,7 @@ fn encrypt_with_cwd_and_relative_input_and_output_files() -> anyhow::Result<()> 
 fn try_encrypt_with_relative_nonexistent_input_file() -> anyhow::Result<()> {
     let password_file = create_temp_file("test_password_123")?;
     assert_cmd!(
-        arcana_cmd()
+        arkana_cmd()
             .arg("encrypt")
             .arg("--password-file")
             .arg(password_file.path())
@@ -213,7 +213,7 @@ fn try_encrypt_with_relative_nonexistent_input_file() -> anyhow::Result<()> {
 fn try_encrypt_with_absolute_nonexistent_input_file() -> anyhow::Result<()> {
     let password_file = create_temp_file("test_password_123")?;
     assert_cmd!(
-        arcana_cmd()
+        arkana_cmd()
             .arg("encrypt")
             .arg("--password-file")
             .arg(password_file.path())
@@ -233,7 +233,7 @@ fn try_encrypt_with_absolute_nonexistent_input_file() -> anyhow::Result<()> {
 #[test]
 fn encrypt_with_cipher_type_cha_cha_20_poly_1305_argument() -> anyhow::Result<()> {
     assert_cmd!(
-        arcana_cmd()
+        arkana_cmd()
             .arg("encrypt")
             .arg("--password-file")
             .arg(fixtures::DEFAULT.password_file_path())
@@ -249,7 +249,7 @@ fn encrypt_with_cipher_type_cha_cha_20_poly_1305_argument() -> anyhow::Result<()
 fn try_encrypt_with_cipher_type_invalid_argument() -> anyhow::Result<()> {
     let password_file = create_temp_file("test_password_123")?;
     assert_cmd!(
-        arcana_cmd()
+        arkana_cmd()
             .arg("encrypt")
             .arg("--password-file")
             .arg(password_file.path())
@@ -269,7 +269,7 @@ fn try_encrypt_with_cipher_type_invalid_argument() -> anyhow::Result<()> {
 #[test]
 fn encrypt_with_kdf_type_argon2_argument() -> anyhow::Result<()> {
     assert_cmd!(
-        arcana_cmd()
+        arkana_cmd()
             .arg("encrypt")
             .arg("--password-file")
             .arg(fixtures::DEFAULT.password_file_path())
@@ -285,7 +285,7 @@ fn encrypt_with_kdf_type_argon2_argument() -> anyhow::Result<()> {
 fn try_encrypt_with_kdf_type_invalid_argument() -> anyhow::Result<()> {
     let password_file = create_temp_file("test_password_123")?;
     assert_cmd!(
-        arcana_cmd()
+        arkana_cmd()
             .arg("encrypt")
             .arg("--password-file")
             .arg(password_file.path())
@@ -305,7 +305,7 @@ fn try_encrypt_with_kdf_type_invalid_argument() -> anyhow::Result<()> {
 #[test]
 fn encrypt_with_kdf_argon2_algorithm_argon2i_argument() -> anyhow::Result<()> {
     assert_cmd!(
-        arcana_cmd()
+        arkana_cmd()
             .arg("encrypt")
             .arg("--password-file")
             .arg(fixtures::DEFAULT_KDF_ARGON2_ALGORITHM_ARGON2I.password_file_path())
@@ -321,7 +321,7 @@ fn encrypt_with_kdf_argon2_algorithm_argon2i_argument() -> anyhow::Result<()> {
 #[test]
 fn encrypt_with_kdf_argon2_algorithm_argon2d_argument() -> anyhow::Result<()> {
     assert_cmd!(
-        arcana_cmd()
+        arkana_cmd()
             .arg("encrypt")
             .arg("--password-file")
             .arg(fixtures::DEFAULT_KDF_ARGON2_ALGORITHM_ARGON2D.password_file_path())
@@ -338,7 +338,7 @@ fn encrypt_with_kdf_argon2_algorithm_argon2d_argument() -> anyhow::Result<()> {
 fn try_encrypt_with_kdf_argon2_invalid_algorithm_argument() -> anyhow::Result<()> {
     let password_file = create_temp_file("test_password_123")?;
     assert_cmd!(
-        arcana_cmd()
+        arkana_cmd()
             .arg("encrypt")
             .arg("--password-file")
             .arg(password_file.path())
@@ -358,7 +358,7 @@ fn try_encrypt_with_kdf_argon2_invalid_algorithm_argument() -> anyhow::Result<()
 #[test]
 fn encrypt_with_kdf_argon2_version_16_argument() -> anyhow::Result<()> {
     assert_cmd!(
-        arcana_cmd()
+        arkana_cmd()
             .arg("encrypt")
             .arg("--password-file")
             .arg(fixtures::DEFAULT_KDF_ARGON2_VERSION_16.password_file_path())
@@ -374,7 +374,7 @@ fn encrypt_with_kdf_argon2_version_16_argument() -> anyhow::Result<()> {
 fn try_encrypt_with_kdf_argon2_version_invalid_argument() -> anyhow::Result<()> {
     let password_file = create_temp_file("test_password_123")?;
     assert_cmd!(
-        arcana_cmd()
+        arkana_cmd()
             .arg("encrypt")
             .arg("--password-file")
             .arg(password_file.path())
@@ -394,7 +394,7 @@ fn try_encrypt_with_kdf_argon2_version_invalid_argument() -> anyhow::Result<()> 
 #[test]
 fn encrypt_with_kdf_argon2_memory_65536_argument() -> anyhow::Result<()> {
     assert_cmd!(
-        arcana_cmd()
+        arkana_cmd()
             .arg("encrypt")
             .arg("--password-file")
             .arg(fixtures::DEFAULT_KDF_ARGON2_MEMORY_65536.password_file_path())
@@ -410,7 +410,7 @@ fn encrypt_with_kdf_argon2_memory_65536_argument() -> anyhow::Result<()> {
 fn try_encrypt_with_kdf_argon2_memory_invalid_argument() -> anyhow::Result<()> {
     let password_file = create_temp_file("test_password_123")?;
     assert_cmd!(
-        arcana_cmd()
+        arkana_cmd()
             .arg("encrypt")
             .arg("--password-file")
             .arg(password_file.path())
@@ -429,7 +429,7 @@ fn try_encrypt_with_kdf_argon2_memory_invalid_argument() -> anyhow::Result<()> {
 #[test]
 fn encrypt_with_kdf_argon2_iterations_1_argument() -> anyhow::Result<()> {
     assert_cmd!(
-        arcana_cmd()
+        arkana_cmd()
             .arg("encrypt")
             .arg("--password-file")
             .arg(fixtures::DEFAULT_KDF_ARGON2_ITERATIONS_1.password_file_path())
@@ -445,7 +445,7 @@ fn encrypt_with_kdf_argon2_iterations_1_argument() -> anyhow::Result<()> {
 fn try_encrypt_with_kdf_argon2_iterations_invalid_argument() -> anyhow::Result<()> {
     let password_file = create_temp_file("test_password_123")?;
     assert_cmd!(
-        arcana_cmd()
+        arkana_cmd()
             .arg("encrypt")
             .arg("--password-file")
             .arg(password_file.path())
@@ -464,7 +464,7 @@ fn try_encrypt_with_kdf_argon2_iterations_invalid_argument() -> anyhow::Result<(
 #[test]
 fn encrypt_with_kdf_argon2_parallelism_1_argument() -> anyhow::Result<()> {
     assert_cmd!(
-        arcana_cmd()
+        arkana_cmd()
             .arg("encrypt")
             .arg("--password-file")
             .arg(fixtures::DEFAULT_KDF_ARGON2_PARALLELISM_1.password_file_path())
@@ -480,7 +480,7 @@ fn encrypt_with_kdf_argon2_parallelism_1_argument() -> anyhow::Result<()> {
 fn try_encrypt_with_kdf_argon2_parallelism_invalid_argument() -> anyhow::Result<()> {
     let password_file = create_temp_file("test_password_123")?;
     assert_cmd!(
-        arcana_cmd()
+        arkana_cmd()
             .arg("encrypt")
             .arg("--password-file")
             .arg(password_file.path())
@@ -499,7 +499,7 @@ fn try_encrypt_with_kdf_argon2_parallelism_invalid_argument() -> anyhow::Result<
 #[test]
 fn encrypt_with_fastest_kdf_arguments() -> anyhow::Result<()> {
     assert_cmd!(
-        arcana_cmd()
+        arkana_cmd()
             .arg("encrypt")
             .arg("--password-file")
             .arg(fixtures::FASTEST.password_file_path())
@@ -518,7 +518,7 @@ fn encrypt_with_fastest_kdf_arguments() -> anyhow::Result<()> {
 #[test]
 fn encrypt_with_binary_format_default() -> anyhow::Result<()> {
     assert_cmd_binary!(
-        arcana_cmd()
+        arkana_cmd()
             .arg("encrypt")
             .arg("--format")
             .arg("binary")
@@ -533,7 +533,7 @@ fn encrypt_with_binary_format_default() -> anyhow::Result<()> {
 #[test]
 fn encrypt_with_yaml_format() -> anyhow::Result<()> {
     assert_cmd!(
-        arcana_cmd()
+        arkana_cmd()
             .arg("encrypt")
             .arg("--format")
             .arg("yaml")
@@ -548,7 +548,7 @@ fn encrypt_with_yaml_format() -> anyhow::Result<()> {
 #[test]
 fn encrypt_with_encoding_base16() -> anyhow::Result<()> {
     assert_cmd!(
-        arcana_cmd()
+        arkana_cmd()
             .arg("encrypt")
             .arg("--encoding")
             .arg("base16")
@@ -569,7 +569,7 @@ fn encrypt_with_encoding_base16() -> anyhow::Result<()> {
 #[test]
 fn encrypt_with_encoding_base32() -> anyhow::Result<()> {
     assert_cmd!(
-        arcana_cmd()
+        arkana_cmd()
             .arg("encrypt")
             .arg("--encoding")
             .arg("base32")
@@ -590,7 +590,7 @@ fn encrypt_with_encoding_base32() -> anyhow::Result<()> {
 #[test]
 fn encrypt_with_encoding_base64_matches_default() -> anyhow::Result<()> {
     assert_cmd!(
-        arcana_cmd()
+        arkana_cmd()
             .arg("encrypt")
             .arg("--encoding")
             .arg("base64")
@@ -612,7 +612,7 @@ fn encrypt_with_encoding_base64_matches_default() -> anyhow::Result<()> {
 fn try_encrypt_with_encoding_invalid() -> anyhow::Result<()> {
     let password_file = create_temp_file("test_password_123")?;
     assert_cmd!(
-        arcana_cmd()
+        arkana_cmd()
             .arg("encrypt")
             .arg("--password-file")
             .arg(password_file.path())

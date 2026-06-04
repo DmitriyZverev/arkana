@@ -1,6 +1,6 @@
 # Roadmap
 
-_This document outlines the planned development stages for `arcana`._
+_This document outlines the planned development stages for `arkana`._
 
 _Each step builds on the previous one, progressively expanding the interface from basic
 stdin/stdout piping to a full interactive experience_
@@ -21,8 +21,8 @@ Encrypt and decrypt data using standard input/output streams. This is the minima
 viable interface and serves as the foundation for all later steps.
 
 ```shell
-arcana encrypt < decrypted.txt > encrypted.yml
-arcana decrypt < encrypted.yml > decrypted.txt
+arkana encrypt < decrypted.txt > encrypted.yml
+arkana decrypt < encrypted.yml > decrypted.txt
 ```
 
 ### Step 2 — File path arguments `Done`
@@ -31,8 +31,8 @@ Add `--input` and `--output` flags as an alternative to stream redirection. Usef
 integrating with scripts or tools that work with file paths directly.
 
 ```shell
-arcana encrypt --input ./decrypted.txt --output ./encrypted.yml
-arcana decrypt --input ./encrypted.yml --output ./decrypted.txt
+arkana encrypt --input ./decrypted.txt --output ./encrypted.yml
+arkana decrypt --input ./encrypted.yml --output ./decrypted.txt
 ```
 
 ### Step 3 — Encryption parameters `Done`
@@ -40,7 +40,7 @@ arcana decrypt --input ./encrypted.yml --output ./decrypted.txt
 Add flags to override KDF and cipher settings per-invocation.
 
 ```shell
-arcana encrypt --kdf-type argon2 \
+arkana encrypt --kdf-type argon2 \
                --kdf-argon2-algorithm argon2id \
                --kdf-argon2-version 19 \
                --kdf-argon2-memory 65536 \
@@ -61,11 +61,11 @@ Supported flags:
 
 ### Step 4 — Configuration file `Planned`
 
-Add support for a configuration file at `$HOME/.arcana/config.toml` for setting default
+Add support for a configuration file at `$HOME/.arkana/config.toml` for setting default
 encryption parameters:
 
 ```toml
-# $HOME/.arcana/config.toml
+# $HOME/.arkana/config.toml
 [kdf]
 type = "argon2"
 
@@ -82,7 +82,7 @@ type = "chacha20poly1305"
 The default config path can be overridden with `--config`:
 
 ```shell
-arcana --config /path/to/config.toml encrypt < decrypted.txt > encrypted.yml
+arkana --config /path/to/config.toml encrypt < decrypted.txt > encrypted.yml
 ```
 
 CLI flags (Step 3) take precedence over config file values.
@@ -111,7 +111,7 @@ The default encoding is `base64` — existing behavior is unchanged.
 A new `--encoding` flag is available during encryption:
 
 ```shell
-arcana encrypt --encoding base16 < decrypted.txt > encrypted.yml
+arkana encrypt --encoding base16 < decrypted.txt > encrypted.yml
 ```
 
 During decryption the `encoding` field is read from the envelope — no flag
@@ -125,8 +125,8 @@ using CBOR (Concise Binary Object Representation) — a compact, binary encoding
 same fields as the YAML container.
 
 ```shell
-arcana encrypt --format binary < decrypted.txt > encrypted.bin
-arcana decrypt --format binary < encrypted.bin > decrypted.txt
+arkana encrypt --format binary < decrypted.txt > encrypted.bin
+arkana decrypt --format binary < encrypted.bin > decrypted.txt
 ```
 
 The default format is `yaml` — existing behavior is unchanged.
@@ -142,8 +142,8 @@ to another without decryption. The envelope content is preserved exactly —
 no password is required and no re-encryption occurs.
 
 ```shell
-arcana convert --from-format yaml --to-format binary --input envelope.yml --output envelope.bin
-arcana convert --from-format binary --to-format yaml --input envelope.bin --output envelope.yml
+arkana convert --from-format yaml --to-format binary --input envelope.yml --output envelope.bin
+arkana convert --from-format binary --to-format yaml --input envelope.bin --output envelope.yml
 ```
 
 Both `--from-format` and `--to-format` are required. Supported values match
@@ -152,7 +152,7 @@ the `--format` flag: `yaml`, `binary`, and (after Step 8) `qr`.
 Standard I/O is supported:
 
 ```shell
-arcana convert --from-format yaml --to-format binary < envelope.yml > envelope.bin
+arkana convert --from-format yaml --to-format binary < envelope.yml > envelope.bin
 ```
 
 ### Step 8 — QR code format `Planned`
@@ -161,19 +161,19 @@ Add `qr` as a new value for the `--format` flag, enabling QR code images as
 an alternative container format. Useful for physical backups and paper storage.
 
 ```shell
-arcana encrypt --format qr < decrypted.txt > qr_codes.tar
+arkana encrypt --format qr < decrypted.txt > qr_codes.tar
 
 # tar archive can contain multiple related QR code images
-arcana decrypt --format qr < qr_codes.tar > decrypted.txt
-arcana decrypt --format qr --input qr_codes.tar --output decrypted.txt
+arkana decrypt --format qr < qr_codes.tar > decrypted.txt
+arkana decrypt --format qr --input qr_codes.tar --output decrypted.txt
 
 # or a single QR code jpeg image
-arcana decrypt --format qr < qr_code.jpeg > decrypted.txt
-arcana decrypt --format qr --input qr_code.jpeg --output decrypted.txt
+arkana decrypt --format qr < qr_code.jpeg > decrypted.txt
+arkana decrypt --format qr --input qr_code.jpeg --output decrypted.txt
 
 # or a single QR code png image
-arcana decrypt --format qr < qr_code.png > decrypted.txt
-arcana decrypt --format qr --input qr_code.png --output decrypted.txt
+arkana decrypt --format qr < qr_code.png > decrypted.txt
+arkana decrypt --format qr --input qr_code.png --output decrypted.txt
 ```
 
 Encrypt always outputs a TAR archive containing one or more PNG images. When the
@@ -196,7 +196,7 @@ Each QR code symbol encodes a binary payload in the following format:
 [N bytes] fragment — a binary fragment of the CBOR-encoded encrypted container
 ```
 
-### Step 9 — PDF render (`arcana render`) `Planned`
+### Step 9 — PDF render (`arkana render`) `Planned`
 
 Add a new `render` command that produces a printable PDF document from an encrypted
 envelope. The PDF serves as a physical backup — it contains QR codes (CBOR-encoded)
@@ -204,16 +204,16 @@ and a formatted human-readable representation of the envelope fields.
 
 ```shell
 # From stdin (default format: yaml):
-arcana encrypt | arcana render --output backup.pdf
+arkana encrypt | arkana render --output backup.pdf
 
 # From file:
-arcana render --input envelope.yaml --output backup.pdf
+arkana render --input envelope.yaml --output backup.pdf
 
 # Binary format:
-arcana encrypt --format binary | arcana render --format binary --output backup.pdf
+arkana encrypt --format binary | arkana render --format binary --output backup.pdf
 
 # To stdout:
-arcana encrypt | arcana render > backup.pdf
+arkana encrypt | arkana render > backup.pdf
 ```
 
 `render` accepts an envelope in any supported format via `--format`
@@ -241,24 +241,24 @@ The PDF consists of two sections, in order:
 
 ### Step 10 — Named secret storage `Planned`
 
-Introduce a secret registry stored in `$HOME/.arcana/secrets/`. Each encryption
+Introduce a secret registry stored in `$HOME/.arkana/secrets/`. Each encryption
 creates a new versioned snapshot of the secret, making it possible to track and
 restore previous versions. Secrets are always stored in YAML format.
 
 The secrets directory can be overridden via `--secrets-dir` or via `config.toml`:
 
 ```shell
-arcana --secrets-dir /path/to/secrets secret encrypt <secret-name> < ./decrypted.txt
+arkana --secrets-dir /path/to/secrets secret encrypt <secret-name> < ./decrypted.txt
 ```
 
 ```toml
-# $HOME/.arcana/config.toml
+# $HOME/.arkana/config.toml
 [secrets]
 dir = "/path/to/secrets"
 ```
 
 `--secrets-dir` takes precedence over the config file value. If neither is set,
-`$HOME/.arcana/secrets/` is used.
+`$HOME/.arkana/secrets/` is used.
 
 File naming pattern: `<secret-name>.YYYY_MM_DD_HH_mm_ss_fffffffff_<counter>.yml`
 
@@ -269,14 +269,14 @@ The timestamp in the filename is always in UTC. The latest version is determined
 
 ```shell
 # From stdin:
-arcana secret encrypt <secret-name> < ./decrypted.txt
+arkana secret encrypt <secret-name> < ./decrypted.txt
 
 # From file:
-arcana secret encrypt <secret-name> --input ./decrypted.txt
+arkana secret encrypt <secret-name> --input ./decrypted.txt
 ```
 
 Both commands write the encrypted result to:
-`$HOME/.arcana/secrets/<secret-name>.YYYY_MM_DD_HH_mm_ss_fffffffff_<counter>.yml`
+`$HOME/.arkana/secrets/<secret-name>.YYYY_MM_DD_HH_mm_ss_fffffffff_<counter>.yml`
 
 Each invocation creates a new version; existing versions are never modified. `--output` is not
 supported — the destination is always the secrets directory.
@@ -285,32 +285,32 @@ supported — the destination is always the secrets directory.
 
 ```shell
 # To stdout:
-arcana secret decrypt <secret-name> > ./decrypted.txt
+arkana secret decrypt <secret-name> > ./decrypted.txt
 
 # To file:
-arcana secret decrypt <secret-name> --output ./decrypted.txt
+arkana secret decrypt <secret-name> --output ./decrypted.txt
 ```
 
 **Decrypting a specific version:**
 
 ```shell
 # To stdout:
-arcana secret decrypt <secret-name> --version 2024_03_16_130000_000000000_0001 > ./decrypted.txt
+arkana secret decrypt <secret-name> --version 2024_03_16_130000_000000000_0001 > ./decrypted.txt
 
 # To file:
-arcana secret decrypt <secret-name> --version 2024_03_16_130000_000000000_0001 --output ./decrypted.txt
+arkana secret decrypt <secret-name> --version 2024_03_16_130000_000000000_0001 --output ./decrypted.txt
 ```
 
-The version identifier matches the filename suffix returned by `arcana secret list-versions <name>`.
+The version identifier matches the filename suffix returned by `arkana secret list-versions <name>`.
 Without `--version`, the latest version is used. Exits with an error if the secret or version does not exist.
 
 **Listing all secrets:**
 
 ```shell
-arcana secret list
+arkana secret list
 ```
 
-Outputs the list of secret names stored in `$HOME/.arcana/secrets/`:
+Outputs the list of secret names stored in `$HOME/.arkana/secrets/`:
 
 ```
 foo
@@ -321,7 +321,7 @@ baz
 **Listing versions of a secret:**
 
 ```shell
-arcana secret list-versions <secret-name>
+arkana secret list-versions <secret-name>
 ```
 
 Outputs the list of available versions for the specified secret, ordered from oldest to newest:
@@ -336,10 +336,10 @@ Outputs the list of available versions for the specified secret, ordered from ol
 
 ```shell
 # Delete all versions of a secret:
-arcana secret delete <secret-name>
+arkana secret delete <secret-name>
 
 # Delete a specific version:
-arcana secret delete <secret-name> --version 2024_03_16_120000_000000000_0001
+arkana secret delete <secret-name> --version 2024_03_16_120000_000000000_0001
 ```
 
 Without `--version`, all versions are deleted. Any deletion requires interactive confirmation or `--force`
@@ -348,10 +348,10 @@ to proceed. Exits with an error if the secret or version does not exist.
 **Renaming a secret:**
 
 ```shell
-arcana secret rename <secret-name> <new-secret-name>
+arkana secret rename <secret-name> <new-secret-name>
 ```
 
-Renames all version files of the secret in `$HOME/.arcana/secrets/`.
+Renames all version files of the secret in `$HOME/.arkana/secrets/`.
 
 ### Step 11 — Interactive mode (TUI) `Planned`
 
@@ -359,5 +359,5 @@ Run the tool without arguments to launch a terminal user interface (TUI) for bro
 decrypting, editing, and re-encrypting stored secrets.
 
 ```shell
-arcana
+arkana
 ```

@@ -1,6 +1,6 @@
 # Principles
 
-Design decisions in `arcana` must follow these principles.
+Design decisions in `arkana` must follow these principles.
 
 ## Cryptography
 
@@ -66,4 +66,4 @@ with format syntax.
 The encoding must be defined in a published RFC or a stable industry-standard
 specification with comparable levels of adoption and documentation. The goal
 is to ensure that any engineer in the future can find the encoding rules
-without access to the original arcana source code.
+without access to the original arkana source code.
