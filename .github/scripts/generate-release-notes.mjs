@@ -6,8 +6,8 @@ const execAsync = promisify(exec);
 
 const BLOCK_TAGS = ['PR', 'BREAKING CHANGE'];
 
-const tags = execSync("git tag --sort=-version:refname | grep '^version/'", {shell: true})
-    .toString().trim().split('\n').filter(Boolean);
+const tags = execSync('git tag --sort=-version:refname', {shell: true})
+    .toString().trim().split('\n').filter(line => line.startsWith('version/'));
 const prevTag = tags.length >= 2 ? tags[1] : null;
 
 const range = prevTag ? `${prevTag}..HEAD` : 'HEAD';
@@ -54,7 +54,7 @@ function formatEntry({subject, body, pr, breakingChange}) {
         const quoted = breakingChange.split('\n').map(l => `> ${l}`).join('\n');
         details += '\n\n  > **BREAKING CHANGE**\n  >\n' + quoted.split('\n').map(l => `  ${l}`).join('\n');
     }
-    return `${title}${details ? `\n\n  <details>\n\n${details}\n\n  </details>\n` : ''}`;
+    return `${title}${details ? `\n\n  <details>\n  <summary>Details</summary>\n\n${details}\n\n  </details>\n` : ''}`;
 }
 
 const commits = await Promise.all(rawCommits.map(parseCommit));

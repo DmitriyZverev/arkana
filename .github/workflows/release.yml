@@ -109,6 +109,6 @@ jobs:
           git tag "${{ steps.version.outputs.tag }}"
           git push origin "${{ steps.version.outputs.tag }}"
       - name: Publish
-        run: gh release create "${{ steps.version.outputs.tag }}" artifacts/* --title "v${{ steps.version.outputs.version }}" --notes-file "$RUNNER_TEMP/notes.md"
+        run: gh release create "${{ steps.version.outputs.tag }}" artifacts/* --title "${{ steps.version.outputs.version }}" --notes-file "$RUNNER_TEMP/notes.md"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
