@@ -191,6 +191,20 @@ fn encrypt_with_cwd_and_relative_input_and_output_files() -> anyhow::Result<()> 
 #[test]
 fn try_encrypt_with_relative_nonexistent_input_file() -> anyhow::Result<()> {
     let password_file = create_temp_file("test_password_123")?;
+    #[cfg(unix)]
+    let expected_stderr = indoc! {"
+        Error: Failed to read input file: \"nonexistent/path/input.txt\"
+
+        Caused by:
+            No such file or directory (os error 2)
+    "};
+    #[cfg(windows)]
+    let expected_stderr = indoc! {"
+        Error: Failed to read input file: \"nonexistent\\path\\input.txt\"
+
+        Caused by:
+            The system cannot find the path specified. (os error 3)
+    "};
     assert_cmd!(
         arkana_cmd()
             .arg("encrypt")
@@ -199,12 +213,7 @@ fn try_encrypt_with_relative_nonexistent_input_file() -> anyhow::Result<()> {
             .arg("--input-file")
             .arg("./nonexistent/path/input.txt")
             .output()?,
-        ExpectedOutput::failure().stderr(indoc! {"
-            Error: Failed to read input file: \"nonexistent/path/input.txt\"
-
-            Caused by:
-                No such file or directory (os error 2)
-        "})
+        ExpectedOutput::failure().stderr(expected_stderr)
     );
     Ok(())
 }
@@ -212,6 +221,20 @@ fn try_encrypt_with_relative_nonexistent_input_file() -> anyhow::Result<()> {
 #[test]
 fn try_encrypt_with_absolute_nonexistent_input_file() -> anyhow::Result<()> {
     let password_file = create_temp_file("test_password_123")?;
+    #[cfg(unix)]
+    let expected_stderr = indoc! {"
+        Error: Failed to read input file: \"nonexistent/path/input.txt\"
+
+        Caused by:
+            No such file or directory (os error 2)
+    "};
+    #[cfg(windows)]
+    let expected_stderr = indoc! {"
+        Error: Failed to read input file: \"nonexistent\\path\\input.txt\"
+
+        Caused by:
+            The system cannot find the path specified. (os error 3)
+    "};
     assert_cmd!(
         arkana_cmd()
             .arg("encrypt")
@@ -220,12 +243,7 @@ fn try_encrypt_with_absolute_nonexistent_input_file() -> anyhow::Result<()> {
             .arg("--input-file")
             .arg(std::env::current_dir()?.join("nonexistent/path/input.txt"))
             .output()?,
-        ExpectedOutput::failure().stderr(indoc! {"
-            Error: Failed to read input file: \"nonexistent/path/input.txt\"
-
-            Caused by:
-                No such file or directory (os error 2)
-        "})
+        ExpectedOutput::failure().stderr(expected_stderr)
     );
     Ok(())
 }
