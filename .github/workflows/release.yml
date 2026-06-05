@@ -64,6 +64,7 @@ jobs:
     name: Publish to registry
     needs: build
     runs-on: ubuntu-22.04
+    environment: crates-io
     steps:
       - uses: actions/checkout@v6.0.2
       - uses: dtolnay/rust-toolchain@1.93.1
