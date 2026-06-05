@@ -1,3 +1,5 @@
+name: Pull Request
+
 on:
   - pull_request
 jobs:
@@ -11,24 +13,44 @@ jobs:
           components: rustfmt
       - run: cargo fmt --all -- --check
   clippy:
-    runs-on: ubuntu-22.04
+    name: Clippy / ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-22.04
+          - windows-2022
     steps:
       - uses: actions/checkout@v6.0.2
       - uses: dtolnay/rust-toolchain@1.93.1
         with:
           components: clippy
+      - uses: Swatinem/rust-cache@v2.9.1
       - run: cargo clippy --all-targets --all-features -- -D warnings -W clippy::all
   build:
-    name: Build
-    runs-on: ubuntu-22.04
+    name: Build / ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-22.04
+          - windows-2022
     steps:
       - uses: actions/checkout@v6.0.2
       - uses: dtolnay/rust-toolchain@1.93.1
       - uses: Swatinem/rust-cache@v2.9.1
       - run: cargo build --verbose
   test:
-    name: Test
-    runs-on: ubuntu-22.04
+    name: Test / ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-22.04
+          - windows-2022
     permissions:
       pull-requests: write
     steps:
@@ -37,20 +59,32 @@ jobs:
         with:
           components: llvm-tools-preview
       - uses: Swatinem/rust-cache@v2.9.1
-      - uses: taiki-e/install-action@v2.69.6
+      # Windows: plain cargo test (no coverage tooling).
+      - if: matrix.os != 'ubuntu-22.04'
+        run: cargo test --features deterministic
+      - if: matrix.os != 'ubuntu-22.04'
+        run: cargo test
+      # Linux: run tests through llvm-cov and publish a coverage report.
+      - if: matrix.os == 'ubuntu-22.04'
+        uses: taiki-e/install-action@v2.69.6
         with:
           tool: cargo-llvm-cov
-      - run: cargo llvm-cov --no-report --features deterministic
-      - run: cargo llvm-cov --no-report
-      - run: cargo llvm-cov report --html
-      - run: cargo llvm-cov report --summary-only | tee coverage-summary.txt
+      - if: matrix.os == 'ubuntu-22.04'
+        run: cargo llvm-cov --no-report --features deterministic
+      - if: matrix.os == 'ubuntu-22.04'
+        run: cargo llvm-cov --no-report
+      - if: matrix.os == 'ubuntu-22.04'
+        run: cargo llvm-cov report --html
+      - if: matrix.os == 'ubuntu-22.04'
+        run: cargo llvm-cov report --summary-only | tee coverage-summary.txt
       - uses: actions/upload-artifact@v7.0.1
         id: upload-coverage
-        if: always()
+        if: always() && matrix.os == 'ubuntu-22.04'
         with:
           name: coverage-report
           path: target/llvm-cov/html/
-      - run: |
+      - if: matrix.os == 'ubuntu-22.04'
+        run: |
           echo '## Code coverage' > coverage-comment.md
           echo '' >> coverage-comment.md
           echo '```' >> coverage-comment.md
@@ -58,7 +92,8 @@ jobs:
           echo '```' >> coverage-comment.md
           echo '' >> coverage-comment.md
           echo "[Download report](${{ steps.upload-coverage.outputs.artifact-url }})" >> coverage-comment.md
-      - uses: marocchino/sticky-pull-request-comment@v3.0.2
+      - if: matrix.os == 'ubuntu-22.04'
+        uses: marocchino/sticky-pull-request-comment@v3.0.2
         with:
           header: coverage
           path: coverage-comment.md
