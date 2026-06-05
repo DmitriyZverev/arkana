@@ -112,7 +112,7 @@ fn generate_nonce() -> [u8; envelope::CipherParams::CHA_CHA20_NONCE_LEN] {
     ChaCha20Poly1305::generate_nonce(OsRng).into()
 }
 
-pub fn encrypt(encrypt_params: EncryptParams) -> Result<Envelope, EncryptError> {
+pub(crate) fn encrypt(encrypt_params: EncryptParams) -> Result<Envelope, EncryptError> {
     let salt = generate_salt()?;
     let key = match &encrypt_params.kdf {
         KdfParams::Argon2 { params: argon2 } => argon2
@@ -146,7 +146,7 @@ pub fn encrypt(encrypt_params: EncryptParams) -> Result<Envelope, EncryptError> 
     })
 }
 
-pub fn decrypt(envelope: Envelope, password: &[u8]) -> Result<Vec<u8>, DecryptError> {
+pub(crate) fn decrypt(envelope: Envelope, password: &[u8]) -> Result<Vec<u8>, DecryptError> {
     let key = match &envelope.params.kdf {
         envelope::KdfParams::Argon2 {
             params: argon2,

@@ -220,7 +220,7 @@ impl From<Encoding> for arkana::Encoding {
 }
 
 #[derive(Debug, Args)]
-pub struct IoArgs {
+pub(crate) struct IoArgs {
     /// Read password from a file instead of prompting for it
     #[arg(long, short = 'p')]
     pub password_file: Option<PathBuf>,
@@ -236,7 +236,7 @@ pub struct IoArgs {
 }
 
 #[derive(Debug, Subcommand)]
-pub enum SubCommand {
+pub(crate) enum SubCommand {
     /// Encrypts data from stdin or a file and writes encrypted data to stdout or a file
     Encrypt {
         #[command(flatten)]
@@ -275,7 +275,7 @@ pub enum SubCommand {
 }
 
 #[derive(Parser, Debug)]
-pub struct CliArgs {
+pub(crate) struct CliArgs {
     /// Working directory for resolving relative paths
     #[arg(long, short = 'C')]
     pub cwd: Option<PathBuf>,

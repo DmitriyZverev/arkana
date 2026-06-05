@@ -9,6 +9,9 @@ repository = "https://github.com/DmitriyZverev/arkana"
 [features]
 deterministic = []
 
+[lints.rust]
+unreachable_pub = "deny"
+
 [dependencies]
 anyhow = "1.0.100"
 argon2 = "0.5.3"

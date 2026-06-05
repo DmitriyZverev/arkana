@@ -7,7 +7,9 @@ use std::io::{Read, Write};
 use std::path::PathBuf;
 use zeroize::Zeroizing;
 
-pub fn read_password(password_file: Option<PathBuf>) -> Result<Zeroizing<Vec<u8>>, std::io::Error> {
+pub(crate) fn read_password(
+    password_file: Option<PathBuf>,
+) -> Result<Zeroizing<Vec<u8>>, std::io::Error> {
     if let Some(file_path) = password_file {
         read_password_from_file(&file_path)
     } else {
