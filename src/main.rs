@@ -1,12 +1,10 @@
 mod cli;
-mod crypto;
-mod envelope;
 mod password;
 
-use crate::cli::{CliArgs, Format, SubCommand};
-use crate::crypto::{EncryptParams, decrypt, encrypt};
+use crate::cli::{CliArgs, SubCommand};
 use crate::password::read_password;
 use anyhow::Context;
+use arkana::EncryptParams;
 use clap::Parser;
 use path_absolutize::Absolutize;
 use pathdiff::diff_paths;
@@ -74,11 +72,7 @@ fn main() -> anyhow::Result<()> {
                 kdf: kdf.into(),
                 cipher: cipher.into(),
             };
-            let envelope = encrypt(encrypt_params)?;
-            let output = match io.format {
-                Format::Yaml => envelope::yaml::serialize(envelope, encoding.into())?,
-                Format::Binary => envelope::binary::serialize(&envelope)?,
-            };
+            let output = arkana::encrypt(encrypt_params, io.format.into_output(encoding))?;
             write_output(&output, output_file, &cwd)?;
         }
         Some(SubCommand::Decrypt { io }) => {
@@ -86,11 +80,8 @@ fn main() -> anyhow::Result<()> {
             let output_file = resolve_path(&cwd, io.output_file)?;
             let password_file = resolve_path(&cwd, io.password_file)?;
             let data = read_input(input_file, &cwd)?;
-            let envelope: envelope::Envelope = match io.format {
-                Format::Yaml => envelope::yaml::deserialize(&data)?,
-                Format::Binary => envelope::binary::deserialize(&data)?,
-            };
-            let decrypted_text = decrypt(envelope, &read_password(password_file)?)?;
+            let decrypted_text =
+                arkana::decrypt(&data, io.format.into(), &read_password(password_file)?)?;
             write_output(&decrypted_text, output_file, &cwd)?;
         }
         Some(SubCommand::Convert {
@@ -103,14 +94,8 @@ fn main() -> anyhow::Result<()> {
             let input_file = resolve_path(&cwd, input_file)?;
             let output_file = resolve_path(&cwd, output_file)?;
             let data = read_input(input_file, &cwd)?;
-            let envelope: envelope::Envelope = match from_format {
-                Format::Yaml => envelope::yaml::deserialize(&data)?,
-                Format::Binary => envelope::binary::deserialize(&data)?,
-            };
-            let output = match to_format {
-                Format::Yaml => envelope::yaml::serialize(envelope, encoding.into())?,
-                Format::Binary => envelope::binary::serialize(&envelope)?,
-            };
+            let output =
+                arkana::convert(&data, from_format.into(), to_format.into_output(encoding))?;
             write_output(&output, output_file, &cwd)?;
         }
         None => {

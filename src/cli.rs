@@ -1,6 +1,5 @@
-use crate::crypto::{CipherParams, KdfParams};
-use crate::envelope::Argon2Params;
 use argon2::{Algorithm, Version};
+use arkana::{Argon2Params, CipherParams, InputFormat, KdfParams, OutputFormat};
 use clap::{Args, Parser, Subcommand, ValueEnum};
 use std::fmt::Display;
 use std::path::PathBuf;
@@ -173,6 +172,26 @@ impl Display for Format {
     }
 }
 
+impl From<Format> for InputFormat {
+    fn from(format: Format) -> Self {
+        match format {
+            Format::Yaml => InputFormat::Yaml,
+            Format::Binary => InputFormat::Binary,
+        }
+    }
+}
+
+impl Format {
+    pub fn into_output(self, encoding: Encoding) -> OutputFormat {
+        match self {
+            Format::Yaml => OutputFormat::Yaml {
+                encoding: encoding.into(),
+            },
+            Format::Binary => OutputFormat::Binary,
+        }
+    }
+}
+
 #[derive(Debug, Clone, Copy, ValueEnum, Default)]
 pub enum Encoding {
     #[value(name = "base16")]
@@ -190,12 +209,12 @@ impl Display for Encoding {
     }
 }
 
-impl From<Encoding> for crate::envelope::text::Encoding {
+impl From<Encoding> for arkana::Encoding {
     fn from(encoding: Encoding) -> Self {
         match encoding {
-            Encoding::Base16 => crate::envelope::text::Encoding::Base16,
-            Encoding::Base32 => crate::envelope::text::Encoding::Base32,
-            Encoding::Base64 => crate::envelope::text::Encoding::Base64,
+            Encoding::Base16 => arkana::Encoding::Base16,
+            Encoding::Base32 => arkana::Encoding::Base32,
+            Encoding::Base64 => arkana::Encoding::Base64,
         }
     }
 }
