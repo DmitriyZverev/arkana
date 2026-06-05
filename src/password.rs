@@ -1,6 +1,6 @@
 use bstr::{ByteSlice, ByteVec};
 use crossterm::cursor::MoveToColumn;
-use crossterm::event::{Event, KeyCode, KeyEvent, read};
+use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, read};
 use crossterm::execute;
 use crossterm::terminal::{self};
 use std::io::{Read, Write};
@@ -48,15 +48,30 @@ impl Drop for RawModeGuard {
     }
 }
 
+#[cfg(unix)]
+fn open_tty() -> Result<std::fs::File, std::io::Error> {
+    std::fs::OpenOptions::new().write(true).open("/dev/tty")
+}
+
+#[cfg(windows)]
+fn open_tty() -> Result<std::fs::File, std::io::Error> {
+    std::fs::OpenOptions::new().write(true).open("CONOUT$")
+}
+
 fn read_password_from_tty() -> Result<Zeroizing<Vec<u8>>, std::io::Error> {
-    let mut tty = std::fs::OpenOptions::new().write(true).open("/dev/tty")?;
+    let mut tty = open_tty()?;
     let mut password = Zeroizing::new(Vec::new());
     let mut char_buf = [0u8; 4];
     terminal::enable_raw_mode()?;
     let _guard = RawModeGuard;
     loop {
         render_password_input(&mut tty, password.chars().count())?;
-        if let Event::Key(KeyEvent { code, .. }) = read()? {
+        if let Event::Key(KeyEvent {
+            code,
+            kind: KeyEventKind::Press,
+            ..
+        }) = read()?
+        {
             match code {
                 KeyCode::Enter => break,
                 KeyCode::Char(char) => {
