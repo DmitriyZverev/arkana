@@ -60,9 +60,22 @@ jobs:
           name: ${{ matrix.target }}
           path: ${{ env.ASSET }}
 
-  publish:
-    name: Publish release
+  publish-crate:
+    name: Publish to registry
     needs: build
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v6.0.2
+      - uses: dtolnay/rust-toolchain@1.93.1
+      - run: cargo publish
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+
+  publish-release:
+    name: Publish release
+    needs:
+      - build
+      - publish-crate
     runs-on: ubuntu-22.04
     permissions:
       contents: write
