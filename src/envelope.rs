@@ -1,6 +1,6 @@
-pub mod binary;
-pub mod text;
-pub mod yaml;
+pub(crate) mod binary;
+pub(crate) mod text;
+pub(crate) mod yaml;
 
 use argon2::{Algorithm, Version};
 use serde::{Deserialize, Serialize};
@@ -10,14 +10,14 @@ mod algorithm_serde {
     use serde::de::Error;
     use serde::{Deserialize, Deserializer, Serializer};
 
-    pub fn serialize<S>(value: &Algorithm, serializer: S) -> Result<S::Ok, S::Error>
+    pub(super) fn serialize<S>(value: &Algorithm, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
     {
         serializer.serialize_str(Algorithm::as_str(value))
     }
 
-    pub fn deserialize<'de, D>(deserializer: D) -> Result<Algorithm, D::Error>
+    pub(super) fn deserialize<'de, D>(deserializer: D) -> Result<Algorithm, D::Error>
     where
         D: Deserializer<'de>,
     {
@@ -32,14 +32,14 @@ mod version_serde {
     use serde::de::Error;
     use serde::{Deserialize, Deserializer, Serializer};
 
-    pub fn serialize<S>(value: &Version, serializer: S) -> Result<S::Ok, S::Error>
+    pub(super) fn serialize<S>(value: &Version, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
     {
         serializer.serialize_u32(u32::from(*value))
     }
 
-    pub fn deserialize<'de, D>(deserializer: D) -> Result<Version, D::Error>
+    pub(super) fn deserialize<'de, D>(deserializer: D) -> Result<Version, D::Error>
     where
         D: Deserializer<'de>,
     {
@@ -98,7 +98,7 @@ impl KdfParams {
 
 #[derive(Deserialize, Serialize)]
 #[serde(tag = "type")]
-pub enum CipherParams {
+pub(crate) enum CipherParams {
     #[serde(rename = "ChaCha20Poly1305")]
     ChaCha20Poly1305 {
         #[serde(with = "serde_bytes")]
@@ -109,18 +109,18 @@ pub enum CipherParams {
 }
 
 impl CipherParams {
-    pub const CHA_CHA20_KEY_LEN: usize = 32;
-    pub const CHA_CHA20_NONCE_LEN: usize = 12;
-    pub const POLY1305_TAG_LEN: usize = 16;
+    pub(crate) const CHA_CHA20_KEY_LEN: usize = 32;
+    pub(crate) const CHA_CHA20_NONCE_LEN: usize = 12;
+    pub(crate) const POLY1305_TAG_LEN: usize = 16;
 }
 
 #[derive(Deserialize, Serialize)]
-pub struct EnvelopeParams {
+pub(crate) struct EnvelopeParams {
     pub kdf: KdfParams,
     pub cipher: CipherParams,
 }
 
-pub struct Envelope {
+pub(crate) struct Envelope {
     pub params: EnvelopeParams,
     pub ciphertext: Vec<u8>,
 }

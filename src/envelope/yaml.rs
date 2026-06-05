@@ -10,12 +10,15 @@ pub enum DeserializeError {
     Deserialize(serde_yaml::Error),
 }
 
-pub fn serialize(envelope: envelope::Envelope, encoding: Encoding) -> serde_yaml::Result<Vec<u8>> {
+pub(crate) fn serialize(
+    envelope: envelope::Envelope,
+    encoding: Encoding,
+) -> serde_yaml::Result<Vec<u8>> {
     let text_envelope = envelope::text::Envelope::encode(envelope, encoding);
     Ok(serde_yaml::to_string(&text_envelope)?.into_bytes())
 }
 
-pub fn deserialize(data: &[u8]) -> Result<envelope::Envelope, DeserializeError> {
+pub(crate) fn deserialize(data: &[u8]) -> Result<envelope::Envelope, DeserializeError> {
     serde_yaml::from_slice::<envelope::text::Envelope>(data)
         .map_err(DeserializeError::Deserialize)?
         .try_into()

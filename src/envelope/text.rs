@@ -56,7 +56,7 @@ pub enum Encoding {
 
 #[derive(Deserialize, Serialize)]
 #[serde(tag = "type")]
-pub enum CipherParams {
+pub(crate) enum CipherParams {
     #[serde(rename = "ChaCha20Poly1305")]
     ChaCha20Poly1305 { nonce: String, tag: String },
 }
@@ -89,7 +89,7 @@ impl envelope::CipherParams {
 
 #[derive(Deserialize, Serialize)]
 #[serde(tag = "type")]
-pub enum KdfParams {
+pub(crate) enum KdfParams {
     #[serde(rename = "argon2")]
     Argon2 {
         #[serde(flatten)]
@@ -121,20 +121,20 @@ impl envelope::KdfParams {
 }
 
 #[derive(Deserialize, Serialize)]
-pub struct EnvelopeParams {
+pub(crate) struct EnvelopeParams {
     pub kdf: KdfParams,
     pub cipher: CipherParams,
 }
 
 #[derive(Deserialize, Serialize)]
-pub struct Envelope {
+pub(crate) struct Envelope {
     pub encoding: Encoding,
     pub params: EnvelopeParams,
     pub ciphertext: String,
 }
 
 impl Envelope {
-    pub fn encode(envelope: envelope::Envelope, encoding: Encoding) -> Self {
+    pub(crate) fn encode(envelope: envelope::Envelope, encoding: Encoding) -> Self {
         Envelope {
             encoding,
             params: EnvelopeParams {
