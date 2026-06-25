@@ -16,9 +16,9 @@ pub enum InputFormat {
 #[derive(Debug, Error)]
 pub enum SerializeError {
     #[error(transparent)]
-    Yaml(serde_yaml::Error),
+    Yaml(#[from] serde_yaml::Error),
     #[error(transparent)]
-    Binary(envelope::binary::SerializeError),
+    Binary(#[from] envelope::binary::SerializeError),
     #[error(transparent)]
     Qr(#[from] envelope::qr::SerializeError),
 }
@@ -26,9 +26,9 @@ pub enum SerializeError {
 #[derive(Debug, Error)]
 pub enum DeserializeError {
     #[error(transparent)]
-    Yaml(envelope::yaml::DeserializeError),
+    Yaml(#[from] envelope::yaml::DeserializeError),
     #[error(transparent)]
-    Binary(envelope::binary::DeserializeError),
+    Binary(#[from] envelope::binary::DeserializeError),
     #[error(transparent)]
     Qr(#[from] envelope::qr::DeserializeError),
 }
