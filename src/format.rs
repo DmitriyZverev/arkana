@@ -4,11 +4,13 @@ use thiserror::Error;
 pub enum OutputFormat {
     Yaml { encoding: Encoding },
     Binary,
+    Qr,
 }
 
 pub enum InputFormat {
     Yaml,
     Binary,
+    Qr,
 }
 
 #[derive(Debug, Error)]
@@ -17,6 +19,8 @@ pub enum SerializeError {
     Yaml(serde_yaml::Error),
     #[error(transparent)]
     Binary(envelope::binary::SerializeError),
+    #[error(transparent)]
+    Qr(#[from] envelope::qr::SerializeError),
 }
 
 #[derive(Debug, Error)]
@@ -25,6 +29,8 @@ pub enum DeserializeError {
     Yaml(envelope::yaml::DeserializeError),
     #[error(transparent)]
     Binary(envelope::binary::DeserializeError),
+    #[error(transparent)]
+    Qr(#[from] envelope::qr::DeserializeError),
 }
 
 pub(crate) fn serialize(
@@ -38,6 +44,7 @@ pub(crate) fn serialize(
         OutputFormat::Binary => {
             envelope::binary::serialize(&envelope).map_err(SerializeError::Binary)
         }
+        OutputFormat::Qr => envelope::qr::serialize(&envelope).map_err(SerializeError::Qr),
     }
 }
 
@@ -47,5 +54,6 @@ pub(crate) fn deserialize(data: &[u8], format: InputFormat) -> Result<Envelope, 
         InputFormat::Binary => {
             envelope::binary::deserialize(data).map_err(DeserializeError::Binary)
         }
+        InputFormat::Qr => envelope::qr::deserialize(data).map_err(DeserializeError::Qr),
     }
 }

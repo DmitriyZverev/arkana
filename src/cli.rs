@@ -164,6 +164,8 @@ pub enum Format {
     Yaml,
     #[value(name = "binary")]
     Binary,
+    #[value(name = "qr")]
+    Qr,
 }
 
 impl Display for Format {
@@ -177,6 +179,7 @@ impl From<Format> for InputFormat {
         match format {
             Format::Yaml => InputFormat::Yaml,
             Format::Binary => InputFormat::Binary,
+            Format::Qr => InputFormat::Qr,
         }
     }
 }
@@ -188,6 +191,7 @@ impl Format {
                 encoding: encoding.into(),
             },
             Format::Binary => OutputFormat::Binary,
+            Format::Qr => OutputFormat::Qr,
         }
     }
 }

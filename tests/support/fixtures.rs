@@ -37,6 +37,38 @@ impl Fixture {
         std::fs::read(self.envelope_bin_file_path())
     }
 
+    pub fn envelope_tar_file_path(&self) -> PathBuf {
+        self.file_path("envelope.tar")
+    }
+
+    pub fn envelope_tar(&self) -> Result<Vec<u8>, std::io::Error> {
+        std::fs::read(self.envelope_tar_file_path())
+    }
+
+    pub fn envelope_png_file_path(&self) -> PathBuf {
+        self.file_path("envelope.png")
+    }
+
+    pub fn envelope_png(&self) -> Result<Vec<u8>, std::io::Error> {
+        std::fs::read(self.envelope_png_file_path())
+    }
+
+    pub fn envelope_jpg_file_path(&self) -> PathBuf {
+        self.file_path("envelope.jpg")
+    }
+
+    pub fn envelope_jpg(&self) -> Result<Vec<u8>, std::io::Error> {
+        std::fs::read(self.envelope_jpg_file_path())
+    }
+
+    pub fn envelope_mixed_tar_file_path(&self) -> PathBuf {
+        self.file_path("envelope_mixed.tar")
+    }
+
+    pub fn envelope_mixed_tar(&self) -> Result<Vec<u8>, std::io::Error> {
+        std::fs::read(self.envelope_mixed_tar_file_path())
+    }
+
     fn file_path(&self, file_name: &str) -> PathBuf {
         PathBuf::from("tests/fixtures")
             .join(self.name)
@@ -74,3 +106,27 @@ pub static FASTEST_BASE16_LOWERCASE: Fixture = Fixture {
     name: "fastest_base16_lowercase",
 };
 pub static LONG_TEXT: Fixture = Fixture { name: "long_text" };
+
+pub mod invalid {
+    use std::path::PathBuf;
+
+    fn file_path(file_name: &str) -> PathBuf {
+        PathBuf::from("tests/fixtures/invalid").join(file_name)
+    }
+
+    pub fn missing_fragment_tar() -> Result<Vec<u8>, std::io::Error> {
+        std::fs::read(file_path("envelope_missing_fragment.tar"))
+    }
+
+    pub fn no_qr_png() -> Result<Vec<u8>, std::io::Error> {
+        std::fs::read(file_path("no_qr.png"))
+    }
+
+    pub fn non_image_tar() -> Result<Vec<u8>, std::io::Error> {
+        std::fs::read(file_path("non_image.tar"))
+    }
+
+    pub fn empty_tar() -> Result<Vec<u8>, std::io::Error> {
+        std::fs::read(file_path("empty.tar"))
+    }
+}
