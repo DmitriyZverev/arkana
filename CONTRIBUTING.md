@@ -47,6 +47,14 @@ cargo test --features deterministic <test_name>
 Prefer integration tests over unit tests to ensure the behavior of the compiled binary is validated from the user's
 perspective. All integration tests live in `tests/*`.
 
+## Dev utilities (`xtask`)
+
+The `xtask` package contains dev utilities for generating test fixtures and working with internal formats. Run them via:
+
+```bash
+cargo xtask <command> [args...]
+```
+
 ## Code coverage
 
 Prerequisites:
