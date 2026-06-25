@@ -192,3 +192,78 @@ fn convert_from_yaml_base16_to_binary() -> anyhow::Result<()> {
     );
     Ok(())
 }
+
+#[test]
+fn convert_from_yaml_to_qr() -> anyhow::Result<()> {
+    assert_cmd_binary!(
+        arkana_cmd()
+            .arg("convert")
+            .arg("--from-format")
+            .arg("yaml")
+            .arg("--to-format")
+            .arg("qr")
+            .pass_stdin(fixtures::DEFAULT.envelope()?)?,
+        ExpectedOutput::success().stdout(fixtures::DEFAULT.envelope_tar()?)
+    );
+    Ok(())
+}
+
+#[test]
+fn convert_from_qr_to_yaml() -> anyhow::Result<()> {
+    assert_cmd!(
+        arkana_cmd()
+            .arg("convert")
+            .arg("--from-format")
+            .arg("qr")
+            .arg("--to-format")
+            .arg("yaml")
+            .pass_stdin(fixtures::DEFAULT.envelope_tar()?)?,
+        ExpectedOutput::success().stdout(fixtures::DEFAULT.envelope()?)
+    );
+    Ok(())
+}
+
+#[test]
+fn convert_from_binary_to_qr() -> anyhow::Result<()> {
+    assert_cmd_binary!(
+        arkana_cmd()
+            .arg("convert")
+            .arg("--from-format")
+            .arg("binary")
+            .arg("--to-format")
+            .arg("qr")
+            .pass_stdin(fixtures::DEFAULT.envelope_bin()?)?,
+        ExpectedOutput::success().stdout(fixtures::DEFAULT.envelope_tar()?)
+    );
+    Ok(())
+}
+
+#[test]
+fn convert_from_qr_to_binary() -> anyhow::Result<()> {
+    assert_cmd_binary!(
+        arkana_cmd()
+            .arg("convert")
+            .arg("--from-format")
+            .arg("qr")
+            .arg("--to-format")
+            .arg("binary")
+            .pass_stdin(fixtures::DEFAULT.envelope_tar()?)?,
+        ExpectedOutput::success().stdout(fixtures::DEFAULT.envelope_bin()?)
+    );
+    Ok(())
+}
+
+#[test]
+fn convert_from_qr_to_qr() -> anyhow::Result<()> {
+    assert_cmd_binary!(
+        arkana_cmd()
+            .arg("convert")
+            .arg("--from-format")
+            .arg("qr")
+            .arg("--to-format")
+            .arg("qr")
+            .pass_stdin(fixtures::DEFAULT.envelope_tar()?)?,
+        ExpectedOutput::success().stdout(fixtures::DEFAULT.envelope_tar()?)
+    );
+    Ok(())
+}

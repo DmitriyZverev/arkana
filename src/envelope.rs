@@ -1,4 +1,5 @@
 pub(crate) mod binary;
+pub(crate) mod qr;
 pub(crate) mod text;
 pub(crate) mod yaml;
 

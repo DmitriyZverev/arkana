@@ -155,7 +155,7 @@ Standard I/O is supported:
 arkana convert --from-format yaml --to-format binary < envelope.yml > envelope.bin
 ```
 
-### Step 8 — QR code format `Planned`
+### Step 8 — QR code format `Done`
 
 Add `qr` as a new value for the `--format` flag, enabling QR code images as
 an alternative container format. Useful for physical backups and paper storage.

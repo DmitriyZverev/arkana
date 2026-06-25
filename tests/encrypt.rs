@@ -646,3 +646,33 @@ fn try_encrypt_with_encoding_invalid() -> anyhow::Result<()> {
     );
     Ok(())
 }
+
+#[test]
+fn encrypt_with_qr_format() -> anyhow::Result<()> {
+    assert_cmd_binary!(
+        arkana_cmd()
+            .arg("encrypt")
+            .arg("--format")
+            .arg("qr")
+            .arg("--password-file")
+            .arg(fixtures::DEFAULT.password_file_path())
+            .pass_stdin(fixtures::DEFAULT.plaintext()?)?,
+        ExpectedOutput::success().stdout(fixtures::DEFAULT.envelope_tar()?)
+    );
+    Ok(())
+}
+
+#[test]
+fn encrypt_long_text_with_qr_format() -> anyhow::Result<()> {
+    assert_cmd_binary!(
+        arkana_cmd()
+            .arg("encrypt")
+            .arg("--format")
+            .arg("qr")
+            .arg("--password-file")
+            .arg(fixtures::LONG_TEXT.password_file_path())
+            .pass_stdin(fixtures::LONG_TEXT.plaintext()?)?,
+        ExpectedOutput::success().stdout(fixtures::LONG_TEXT.envelope_tar()?)
+    );
+    Ok(())
+}

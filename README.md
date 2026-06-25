@@ -14,7 +14,7 @@ _A modern CLI tool for password-based encryption with human-readable output._
 - **Secure Key Derivation**: `Argon2id` with configurable parameters
 - **Flexible I/O**: Stdin/stdout by default, with optional `--input-file` / `--output-file` flags
 - **Configurable Encryption Parameters**: Override KDF and cipher settings per-invocation via CLI flags
-- **Multiple Output Formats**: Human-readable YAML (default) or compact binary via `--format`
+- **Multiple Output Formats**: Human-readable YAML (default), compact binary, or QR code images via `--format`
 
 ## Usage
 
@@ -107,6 +107,14 @@ arkana encrypt --format binary --input-file secret.txt --output-file encrypted.b
 
 # Decrypt from binary format
 arkana decrypt --format binary --input-file encrypted.bin --output-file decrypted.txt
+
+# Encrypt to QR code format (TAR archive of PNG images)
+arkana encrypt --format qr --input-file secret.txt --output-file qr_codes.tar
+
+# Decrypt from QR code format (TAR archive with images, PNG, or JPEG)
+arkana decrypt --format qr --input-file qr_codes.tar --output-file decrypted.txt
+arkana decrypt --format qr < qr_code.png > decrypted.txt
+arkana decrypt --format qr < qr_code.jpeg > decrypted.txt
 ```
 
 ### Convert Between Formats
@@ -120,6 +128,12 @@ arkana convert --from-format yaml --to-format binary < encrypted.yml > encrypted
 
 # Binary to YAML
 arkana convert --from-format binary --to-format yaml --input-file encrypted.bin --output-file encrypted.yml
+
+# YAML to QR
+arkana convert --from-format yaml --to-format qr < encrypted.yml > qr_codes.tar
+
+# QR to YAML
+arkana convert --from-format qr --to-format yaml < qr_codes.tar > encrypted.yml
 ```
 
 ### Override Working Directory
@@ -137,7 +151,8 @@ arkana --cwd /path/to/dir encrypt --input-file secret.txt --output-file encrypte
 ## Envelope Format
 
 The encrypted data is stored in a self-describing envelope that contains all parameters needed for decryption.
-Two formats are supported: YAML (default, human-readable) and binary (compact).
+Three formats are supported: YAML (default, human-readable), binary (compact), and QR code (PNG images in a TAR
+archive).
 
 ### YAML
 
@@ -186,6 +201,18 @@ The `ciphertext` section is likewise stored as raw bytes.
 The fixed-size header (`magic` + `version` + `params_len` + `ciphertext_len`) makes the envelope
 self-delimiting — the exact byte boundaries of every section are known after reading the first 15 bytes.
 The maximum supported ciphertext size is 4 294 967 295 bytes (~4 GiB).
+
+### QR
+
+The QR format encodes the CBOR-serialized envelope into one or more QR code images, packaged as
+a TAR archive of PNG files. Useful for physical backups and paper storage.
+
+When the encrypted data exceeds the capacity of a single QR code, it is split across multiple
+fragments. Each QR code is a self-contained symbol that includes a format version, fragment index,
+total count, and a SHA-256 checksum for integrity verification after reassembly.
+
+Decryption accepts a TAR archive, a single PNG, or a single JPEG image — the input type is
+auto-detected. A single image may contain multiple QR codes (e.g., a photo of a printed page).
 
 ## See also
 

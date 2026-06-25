@@ -1000,3 +1000,195 @@ fn try_decrypt_with_invalid_encoding_value() -> anyhow::Result<()> {
     );
     Ok(())
 }
+
+#[test]
+fn decrypt_with_qr_format() -> anyhow::Result<()> {
+    assert_cmd!(
+        arkana_cmd()
+            .arg("decrypt")
+            .arg("--format")
+            .arg("qr")
+            .arg("--password-file")
+            .arg(fixtures::DEFAULT.password_file_path())
+            .pass_stdin(fixtures::DEFAULT.envelope_tar()?)?,
+        ExpectedOutput::success().stdout(fixtures::DEFAULT.plaintext()?)
+    );
+    Ok(())
+}
+
+#[test]
+fn decrypt_long_text_from_tar_with_qr_format() -> anyhow::Result<()> {
+    assert_cmd!(
+        arkana_cmd()
+            .arg("decrypt")
+            .arg("--format")
+            .arg("qr")
+            .arg("--password-file")
+            .arg(fixtures::LONG_TEXT.password_file_path())
+            .pass_stdin(fixtures::LONG_TEXT.envelope_tar()?)?,
+        ExpectedOutput::success().stdout(fixtures::LONG_TEXT.plaintext()?)
+    );
+    Ok(())
+}
+
+#[test]
+fn decrypt_long_text_from_png_with_qr_format() -> anyhow::Result<()> {
+    assert_cmd!(
+        arkana_cmd()
+            .arg("decrypt")
+            .arg("--format")
+            .arg("qr")
+            .arg("--password-file")
+            .arg(fixtures::LONG_TEXT.password_file_path())
+            .pass_stdin(fixtures::LONG_TEXT.envelope_png()?)?,
+        ExpectedOutput::success().stdout(fixtures::LONG_TEXT.plaintext()?)
+    );
+    Ok(())
+}
+
+#[test]
+fn decrypt_from_png_with_qr_format() -> anyhow::Result<()> {
+    assert_cmd!(
+        arkana_cmd()
+            .arg("decrypt")
+            .arg("--format")
+            .arg("qr")
+            .arg("--password-file")
+            .arg(fixtures::DEFAULT.password_file_path())
+            .pass_stdin(fixtures::DEFAULT.envelope_png()?)?,
+        ExpectedOutput::success().stdout(fixtures::DEFAULT.plaintext()?)
+    );
+    Ok(())
+}
+
+#[test]
+fn decrypt_from_jpg_with_qr_format() -> anyhow::Result<()> {
+    assert_cmd!(
+        arkana_cmd()
+            .arg("decrypt")
+            .arg("--format")
+            .arg("qr")
+            .arg("--password-file")
+            .arg(fixtures::DEFAULT.password_file_path())
+            .pass_stdin(fixtures::DEFAULT.envelope_jpg()?)?,
+        ExpectedOutput::success().stdout(fixtures::DEFAULT.plaintext()?)
+    );
+    Ok(())
+}
+
+#[test]
+fn decrypt_from_mixed_tar_with_qr_format() -> anyhow::Result<()> {
+    assert_cmd!(
+        arkana_cmd()
+            .arg("decrypt")
+            .arg("--format")
+            .arg("qr")
+            .arg("--password-file")
+            .arg(fixtures::DEFAULT.password_file_path())
+            .pass_stdin(fixtures::DEFAULT.envelope_mixed_tar()?)?,
+        ExpectedOutput::success().stdout(fixtures::DEFAULT.plaintext()?)
+    );
+    Ok(())
+}
+
+#[test]
+fn try_decrypt_from_tar_with_missing_fragment_with_qr_format() -> anyhow::Result<()> {
+    assert_cmd!(
+        arkana_cmd()
+            .arg("decrypt")
+            .arg("--format")
+            .arg("qr")
+            .arg("--password-file")
+            .arg(fixtures::DEFAULT.password_file_path())
+            .pass_stdin(fixtures::invalid::missing_fragment_tar()?)?,
+        ExpectedOutput::failure().stderr(indoc! {"
+            Error: Missing fragments: [1]
+        "})
+    );
+    Ok(())
+}
+
+#[test]
+fn try_decrypt_from_no_qr_png_with_qr_format() -> anyhow::Result<()> {
+    assert_cmd!(
+        arkana_cmd()
+            .arg("decrypt")
+            .arg("--format")
+            .arg("qr")
+            .arg("--password-file")
+            .arg(fixtures::DEFAULT.password_file_path())
+            .pass_stdin(fixtures::invalid::no_qr_png()?)?,
+        ExpectedOutput::failure().stderr(indoc! {"
+            Error: NotFoundException
+        "})
+    );
+    Ok(())
+}
+
+#[test]
+fn try_decrypt_yaml_envelope_with_qr_format() -> anyhow::Result<()> {
+    assert_cmd!(
+        arkana_cmd()
+            .arg("decrypt")
+            .arg("--format")
+            .arg("qr")
+            .arg("--password-file")
+            .arg(fixtures::DEFAULT.password_file_path())
+            .pass_stdin(fixtures::DEFAULT.envelope()?)?,
+        ExpectedOutput::failure().stderr(indoc! {"
+            Error: failed to read entire block
+        "})
+    );
+    Ok(())
+}
+
+#[test]
+fn try_decrypt_from_empty_tar_with_qr_format() -> anyhow::Result<()> {
+    assert_cmd!(
+        arkana_cmd()
+            .arg("decrypt")
+            .arg("--format")
+            .arg("qr")
+            .arg("--password-file")
+            .arg(fixtures::DEFAULT.password_file_path())
+            .pass_stdin(fixtures::invalid::empty_tar()?)?,
+        ExpectedOutput::failure().stderr(indoc! {"
+            Error: Missing fragments: [1]
+        "})
+    );
+    Ok(())
+}
+
+#[test]
+fn try_decrypt_from_non_image_tar_with_qr_format() -> anyhow::Result<()> {
+    assert_cmd!(
+        arkana_cmd()
+            .arg("decrypt")
+            .arg("--format")
+            .arg("qr")
+            .arg("--password-file")
+            .arg(fixtures::DEFAULT.password_file_path())
+            .pass_stdin(fixtures::invalid::non_image_tar()?)?,
+        ExpectedOutput::failure().stderr(indoc! {"
+            Error: The image format could not be determined
+        "})
+    );
+    Ok(())
+}
+
+#[test]
+fn try_decrypt_binary_envelope_with_qr_format() -> anyhow::Result<()> {
+    assert_cmd!(
+        arkana_cmd()
+            .arg("decrypt")
+            .arg("--format")
+            .arg("qr")
+            .arg("--password-file")
+            .arg(fixtures::DEFAULT.password_file_path())
+            .pass_stdin(fixtures::DEFAULT.envelope_bin()?)?,
+        ExpectedOutput::failure().stderr(indoc! {"
+            Error: failed to read entire block
+        "})
+    );
+    Ok(())
+}
