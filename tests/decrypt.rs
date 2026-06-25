@@ -692,6 +692,9 @@ fn try_decrypt_binary_invalid_params() -> anyhow::Result<()> {
             .pass_stdin(data.as_slice())?,
         ExpectedOutput::failure().stderr(indoc! {"
             Error: CBOR error: Semantic(None, \"unknown variant `argon3`, expected `argon2`\")
+
+            Caused by:
+                Semantic(None, \"unknown variant `argon3`, expected `argon2`\")
         "})
     );
     Ok(())
@@ -900,6 +903,9 @@ fn try_decrypt_with_invalid_salt_length() -> anyhow::Result<()> {
             "})?,
         ExpectedOutput::failure().stderr(indoc! {"
             Error: Decoding error: Invalid length: expected 32, actual 31
+
+            Caused by:
+                Invalid length: expected 32, actual 31
         "})
     );
     Ok(())
@@ -932,6 +938,9 @@ fn try_decrypt_with_invalid_nonce_length() -> anyhow::Result<()> {
             "})?,
         ExpectedOutput::failure().stderr(indoc! {"
             Error: Decoding error: Invalid length: expected 12, actual 11
+
+            Caused by:
+                Invalid length: expected 12, actual 11
         "})
     );
     Ok(())
@@ -964,6 +973,9 @@ fn try_decrypt_with_invalid_tag_length() -> anyhow::Result<()> {
             "})?,
         ExpectedOutput::failure().stderr(indoc! {"
             Error: Decoding error: Invalid length: expected 16, actual 15
+
+            Caused by:
+                Invalid length: expected 16, actual 15
         "})
     );
     Ok(())

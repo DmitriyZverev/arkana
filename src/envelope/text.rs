@@ -8,7 +8,7 @@ pub enum DecodeError {
     #[error("Invalid length: expected {expected}, actual {actual}")]
     InvalidLength { expected: usize, actual: usize },
     #[error(transparent)]
-    Decode(data_encoding::DecodeError),
+    Decode(#[from] data_encoding::DecodeError),
 }
 
 fn encode_bytes(bytes: &[u8], encoding: &Encoding) -> String {
@@ -35,7 +35,7 @@ fn decode_bytes(s: &str, encoding: &Encoding) -> Result<Vec<u8>, data_encoding::
 }
 
 fn decode_fixed<const N: usize>(s: &str, encoding: &Encoding) -> Result<[u8; N], DecodeError> {
-    let bytes = decode_bytes(s, encoding).map_err(DecodeError::Decode)?;
+    let bytes = decode_bytes(s, encoding)?;
     let len = bytes.len();
     bytes.try_into().map_err(|_| DecodeError::InvalidLength {
         expected: N,
@@ -155,8 +155,7 @@ impl TryFrom<Envelope> for envelope::Envelope {
                 kdf: envelope::KdfParams::decode(envelope.params.kdf, &envelope.encoding)?,
                 cipher: envelope::CipherParams::decode(envelope.params.cipher, &envelope.encoding)?,
             },
-            ciphertext: decode_bytes(&envelope.ciphertext, &envelope.encoding)
-                .map_err(DecodeError::Decode)?,
+            ciphertext: decode_bytes(&envelope.ciphertext, &envelope.encoding)?,
         })
     }
 }

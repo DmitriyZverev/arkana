@@ -5,9 +5,9 @@ use thiserror::Error;
 #[derive(Debug, Error)]
 pub enum DeserializeError {
     #[error("Decoding error: {0}")]
-    Decode(envelope::text::DecodeError),
+    Decode(#[from] envelope::text::DecodeError),
     #[error(transparent)]
-    Deserialize(serde_yaml::Error),
+    Deserialize(#[from] serde_yaml::Error),
 }
 
 pub(crate) fn serialize(
@@ -19,8 +19,7 @@ pub(crate) fn serialize(
 }
 
 pub(crate) fn deserialize(data: &[u8]) -> Result<envelope::Envelope, DeserializeError> {
-    serde_yaml::from_slice::<envelope::text::Envelope>(data)
-        .map_err(DeserializeError::Deserialize)?
+    serde_yaml::from_slice::<envelope::text::Envelope>(data)?
         .try_into()
         .map_err(DeserializeError::Decode)
 }
