@@ -8,7 +8,7 @@ const BLOCK_TAGS = ['PR', 'BREAKING CHANGE'];
 
 const tags = execSync('git tag --sort=-version:refname', {shell: true})
     .toString().trim().split('\n').filter(line => line.startsWith('version/'));
-const prevTag = tags.length >= 2 ? tags[1] : null;
+const prevTag = tags.length >= 1 ? tags[0] : null;
 
 const range = prevTag ? `${prevTag}..HEAD` : 'HEAD';
 const rawCommits = execSync(`git log ${range} --pretty=format:"%H"`, {shell: true})
