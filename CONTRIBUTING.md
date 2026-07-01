@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-- Rust `1.93.1` or later: https://rustup.rs
+- Rust `1.88.0` or later: https://rustup.rs
 - `rustfmt` and `clippy` components: `rustup component add rustfmt clippy`
 
 ## Development workflow
