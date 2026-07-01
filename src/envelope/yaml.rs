@@ -19,7 +19,5 @@ pub(crate) fn serialize(
 }
 
 pub(crate) fn deserialize(data: &[u8]) -> Result<envelope::Envelope, DeserializeError> {
-    serde_yaml::from_slice::<envelope::text::Envelope>(data)?
-        .try_into()
-        .map_err(DeserializeError::Decode)
+    Ok(serde_yaml::from_slice::<envelope::text::Envelope>(data)?.try_into()?)
 }

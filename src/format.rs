@@ -23,6 +23,7 @@ pub enum SerializeError {
     Qr(#[from] envelope::qr::SerializeError),
 }
 
+#[non_exhaustive]
 #[derive(Debug, Error)]
 pub enum DeserializeError {
     #[error(transparent)]
@@ -38,22 +39,16 @@ pub(crate) fn serialize(
     format: OutputFormat,
 ) -> Result<Vec<u8>, SerializeError> {
     match format {
-        OutputFormat::Yaml { encoding } => {
-            envelope::yaml::serialize(envelope, encoding).map_err(SerializeError::Yaml)
-        }
-        OutputFormat::Binary => {
-            envelope::binary::serialize(&envelope).map_err(SerializeError::Binary)
-        }
-        OutputFormat::Qr => envelope::qr::serialize(&envelope).map_err(SerializeError::Qr),
+        OutputFormat::Yaml { encoding } => Ok(envelope::yaml::serialize(envelope, encoding)?),
+        OutputFormat::Binary => Ok(envelope::binary::serialize(&envelope)?),
+        OutputFormat::Qr => Ok(envelope::qr::serialize(&envelope)?),
     }
 }
 
 pub(crate) fn deserialize(data: &[u8], format: InputFormat) -> Result<Envelope, DeserializeError> {
     match format {
-        InputFormat::Yaml => envelope::yaml::deserialize(data).map_err(DeserializeError::Yaml),
-        InputFormat::Binary => {
-            envelope::binary::deserialize(data).map_err(DeserializeError::Binary)
-        }
-        InputFormat::Qr => envelope::qr::deserialize(data).map_err(DeserializeError::Qr),
+        InputFormat::Yaml => Ok(envelope::yaml::deserialize(data)?),
+        InputFormat::Binary => Ok(envelope::binary::deserialize(data)?),
+        InputFormat::Qr => Ok(envelope::qr::deserialize(data)?),
     }
 }
