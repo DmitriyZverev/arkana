@@ -281,7 +281,7 @@ fn pack_tar(images: Vec<DynamicImage>) -> Result<Vec<u8>, PackTarError> {
         archive.append_data(&mut header, &name, png_data.as_slice())?;
     }
     archive.finish()?;
-    archive.into_inner().map_err(PackTarError::Io)
+    Ok(archive.into_inner()?)
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -346,7 +346,7 @@ pub(crate) fn serialize(envelope: &envelope::Envelope) -> Result<Vec<u8>, Serial
         .chain(fragments.ciphertext.iter())
         .map(encode_qr)
         .collect::<Result<Vec<_>, _>>()?;
-    pack_tar(images).map_err(SerializeError::PackTar)
+    Ok(pack_tar(images)?)
 }
 
 #[derive(Debug, thiserror::Error)]
