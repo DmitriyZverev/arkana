@@ -12,7 +12,7 @@ Before submitting a PR, ensure the following checks pass:
 1. Run tests:
 
    ```bash
-   cargo test --features deterministic
+   cargo test && cargo test --features deterministic
    ```
 
 2. Run linter and static analysis:
@@ -29,31 +29,26 @@ Before submitting a PR, ensure the following checks pass:
 
 ## Tests
 
-The `deterministic` feature must be enabled when running tests. It replaces random salt/nonce generation with fixed
-values to make snapshots reproducible.
-
 To run all tests:
 
 ```bash
-cargo test --features deterministic
+cargo test && cargo test --features deterministic
 ```
+
+The `deterministic` feature must be enabled when running snapshot tests. It replaces random salt/nonce generation with
+fixed values to make snapshots reproducible.
 
 To run a single test:
 
 ```bash
+cargo test <test_name>
+
+# In case of deterministic tests:
 cargo test --features deterministic <test_name>
 ```
 
 Prefer integration tests over unit tests to ensure the behavior of the compiled binary is validated from the user's
 perspective. All integration tests live in `tests/*`.
-
-## Dev utilities (`xtask`)
-
-The `xtask` package contains dev utilities for generating test fixtures and working with internal formats. Run them via:
-
-```bash
-cargo xtask <command> [args...]
-```
 
 ## Code coverage
 
@@ -71,7 +66,18 @@ Prerequisites:
 To generate an HTML coverage report locally:
 
 ```bash
-cargo llvm-cov --features deterministic --html --open
+cargo llvm-cov clean --workspace && \
+cargo llvm-cov --no-report && \
+cargo llvm-cov --no-report --features deterministic && \
+cargo llvm-cov report --html --open
+```
+
+## Dev utilities (`xtask`)
+
+The `xtask` package contains dev utilities for generating test fixtures and working with internal formats. Run them via:
+
+```bash
+cargo xtask <command> [args...]
 ```
 
 ## Commit conventions
