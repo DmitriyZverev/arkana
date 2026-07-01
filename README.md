@@ -204,12 +204,31 @@ The maximum supported ciphertext size is 4 294 967 295 bytes (~4 GiB).
 
 ### QR
 
-The QR format encodes the CBOR-serialized envelope into one or more QR code images, packaged as
-a TAR archive of PNG files. Useful for physical backups and paper storage.
+The QR format encodes a [binary-format](#binary) envelope into QR code images, packaged as a TAR archive of PNG files.
+Useful for physical backups and paper storage.
 
 When the encrypted data exceeds the capacity of a single QR code, it is split across multiple
 fragments. Each QR code is a self-contained symbol that includes a format version, fragment index,
-total count, and a SHA-256 checksum for integrity verification after reassembly.
+total count, and a checksum for integrity verification after reassembly.
+
+Each fragment has the following layout:
+
+```
+[ version: 1B ][ index: 2B ][ total: 2B ][ checksum: 32B ][ chunk ]
+```
+
+| Field      | Size             | Description                                                                   |
+|------------|------------------|-------------------------------------------------------------------------------|
+| `version`  | 1 byte           | Fragment format version; only `0x01` (`1`) is supported                       |
+| `index`    | 2 bytes (BE u16) | 1-based position of this fragment among `total`                               |
+| `total`    | 2 bytes (BE u16) | Total number of fragments the envelope was split into                         |
+| `checksum` | 32 bytes         | SHA-256 checksum of the full reassembled data, identical across all fragments |
+| `chunk`    | remaining bytes  | A chunk of the binary-format header or ciphertext, up to 176 bytes            |
+
+The [binary-format](#binary) header and ciphertext are chunked into fragments independently — the
+header's fragments always precede the ciphertext's fragments, but each is split on its own, so a
+fragment never contains bytes from both. Reassembling all fragments in order yields a full
+binary-format envelope.
 
 Decryption accepts a TAR archive, a single PNG, or a single JPEG image — the input type is
 auto-detected. A single image may contain multiple QR codes (e.g., a photo of a printed page).
