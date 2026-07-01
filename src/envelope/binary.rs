@@ -16,7 +16,7 @@ pub(crate) const HEADER_LEN: usize = MAGIC_LEN + VERSION_LEN + PARAMS_LEN + CIPH
 #[derive(Debug, Error)]
 pub enum SerializeError {
     #[error("CBOR serialization error: {0}")]
-    Cbor(ciborium::ser::Error<std::io::Error>),
+    Cbor(#[from] ciborium::ser::Error<std::io::Error>),
 
     #[error("Ciphertext too large: {0} bytes, maximum is {max}", max = CiphertextLen::MAX)]
     CiphertextTooLarge(usize),
@@ -40,12 +40,12 @@ pub enum DeserializeError {
     TrailingCiphertext,
 
     #[error("CBOR error: {0}")]
-    Cbor(ciborium::de::Error<std::io::Error>),
+    Cbor(#[from] ciborium::de::Error<std::io::Error>),
 }
 
 pub(crate) fn serialize_header(envelope: &envelope::Envelope) -> Result<Vec<u8>, SerializeError> {
     let mut params_bytes = Vec::new();
-    ciborium::into_writer(&envelope.params, &mut params_bytes).map_err(SerializeError::Cbor)?;
+    ciborium::into_writer(&envelope.params, &mut params_bytes)?;
     let params_len = params_bytes.len() as ParamsLen;
     let ciphertext_len = CiphertextLen::try_from(envelope.ciphertext.len())
         .map_err(|_| SerializeError::CiphertextTooLarge(envelope.ciphertext.len()))?;
@@ -103,8 +103,7 @@ pub(crate) fn deserialize(data: &[u8]) -> Result<envelope::Envelope, Deserialize
                 actual: data.len(),
             })?;
     let mut cursor = std::io::Cursor::new(params_bytes);
-    let params: envelope::EnvelopeParams =
-        ciborium::from_reader(&mut cursor).map_err(DeserializeError::Cbor)?;
+    let params: envelope::EnvelopeParams = ciborium::from_reader(&mut cursor)?;
     if cursor.position() as usize != params_bytes.len() {
         return Err(DeserializeError::TrailingBytes);
     }
